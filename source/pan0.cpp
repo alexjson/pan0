@@ -7,6 +7,9 @@
 
 double eDistance(vector<int> vec1, vector<int> vec2);
 
+map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector);
+std::vector<string> filterImages( vector<Imageobject> imageVector, map<pair<string, string>, vector< DMatch> > matchLookUp);
+
 using namespace cv;
 using namespace std;
 
@@ -16,15 +19,14 @@ int main( int argc, char **argv ) {
 
     vector<Imageobject> imageVector = parser->getImageVector();
 
-
     vector<KeyPoint> keypoints;
     Mat descriptors;
 
     vector< vector < KeyPoint > > keyPointVector;
     std::vector<Mat> descriptorsVector;
     SiftFeatureDetector featureDetector;
-    SurfDescriptorExtractor featureExtractor;
-    FlannBasedMatcher flannMatcher;
+    SiftDescriptorExtractor featureExtractor;
+
 
     cout << "Calculating descriptors" << endl;
     for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
@@ -35,42 +37,12 @@ int main( int argc, char **argv ) {
     }
     cout << "done." << endl;
 
-    cout << "matching" << endl;
-    map<pair<string, string>, vector< DMatch> > matchLookUp;
+    map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
+    std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
 
-    std::vector< DMatch > matches;
-    for (int i = 0; i < imageVector.size() ; ++i) {
-        for (int k = i + 1; k < imageVector.size(); ++k) {
-            std::vector< DMatch > good_matches;
-            double max_dist = 0; double min_dist = 100;
-            flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
-            
-            for ( int y = 0; y < imageVector[i].getDescriptors().rows; y++ ) {
-                if ( matches[y].distance <= 0.08 ) {
-                    good_matches.push_back( matches[y]);
-                }
-            }
-            matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())] = good_matches;
-
-        }
-    }
-    cout << "done." << endl;
-
-
-    std::vector< DMatch > currMatch;
-    pair<string, string> key;
-    int TRESH = 35;
-    double magDiff = 0.0;
-    for (int i = 0; i < imageVector.size(); ++i) {
-        for (int k = 0; k < imageVector.size(); ++k) {
-            if (matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())].size() > TRESH ) {
-                magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
-                if (magDiff > 25.0 && magDiff < 60.0) {
-                    cout << "Bra match   " << imageVector[i].getFileName() << "   " << imageVector[k].getFileName() << endl;
-                    cout << matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())].size() << endl;
-                }
-            }
-        }
+    cout << "Images to stitch" << endl;
+    for (int i = 0; i < toStitch.size(); ++i) {
+        cout << toStitch[i] << endl;
     }
 
     Mat image;
@@ -87,9 +59,32 @@ int main( int argc, char **argv ) {
     imshow( "Display Image", image );
 
     waitKey(0);
-
-
     return 0;
+};
+
+
+map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector) {
+    cout << "matching" << endl;
+    FlannBasedMatcher flannMatcher;
+    map<pair<string, string>, vector< DMatch> > matchLookUp;
+
+    std::vector< DMatch > matches;
+    for (int i = 0; i < imageVector.size() ; ++i) {
+        for (int k = i + 1; k < imageVector.size(); ++k) {
+            std::vector< DMatch > good_matches;
+            double max_dist = 0; double min_dist = 100;
+            flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
+
+            for ( int y = 0; y < imageVector[i].getDescriptors().rows; y++ ) {
+                if ( matches[y].distance <= 50.0 ) {
+                    good_matches.push_back( matches[y]);
+                }
+            }
+            matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())] = good_matches;
+        }
+    }
+    cout << "done." << endl;
+    return matchLookUp;
 };
 
 double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
@@ -103,3 +98,49 @@ double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
 
     return dist;
 };
+
+std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<string, string>, vector< DMatch> > matchLookUp) {
+
+    pair<string, string> key1;
+    pair<string, string> key2;
+    std::vector<string> toStitch;
+    int TRESH = 50;
+    double magDiff = 0.0;
+
+
+    //FIXME: Grupepra bilderna i "panorama" grupper om gruppen är mindre än 4 strunta i den
+
+    cout << "Filtering results" << endl;
+    for (int i = 0; i < imageVector.size(); ++i) {
+        for (int k = 0; k < imageVector.size(); ++k) {
+
+            key1 = make_pair(imageVector[i].getFileName(), imageVector[k].getFileName());
+            key2 = make_pair(imageVector[k].getFileName(), imageVector[i].getFileName());
+
+            if (matchLookUp[key1].size() > TRESH  || matchLookUp[key2].size() > TRESH ) {
+                magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
+
+                if (magDiff > 25.0 && magDiff < 60.0) {
+                    toStitch.push_back(imageVector[i].getFileName());
+                    toStitch.push_back(imageVector[k].getFileName());
+                } else {
+                    cout << "image to be removed" << endl;
+                    cout << imageVector[k].getFileName() <<endl;
+                }
+            }
+        }
+    }
+    cout << "done." << endl;
+
+
+    //Remove duplicates from the vector
+    cout << "Removing duplicates" << endl;
+    sort( toStitch.begin(), toStitch.end() );
+    toStitch.erase( unique( toStitch.begin(), toStitch.end() ), toStitch.end() );
+    cout << "done." << endl;
+
+    return toStitch;
+
+};
+
+
