@@ -67,9 +67,23 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
                 if ( dist > max_dist ) max_dist = dist;
             }
 
-            printf("-- Max dist : %f \n", max_dist );
-            printf("-- Min dist : %f \n", min_dist );
+            double second_min = 1000;
 
+            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
+                double dist = matches[x].distance;
+                if ( dist < second_min && dist > min_dist ) second_min = dist;
+            }
+
+
+            double ratio = min_dist / second_min;
+            // printf("-- Max dist : %f \n", max_dist );
+            // printf("-- Min dist : %f \n", min_dist );
+            // printf("-- Second dist : %f \n", second_min );
+            // printf("-- ratio : %f \n", ratio );
+
+            if (ratio > 0.8) {
+                cout << "Match " <<imageVector[i].getFileName()<<"          "<< imageVector[k].getFileName() << "    " << ratio<<endl;
+            }
 
 
             for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
@@ -78,12 +92,6 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
                 }
             }
 
-
-            // for ( int y = 0; y < imageVector[i].getDescriptors().rows; y++ ) {
-            //     if ( matches[y].distance <= 50.0 ) {
-            //         good_matches.push_back( matches[y]);
-            //     }
-            // }
             matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())] = good_matches;
         }
     }
@@ -123,10 +131,18 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
             key1 = make_pair(imageVector[i].getFileName(), imageVector[k].getFileName());
             key2 = make_pair(imageVector[k].getFileName(), imageVector[i].getFileName());
 
+            // cout <<"PairMatches" << endl;
+            // cout << imageVector[i].getFileName() <<"  "<<imageVector[k].getFileName() << endl;
+            // cout <<"                " << matchLookUp[key1].size() << endl;
+            // cout <<"                " << matchLookUp[key2].size() << endl;
+
+
             if (matchLookUp[key1].size() > TRESH  || matchLookUp[key2].size() > TRESH ) {
                 magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
+                // cout << magDiff << endl;
 
                 if (magDiff > 25.0 && magDiff < 60.0) {
+                    tmp.push_back(imageVector[k].getFileName());
                     toStitch.push_back(imageVector[i].getFileName());
                     toStitch.push_back(imageVector[k].getFileName());
                 }
@@ -135,6 +151,16 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
         lookUp.push_back(make_pair(imageVector[i].getFileName(), tmp));
     }
     cout << "done." << endl;
+
+    cout << "lookUp size" << endl;
+    cout << lookUp.size() << endl;
+    for (int x = 0; x < lookUp.size(); ++x) {
+        cout << lookUp[x].first << endl;
+        cout << lookUp[x].second.size() << endl;
+        for (int y = 0; y < lookUp[x].second.size(); ++y) {
+            cout << "           " << lookUp[x].second[y] << endl;
+        }
+    }
 
 
     //Remove duplicates from the vector
