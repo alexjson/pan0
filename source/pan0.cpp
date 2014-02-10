@@ -106,6 +106,7 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
     pair<string, string> key1;
     pair<string, string> key2;
     std::vector<string> toStitch;
+    std::vector<pair <string, std::vector<string> > > lookUp;
     int TRESH = 50;
     double magDiff = 0.0;
 
@@ -114,6 +115,7 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
 
     cout << "Filtering results" << endl;
     for (int i = 0; i < imageVector.size(); ++i) {
+        std::vector<string> tmp;
         for (int k = 0; k < imageVector.size(); ++k) {
 
             key1 = make_pair(imageVector[i].getFileName(), imageVector[k].getFileName());
@@ -125,12 +127,10 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
                 if (magDiff > 25.0 && magDiff < 60.0) {
                     toStitch.push_back(imageVector[i].getFileName());
                     toStitch.push_back(imageVector[k].getFileName());
-                } else {
-                    cout << "image to be removed" << endl;
-                    cout << imageVector[k].getFileName() <<endl;
                 }
             }
         }
+        lookUp.push_back(imageVector[i].getFileName(),tmp);
     }
     cout << "done." << endl;
 
