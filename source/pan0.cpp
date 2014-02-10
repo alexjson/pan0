@@ -2,6 +2,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv/highgui.h>
 #include <opencv2/nonfree/features2d.hpp>
+#include </usr/local/include/opencv2/stitching/stitcher.hpp>
 #include </home/alex/xjobb/c++/include/pan0.h>
 #include </home/alex/xjobb/c++/include/dataparser.h>
 
@@ -9,6 +10,7 @@ double eDistance(vector<int> vec1, vector<int> vec2);
 
 map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector);
 std::vector<string> filterImages( vector<Imageobject> imageVector, map<pair<string, string>, vector< DMatch> > matchLookUp);
+void stitchTest(vector<string> filesToStitch);
 
 using namespace cv;
 using namespace std;
@@ -144,3 +146,31 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
 };
 
 
+void stitchTest(vector<string> filesToStitch) {
+
+    cout << "stitching!" << endl;
+    string tmpPath = "/home/alex/xjobb/images2/test/";
+    vector< Mat > vImg;
+    Mat rImg;
+
+    for (int i = 0; i < filesToStitch.size(); ++i) {
+        vImg.push_back( imread(tmpPath + filesToStitch[i]));
+    }
+
+
+    Stitcher stitcher = Stitcher::createDefault();
+
+
+    unsigned long AAtime = 0, BBtime = 0; //check processing time
+    AAtime = getTickCount(); //check processing time
+
+    stitcher.stitch(vImg, rImg);
+
+    BBtime = getTickCount(); //check processing time
+    printf("%.2lf sec \n",  (BBtime - AAtime) / getTickFrequency() ); //check processing time
+
+    imshow("Stitching Result", rImg);
+
+    waitKey(0);
+
+};
