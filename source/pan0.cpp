@@ -29,7 +29,6 @@ int main( int argc, char **argv ) {
     SiftFeatureDetector featureDetector;
     SiftDescriptorExtractor featureExtractor;
 
-
     cout << "Calculating descriptors" << endl;
     for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
         featureDetector.detect(i->getImage(), keypoints);
@@ -42,27 +41,12 @@ int main( int argc, char **argv ) {
     map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
     std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
 
-    cout << "Images to stitch" << endl;
-    for (int i = 0; i < toStitch.size(); ++i) {
-        cout << toStitch[i] << endl;
-    }
-
-    // Mat image;
-    // image = imread( argv[1], 1 );
-
-    // featureDetector.detect(image, keypoints);
-
-    // if ( argc != 2 || !image.data ) {
-    //     printf( "No image data \n" );
-    //     return -1;
+    // cout << "Images to stitch" << endl;
+    // for (int i = 0; i < toStitch.size(); ++i) {
+    //     cout << toStitch[i] << endl;
     // }
-
-    // namedWindow( "Display Image", CV_WINDOW_AUTOSIZE );
-    // imshow( "Display Image", image );
-
-    // waitKey(0);
-    // return 0;
 };
+
 
 
 map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector) {
@@ -77,11 +61,29 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
             double max_dist = 0; double min_dist = 100;
             flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
 
-            for ( int y = 0; y < imageVector[i].getDescriptors().rows; y++ ) {
-                if ( matches[y].distance <= 50.0 ) {
-                    good_matches.push_back( matches[y]);
+            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
+                double dist = matches[x].distance;
+                if ( dist < min_dist ) min_dist = dist;
+                if ( dist > max_dist ) max_dist = dist;
+            }
+
+            printf("-- Max dist : %f \n", max_dist );
+            printf("-- Min dist : %f \n", min_dist );
+
+
+
+            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
+                if ( matches[x].distance <= max(2 * min_dist, 0.02) ) {
+                    good_matches.push_back( matches[x]);
                 }
             }
+
+
+            // for ( int y = 0; y < imageVector[i].getDescriptors().rows; y++ ) {
+            //     if ( matches[y].distance <= 50.0 ) {
+            //         good_matches.push_back( matches[y]);
+            //     }
+            // }
             matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())] = good_matches;
         }
     }
@@ -130,7 +132,7 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
                 }
             }
         }
-        lookUp.push_back(make_pair(imageVector[i].getFileName(),tmp));
+        lookUp.push_back(make_pair(imageVector[i].getFileName(), tmp));
     }
     cout << "done." << endl;
 
