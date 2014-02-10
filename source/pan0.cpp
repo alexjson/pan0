@@ -6,45 +6,76 @@
 #include </home/alex/xjobb/c++/include/pan0.h>
 #include </home/alex/xjobb/c++/include/dataparser.h>
 
+int SIZE = 4;
+string PATH = "";
 double eDistance(vector<int> vec1, vector<int> vec2);
-
 map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector);
 std::vector<string> filterImages( vector<Imageobject> imageVector, map<pair<string, string>, vector< DMatch> > matchLookUp);
-void stitchTest(vector<string> filesToStitch);
+void stitchTest(vector<string> filesToStitch, string PATH);
+std::vector<string> findCandidates(vector<Imageobject> imageVector);
+
 
 using namespace cv;
 using namespace std;
 
 int main( int argc, char **argv ) {
-    Dataparser *parser = new Dataparser();
-    parser->parseData("/home/alex/xjobb/images2/test");
 
+
+    // Check the number of parameters
+    if (argc < 2) {
+        // Tell the user how to run the program
+        std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
+        /* "Usage messages" are a conventional way of telling the user
+         * how to run a program if they enter the command incorrectly.
+         */
+        return 1;
+    }
+
+    PATH = argv[1];
+
+
+
+    
+    Dataparser *parser = new Dataparser();
+    parser->parseData(PATH);
+      
     vector<Imageobject> imageVector = parser->getImageVector();
 
-    vector<KeyPoint> keypoints;
-    Mat descriptors;
+    std::vector<string>  imageNames = findCandidates(imageVector);
 
-    vector< vector < KeyPoint > > keyPointVector;
-    std::vector<Mat> descriptorsVector;
-    SiftFeatureDetector featureDetector;
-    SiftDescriptorExtractor featureExtractor;
-
-    cout << "Calculating descriptors" << endl;
-    for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
-        featureDetector.detect(i->getImage(), keypoints);
-        i->setKeyPoints(keypoints);
-        featureExtractor.compute(i->getImage(), keypoints, descriptors);
-        i->setDescriptors(descriptors);
+    if (imageNames.size() > SIZE) {
+        stitchTest(imageNames,PATH);
+    }else{
+        cout << "To few matching images" << endl;
     }
-    cout << "done." << endl;
 
-    map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
-    std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
 
-    cout << "Images to stitch" << endl;
-    for (int i = 0; i < toStitch.size(); ++i) {
-        cout << toStitch[i] << endl;
-    }
+
+
+    // vector<KeyPoint> keypoints;
+    // Mat descriptors;
+
+    // vector< vector < KeyPoint > > keyPointVector;
+    // std::vector<Mat> descriptorsVector;
+    // SiftFeatureDetector featureDetector;
+    // SiftDescriptorExtractor featureExtractor;
+
+    // cout << "Calculating descriptors" << endl;
+    // for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
+    //     featureDetector.detect(i->getImage(), keypoints);
+    //     i->setKeyPoints(keypoints);
+    //     featureExtractor.compute(i->getImage(), keypoints, descriptors);
+    //     i->setDescriptors(descriptors);
+    // }
+    // cout << "done." << endl;
+
+    // map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
+    // std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
+
+    // cout << "Images to stitch" << endl;
+    // for (int i = 0; i < toStitch.size(); ++i) {
+    //     cout << toStitch[i] << endl;
+    // }
 
 };
 
@@ -56,43 +87,79 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
     map<pair<string, string>, vector< DMatch> > matchLookUp;
 
     std::vector< DMatch > matches;
-    for (int i = 0; i < imageVector.size() ; ++i) {
+    for (int i = 0; i <= imageVector.size() ; ++i) {
         for (int k = i + 1; k < imageVector.size(); ++k) {
+
+            // cout <<  imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << endl;
+
+
             std::vector< DMatch > good_matches;
             double max_dist = 0; double min_dist = 100;
-            // flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
-
-            flannMatcher.knnMatch(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches,2);
+            flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
+            std::vector<vector<DMatch > > matches2;
+            flannMatcher.knnMatch(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches2, 10);
             // flann::Index flannIndex(imageVector[i].getDescriptors(), flann::KDTreeIndexParams());
+
+            // float sum = 0.0f;
+            // for (int idx = 0; idx < 10; ++idx) {
+            //     sum += matches2[0][idx].distance;
+            // }
+            // cout << "Mean       " << sum / 10 << endl;
+
+            // for (int z = 0; z < 10; ++z) {
+            //     matches2[z]
+            // }
+            // float mean = 0.0f;
+            // for (int x = 0; x < matches2.size(); ++x) {
+
+
+            //     // cout << matches2[x][0].distance << endl;
+            //     // for (int y = 0; y < matches2[x].size(); ++y) {
+            //     //     mean += matches2[x][y].distance;
+            //     // }
+
+            //     // mean = mean/10;
+            //     // cout <<"mean            " <<mean << endl;
+
+            // }
+
+
+            // for (int i = 0; i < min(des_image.rows - 1, (int) matches.size()); i++) { //THIS LOOP IS SENSITIVE TO SEGFAULTS
+            //     if ((matches[i][0].distance < 0.6 * (matches[i][1].distance)) && ((int) matches[i].size() <= 2 && (int) matches[i].size() > 0)) {
+            //         good_matches.push_back(matches[i][0]);
+            //     }
+            // }
+
+
 
             // std::vector<int> idx;
             // std::vector<float> dist;
             // int K = 5;
             // flannIndex.knnSearch(imageVector[k].getDescriptors(), idx, dist, K, cv::flann::SearchParams(5));
 
-            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
-                double dist = matches[x].distance;
-                if ( dist < min_dist ) min_dist = dist;
-                if ( dist > max_dist ) max_dist = dist;
-            }
+            // for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
+            //     double dist = matches[x].distance;
+            //     if ( dist < min_dist ) min_dist = dist;
+            //     if ( dist > max_dist ) max_dist = dist;
+            // }
 
-            double second_min = 1000;
+            // double second_min = 1000;
 
-            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
-                double dist = matches[x].distance;
-                if ( dist < second_min && dist > min_dist ) second_min = dist;
-            }
+            // for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
+            //     double dist = matches[x].distance;
+            //     if ( dist < second_min && dist > min_dist ) second_min = dist;
+            // }
 
 
-            double ratio = min_dist / second_min;
-            // printf("-- Max dist : %f \n", max_dist );
-            // printf("-- Min dist : %f \n", min_dist );
-            // printf("-- Second dist : %f \n", second_min );
-            // printf("-- ratio : %f \n", ratio );
+            // double ratio = min_dist / second_min;
+            // // printf("-- Max dist : %f \n", max_dist );
+            // // printf("-- Min dist : %f \n", min_dist );
+            // // printf("-- Second dist : %f \n", second_min );
+            // // printf("-- ratio : %f \n", ratio );
 
-            if (ratio > 0.9) {
-                cout << "Match " << imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << "    " << ratio << endl;
-            }
+            // if (ratio > 0.9) {
+            //     cout << "Match " << imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << "    " << ratio << endl;
+            // }
 
 
             for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
@@ -130,7 +197,6 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
     double magDiff = 0.0;
 
 
-    //FIXME: Grupepra bilderna i "panorama" grupper om gruppen är mindre än 4 strunta i den
 
     cout << "Filtering results" << endl;
     for (int i = 0; i < imageVector.size(); ++i) {
@@ -161,15 +227,15 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
     }
     cout << "done." << endl;
 
-    cout << "lookUp size" << endl;
-    cout << lookUp.size() << endl;
-    for (int x = 0; x < lookUp.size(); ++x) {
-        cout << lookUp[x].first << endl;
-        cout << lookUp[x].second.size() << endl;
-        for (int y = 0; y < lookUp[x].second.size(); ++y) {
-            cout << "           " << lookUp[x].second[y] << endl;
-        }
-    }
+    // cout << "lookUp size" << endl;
+    // cout << lookUp.size() << endl;
+    // for (int x = 0; x < lookUp.size(); ++x) {
+    //     cout << lookUp[x].first << endl;
+    //     cout << lookUp[x].second.size() << endl;
+    //     for (int y = 0; y < lookUp[x].second.size(); ++y) {
+    //         cout << "           " << lookUp[x].second[y] << endl;
+    //     }
+    // }
 
 
     //Remove duplicates from the vector
@@ -182,11 +248,45 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
 
 };
 
+std::vector<string> findCandidates(vector<Imageobject> imageVector) {
+    double magDiff = 0.0;
+    std::map<string, string> tmp;
+    for (int i = 0; i < imageVector.size(); ++i) {
+        for (int k = 0; k < imageVector.size(); ++k) {
+            magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
 
-void stitchTest(vector<string> filesToStitch) {
+            if (magDiff > 25.0 && magDiff < 70.0) {
+                tmp.insert(std::map<string, string>::value_type(imageVector[i].getFileName(), imageVector[k].getFileName()));
+            }
+
+        }
+
+    }
+
+    std::vector<string> result;
+    std::map<string, string>::iterator it = tmp.begin();
+    for (it = tmp.begin(); it != tmp.end(); ++it) {
+        result.push_back(it->second);
+        std::cout << it->first << " => " << it->second << '\n';
+    }
+
+    cout << "Removing duplicates" << endl;
+    sort( result.begin(), result.end() );
+    result.erase( unique( result.begin(), result.end() ), result.end() );
+    cout << "done." << endl;
+
+    for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
+        cout << *it << endl;
+    }
+
+    return result;
+}
+
+
+void stitchTest(vector<string> filesToStitch, string PATH) {
 
     cout << "stitching!" << endl;
-    string tmpPath = "/home/alex/xjobb/images2/test/";
+    string tmpPath = PATH;
     vector< Mat > vImg;
     Mat rImg;
 
