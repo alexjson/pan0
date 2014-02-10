@@ -17,7 +17,7 @@ using namespace std;
 
 int main( int argc, char **argv ) {
     Dataparser *parser = new Dataparser();
-    parser->parseData("/home/alex/xjobb/images/test");
+    parser->parseData("/home/alex/xjobb/images2/test");
 
     vector<Imageobject> imageVector = parser->getImageVector();
 
@@ -47,21 +47,21 @@ int main( int argc, char **argv ) {
         cout << toStitch[i] << endl;
     }
 
-    Mat image;
-    image = imread( argv[1], 1 );
+    // Mat image;
+    // image = imread( argv[1], 1 );
 
-    featureDetector.detect(image, keypoints);
+    // featureDetector.detect(image, keypoints);
 
-    if ( argc != 2 || !image.data ) {
-        printf( "No image data \n" );
-        return -1;
-    }
+    // if ( argc != 2 || !image.data ) {
+    //     printf( "No image data \n" );
+    //     return -1;
+    // }
 
-    namedWindow( "Display Image", CV_WINDOW_AUTOSIZE );
-    imshow( "Display Image", image );
+    // namedWindow( "Display Image", CV_WINDOW_AUTOSIZE );
+    // imshow( "Display Image", image );
 
-    waitKey(0);
-    return 0;
+    // waitKey(0);
+    // return 0;
 };
 
 
@@ -130,7 +130,7 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
                 }
             }
         }
-        lookUp.push_back(imageVector[i].getFileName(),tmp);
+        lookUp.push_back(make_pair(imageVector[i].getFileName(),tmp));
     }
     cout << "done." << endl;
 
