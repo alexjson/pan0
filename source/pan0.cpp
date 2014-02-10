@@ -41,10 +41,11 @@ int main( int argc, char **argv ) {
     map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
     std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
 
-    // cout << "Images to stitch" << endl;
-    // for (int i = 0; i < toStitch.size(); ++i) {
-    //     cout << toStitch[i] << endl;
-    // }
+    cout << "Images to stitch" << endl;
+    for (int i = 0; i < toStitch.size(); ++i) {
+        cout << toStitch[i] << endl;
+    }
+
 };
 
 
@@ -59,7 +60,15 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
         for (int k = i + 1; k < imageVector.size(); ++k) {
             std::vector< DMatch > good_matches;
             double max_dist = 0; double min_dist = 100;
-            flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
+            // flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
+
+            flannMatcher.knnMatch(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches,2);
+            // flann::Index flannIndex(imageVector[i].getDescriptors(), flann::KDTreeIndexParams());
+
+            // std::vector<int> idx;
+            // std::vector<float> dist;
+            // int K = 5;
+            // flannIndex.knnSearch(imageVector[k].getDescriptors(), idx, dist, K, cv::flann::SearchParams(5));
 
             for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
                 double dist = matches[x].distance;
@@ -81,8 +90,8 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
             // printf("-- Second dist : %f \n", second_min );
             // printf("-- ratio : %f \n", ratio );
 
-            if (ratio > 0.8) {
-                cout << "Match " <<imageVector[i].getFileName()<<"          "<< imageVector[k].getFileName() << "    " << ratio<<endl;
+            if (ratio > 0.9) {
+                cout << "Match " << imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << "    " << ratio << endl;
             }
 
 
