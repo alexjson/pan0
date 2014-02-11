@@ -9,6 +9,8 @@ public:
     Imageobject(Json::Value jsonRoot, string fielName);
     ~Imageobject();
 
+
+    bool operator== (const Imageobject &n2);
     vector<int> getMag_data() {
         return mag_data;
     };

@@ -18,7 +18,6 @@ public:
     std::vector<Imageobject> getImageVector() {
         return *imageVector_;
     };
-    // std::vector<Json::Value> getJsonVector(){return *jsonVector_; };
     void parseData(std::string dataPath);
 
 private:
