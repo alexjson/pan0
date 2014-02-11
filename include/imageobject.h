@@ -8,32 +8,37 @@ public:
     Imageobject(Json::Value jsonRoot, Mat image, string fielName);
     Imageobject(Json::Value jsonRoot, string fielName);
     ~Imageobject();
-
-
-    bool operator== (const Imageobject &n2);
-    vector<int> getMag_data() {
+    
+    bool operator==(const Imageobject &rhs) {
+        return this->getFileName() == rhs.getFileName();
+    };
+    vector<int> getMag_data() const {
         return mag_data;
     };
-    vector<int> getAcc_data() {
+    vector<int> getAcc_data() const {
         return acc_data;
     };
-    string getTrigger() {
+    string getTrigger() const {
         return triggerMethod_;
     };
-    string getFileName() {
+    string getFileName() const {
         return fileName_;
     };
-    Mat getImage() {
+    Mat getImage() const {
         return image_;
+    };
+
+    void setImage(Mat image) {
+        image_ = image;
     };
 
     void setKeyPoints(std::vector<KeyPoint> keyPoints);
     void setDescriptors(Mat descriptors);
 
-    Mat getDescriptors() {
+    Mat getDescriptors() const {
         return descriptors_;
     };
-    vector<KeyPoint> getDKeypoints() {
+    vector<KeyPoint> getDKeypoints() const {
         return keyPointVec_;
     };
 
@@ -47,3 +52,6 @@ private:
     Mat descriptors_;
     string triggerMethod_;
 };
+
+
+

@@ -45,3 +45,22 @@ void Dataparser::parseData(std::string dataPath) {
     }
 }
 
+//Läs in allt på nytt ??
+void Dataparser::parseImages(std::string dataPath, std::vector<string> imageNames) {
+
+    imageVector_->clear();
+    Json::Reader reader;
+    Json::Value root;
+    string tmp = "";
+    string jsonFile = "";
+
+    for (std::vector<string>::iterator it = imageNames.begin(); it != imageNames.end(); ++it) {
+        tmp = *it;
+        Mat img = imread(dataPath + "/" + tmp);
+        jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
+        ifstream test(jsonFile.c_str(), ifstream::binary);
+        reader.parse(test, root, false);
+        Imageobject imgObj(root, img, tmp);
+        imageVector_->push_back(imgObj);
+    }
+}

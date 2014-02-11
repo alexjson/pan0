@@ -35,10 +35,3 @@ void Imageobject::setKeyPoints(std::vector<KeyPoint> keyPoints) {
 void Imageobject::setDescriptors(Mat descriptors) {
     descriptors_ = descriptors;
 };
-
-bool Imageobject::operator== ( const Imageobject &n2){
-    return this->fileName_ == n2.fileName_;
-};
-
-
-

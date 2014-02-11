@@ -35,13 +35,17 @@ int main( int argc, char **argv ) {
 
 
 
-    
+
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
-      
+
     vector<Imageobject> imageVector = parser->getImageVector();
 
+
     std::vector<string>  imageNames = findCandidates(imageVector);
+    imageVector.clear();
+    parser->parseImages(PATH,imageNames);
+    imageVector = parser->getImageVector();    
 
     // if (imageNames.size() > SIZE) {
     //     stitchTest(imageNames,PATH);
@@ -89,9 +93,6 @@ map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject>
     std::vector< DMatch > matches;
     for (int i = 0; i <= imageVector.size() ; ++i) {
         for (int k = i + 1; k < imageVector.size(); ++k) {
-
-            // cout <<  imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << endl;
-
 
             std::vector< DMatch > good_matches;
             double max_dist = 0; double min_dist = 100;
@@ -206,15 +207,9 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
             key1 = make_pair(imageVector[i].getFileName(), imageVector[k].getFileName());
             key2 = make_pair(imageVector[k].getFileName(), imageVector[i].getFileName());
 
-            // cout <<"PairMatches" << endl;
-            // cout << imageVector[i].getFileName() <<"  "<<imageVector[k].getFileName() << endl;
-            // cout <<"                " << matchLookUp[key1].size() << endl;
-            // cout <<"                " << matchLookUp[key2].size() << endl;
-
 
             if (matchLookUp[key1].size() > TRESH  || matchLookUp[key2].size() > TRESH ) {
                 magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
-                // cout << magDiff << endl;
 
                 if (magDiff > 25.0 && magDiff < 60.0) {
                     tmp.push_back(imageVector[k].getFileName());
@@ -227,15 +222,6 @@ std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<str
     }
     cout << "done." << endl;
 
-    // cout << "lookUp size" << endl;
-    // cout << lookUp.size() << endl;
-    // for (int x = 0; x < lookUp.size(); ++x) {
-    //     cout << lookUp[x].first << endl;
-    //     cout << lookUp[x].second.size() << endl;
-    //     for (int y = 0; y < lookUp[x].second.size(); ++y) {
-    //         cout << "           " << lookUp[x].second[y] << endl;
-    //     }
-    // }
 
 
     //Remove duplicates from the vector
@@ -267,7 +253,6 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     std::map<string, string>::iterator it = tmp.begin();
     for (it = tmp.begin(); it != tmp.end(); ++it) {
         result.push_back(it->second);
-        std::cout << it->first << " => " << it->second << '\n';
     }
 
     cout << "Removing duplicates" << endl;
@@ -275,9 +260,9 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     result.erase( unique( result.begin(), result.end() ), result.end() );
     cout << "done." << endl;
 
-    for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
-        cout << *it << endl;
-    }
+    // for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
+    //     cout << *it << endl;
+    // }
 
     return result;
 }
