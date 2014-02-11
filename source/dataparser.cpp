@@ -24,13 +24,14 @@ void Dataparser::parseData(std::string dataPath) {
         while ((ent = readdir (dir)) != NULL) {
             tmp = ent->d_name;
             if (tmp.find(".jpg") != string::npos) {
-                Mat img = imread(dataPath + "/" + tmp);
+                // Mat img = imread(dataPath + "/" + tmp);
                 // imageVector_->push_back(imread(dataPath+"/"+tmp));
 
-                jsonFile = dataPath + "/" + tmp.substr(0, tmp.find(".jpg")) + ".json";
+                jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
                 ifstream test(jsonFile.c_str(), ifstream::binary);
                 reader.parse(test, root, false);
-                Imageobject imgObj(root, img, tmp);
+                // Imageobject imgObj(root, img, tmp);
+                Imageobject imgObj(root, tmp);
 
                 imageVector_->push_back(imgObj);
 

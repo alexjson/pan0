@@ -6,6 +6,7 @@ using namespace std;
 class Imageobject {
 public:
     Imageobject(Json::Value jsonRoot, Mat image, string fielName);
+    Imageobject(Json::Value jsonRoot, string fielName);
     ~Imageobject();
 
     vector<int> getMag_data() {

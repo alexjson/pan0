@@ -43,11 +43,11 @@ int main( int argc, char **argv ) {
 
     std::vector<string>  imageNames = findCandidates(imageVector);
 
-    if (imageNames.size() > SIZE) {
-        stitchTest(imageNames,PATH);
-    }else{
-        cout << "To few matching images" << endl;
-    }
+    // if (imageNames.size() > SIZE) {
+    //     stitchTest(imageNames,PATH);
+    // }else{
+    //     cout << "To few matching images" << endl;
+    // }
 
 
 

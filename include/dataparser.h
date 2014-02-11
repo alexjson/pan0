@@ -23,6 +23,4 @@ public:
 
 private:
     std::vector<Imageobject> *imageVector_;
-    // std::vector<Json::Value>* jsonVector_;
-    /* data */
 };
