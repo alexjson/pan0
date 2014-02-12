@@ -4,12 +4,15 @@ find_package( OpenCV REQUIRED )
 set(HEADERS
    include/pan0.h
    include/dataparser.h
+   include/imageanalyser.h
    include/imageobject.h
+
 )
 
 set(SOURCE
  	source/pan0.cpp
  	source/dataparser.cpp
+ 	source/imageanalyser.cpp
  	source/imageobject.cpp
 )
 add_executable( pan0  ${SOURCE} ${HEADER_FILES})

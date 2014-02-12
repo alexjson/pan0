@@ -1,3 +1,6 @@
+#ifndef DATAPARSER_H
+#define DATAPARSER_H
+
 #include <cstdio>
 #include <cstring>
 #include <vector>
@@ -25,3 +28,5 @@ public:
 private:
     std::vector<Imageobject> *imageVector_;
 };
+
+#endif

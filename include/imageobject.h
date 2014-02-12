@@ -1,3 +1,6 @@
+#ifndef IMAGEOBJECT_H
+#define IMAGEOBJECT_H
+
 #include <opencv2/opencv.hpp>
 #include </usr/include/jsoncpp/json.h>
 
@@ -54,4 +57,4 @@ private:
 };
 
 
-
+#endif //IMAGEOBJECT_H

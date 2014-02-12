@@ -1,18 +1,12 @@
-#include <stdio.h>
-#include <opencv2/opencv.hpp>
-#include <opencv/highgui.h>
-#include <opencv2/nonfree/features2d.hpp>
-#include </usr/local/include/opencv2/stitching/stitcher.hpp>
 #include </home/alex/xjobb/c++/include/pan0.h>
-#include </home/alex/xjobb/c++/include/dataparser.h>
 
 int SIZE = 4;
 string PATH = "";
 double eDistance(vector<int> vec1, vector<int> vec2);
 map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector);
-std::vector<string> filterImages( vector<Imageobject> imageVector, map<pair<string, string>, vector< DMatch> > matchLookUp);
 void stitchTest(vector<string> filesToStitch, string PATH);
 std::vector<string> findCandidates(vector<Imageobject> imageVector);
+std::vector<Imageobject> analysImages(vector<Imageobject> imageVector);
 
 
 using namespace cv;
@@ -20,14 +14,8 @@ using namespace std;
 
 int main( int argc, char **argv ) {
 
-
-    // Check the number of parameters
     if (argc < 2) {
-        // Tell the user how to run the program
         std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
-        /* "Usage messages" are a conventional way of telling the user
-         * how to run a program if they enter the command incorrectly.
-         */
         return 1;
     }
 
@@ -44,43 +32,16 @@ int main( int argc, char **argv ) {
 
     std::vector<string>  imageNames = findCandidates(imageVector);
     imageVector.clear();
-    parser->parseImages(PATH,imageNames);
-    imageVector = parser->getImageVector();    
+    parser->parseImages(PATH, imageNames);
+    imageVector = parser->getImageVector();
 
-    // if (imageNames.size() > SIZE) {
-    //     stitchTest(imageNames,PATH);
-    // }else{
-    //     cout << "To few matching images" << endl;
-    // }
+    imageVector = analysImages(imageVector);
 
-
-
-
-    // vector<KeyPoint> keypoints;
-    // Mat descriptors;
-
-    // vector< vector < KeyPoint > > keyPointVector;
-    // std::vector<Mat> descriptorsVector;
-    // SiftFeatureDetector featureDetector;
-    // SiftDescriptorExtractor featureExtractor;
-
-    // cout << "Calculating descriptors" << endl;
-    // for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
-    //     featureDetector.detect(i->getImage(), keypoints);
-    //     i->setKeyPoints(keypoints);
-    //     featureExtractor.compute(i->getImage(), keypoints, descriptors);
-    //     i->setDescriptors(descriptors);
-    // }
-    // cout << "done." << endl;
-
-    // map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
-    // std::vector<string> toStitch =  filterImages(imageVector, matchLookUp);
-
-    // cout << "Images to stitch" << endl;
-    // for (int i = 0; i < toStitch.size(); ++i) {
-    //     cout << toStitch[i] << endl;
-    // }
-
+    if (imageNames.size() > SIZE) {
+        stitchTest(imageNames, PATH);
+    } else {
+        cout << "To few matching images" << endl;
+    }
 };
 
 
@@ -188,51 +149,6 @@ double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
     return dist;
 };
 
-std::vector<string> filterImages( vector<Imageobject> imageVector , map<pair<string, string>, vector< DMatch> > matchLookUp) {
-
-    pair<string, string> key1;
-    pair<string, string> key2;
-    std::vector<string> toStitch;
-    std::vector<pair <string, std::vector<string> > > lookUp;
-    int TRESH = 50;
-    double magDiff = 0.0;
-
-
-
-    cout << "Filtering results" << endl;
-    for (int i = 0; i < imageVector.size(); ++i) {
-        std::vector<string> tmp;
-        for (int k = 0; k < imageVector.size(); ++k) {
-
-            key1 = make_pair(imageVector[i].getFileName(), imageVector[k].getFileName());
-            key2 = make_pair(imageVector[k].getFileName(), imageVector[i].getFileName());
-
-
-            if (matchLookUp[key1].size() > TRESH  || matchLookUp[key2].size() > TRESH ) {
-                magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
-
-                if (magDiff > 25.0 && magDiff < 60.0) {
-                    tmp.push_back(imageVector[k].getFileName());
-                    toStitch.push_back(imageVector[i].getFileName());
-                    toStitch.push_back(imageVector[k].getFileName());
-                }
-            }
-        }
-        lookUp.push_back(make_pair(imageVector[i].getFileName(), tmp));
-    }
-    cout << "done." << endl;
-
-
-
-    //Remove duplicates from the vector
-    cout << "Removing duplicates" << endl;
-    sort( toStitch.begin(), toStitch.end() );
-    toStitch.erase( unique( toStitch.begin(), toStitch.end() ), toStitch.end() );
-    cout << "done." << endl;
-
-    return toStitch;
-
-};
 
 std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     double magDiff = 0.0;
@@ -252,6 +168,7 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     std::vector<string> result;
     std::map<string, string>::iterator it = tmp.begin();
     for (it = tmp.begin(); it != tmp.end(); ++it) {
+        result.push_back(it->first);
         result.push_back(it->second);
     }
 
@@ -260,9 +177,9 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     result.erase( unique( result.begin(), result.end() ), result.end() );
     cout << "done." << endl;
 
-    // for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
-    //     cout << *it << endl;
-    // }
+    for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
+        cout << *it << endl;
+    }
 
     return result;
 }
@@ -296,3 +213,27 @@ void stitchTest(vector<string> filesToStitch, string PATH) {
     waitKey(0);
 
 };
+
+std::vector<Imageobject> analysImages(vector<Imageobject> imageVector) {
+
+    vector<KeyPoint> keypoints;
+    Mat descriptors;
+
+    vector< vector < KeyPoint > > keyPointVector;
+    std::vector<Mat> descriptorsVector;
+    SiftFeatureDetector featureDetector;
+    SiftDescriptorExtractor featureExtractor;
+
+    cout << "Calculating descriptors" << endl;
+    for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
+        featureDetector.detect(i->getImage(), keypoints);
+        i->setKeyPoints(keypoints);
+        featureExtractor.compute(i->getImage(), keypoints, descriptors);
+        i->setDescriptors(descriptors);
+    }
+    cout << "done." << endl;
+
+    map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
+
+
+}
