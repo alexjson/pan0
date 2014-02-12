@@ -41,7 +41,7 @@ public:
     Mat getDescriptors() const {
         return descriptors_;
     };
-    vector<KeyPoint> getDKeypoints() const {
+    vector<KeyPoint> getKeypoints() const {
         return keyPointVec_;
     };
 

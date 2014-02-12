@@ -15,8 +15,6 @@ void Dataparser::parseData(std::string dataPath) {
     string tmp = "";
     string jsonFile = "";
 
-
-
     DIR *dir;
     struct dirent *ent;
     if ((dir = opendir (dataPath.c_str())) != NULL) {
@@ -24,28 +22,20 @@ void Dataparser::parseData(std::string dataPath) {
         while ((ent = readdir (dir)) != NULL) {
             tmp = ent->d_name;
             if (tmp.find(".jpg") != string::npos) {
-                // Mat img = imread(dataPath + "/" + tmp);
-                // imageVector_->push_back(imread(dataPath+"/"+tmp));
-
                 jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
                 ifstream test(jsonFile.c_str(), ifstream::binary);
                 reader.parse(test, root, false);
-                // Imageobject imgObj(root, img, tmp);
                 Imageobject imgObj(root, tmp);
-
                 imageVector_->push_back(imgObj);
-
             }
         }
         closedir (dir);
-
     } else {
         /* could not open directory */
         perror ("");
     }
 }
 
-//Läs in allt på nytt ??
 void Dataparser::parseImages(std::string dataPath, std::vector<string> imageNames) {
 
     imageVector_->clear();

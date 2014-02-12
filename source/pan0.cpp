@@ -15,13 +15,13 @@ using namespace std;
 int main( int argc, char **argv ) {
 
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
-        return 1;
+
+        PATH = "/home/alex/xjobb/images/test/";
+        // std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
+        // return 1;
+    }else{
+        PATH = argv[1];
     }
-
-    PATH = argv[1];
-
-
 
 
     Dataparser *parser = new Dataparser();
@@ -35,13 +35,19 @@ int main( int argc, char **argv ) {
     parser->parseImages(PATH, imageNames);
     imageVector = parser->getImageVector();
 
-    imageVector = analysImages(imageVector);
+    ImageAnalyser* analyser = new ImageAnalyser();
 
-    if (imageNames.size() > SIZE) {
-        stitchTest(imageNames, PATH);
-    } else {
-        cout << "To few matching images" << endl;
-    }
+    imageVector = analyser->calculateDescriptors(imageVector);
+    
+    analyser->analyse(imageVector);
+
+
+    return 0;
+    // if (imageNames.size() > SIZE) {
+    //     stitchTest(imageNames, PATH);
+    // } else {
+    //     cout << "To few matching images" << endl;
+    // }
 };
 
 
@@ -177,9 +183,9 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
     result.erase( unique( result.begin(), result.end() ), result.end() );
     cout << "done." << endl;
 
-    for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
-        cout << *it << endl;
-    }
+    // for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
+    //     cout << *it << endl;
+    // }
 
     return result;
 }

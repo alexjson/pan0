@@ -8,20 +8,18 @@ using namespace std;
 using namespace cv;
 class ImageObject;
 
-class ImageAnalyser
-{
+class ImageAnalyser {
 public:
-	ImageAnalyser(std::vector<ImageObject> imageVector);
-	ImageAnalyser();
+    ImageAnalyser();
+    ~ImageAnalyser();
 
-	~ImageAnalyser();
-
-	void analyse();
+    std::vector<Imageobject> calculateDescriptors(std::vector<Imageobject> imageVector);
+    void analyse(std::vector<Imageobject> imageVector);
 
 private:
-	Ptr<DescriptorMatcher> matcher;
-	Ptr<FeatureDetector> detector;
-	Ptr<DescriptorExtractor> extractor;
+    Ptr<DescriptorMatcher> matcher;
+    Ptr<FeatureDetector> detector;
+    Ptr<DescriptorExtractor> extractor;
 };
 
 
