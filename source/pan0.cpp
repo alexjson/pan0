@@ -3,10 +3,8 @@
 int SIZE = 4;
 string PATH = "";
 double eDistance(vector<int> vec1, vector<int> vec2);
-map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector);
 void stitchTest(vector<string> filesToStitch, string PATH);
 std::vector<string> findCandidates(vector<Imageobject> imageVector);
-std::vector<Imageobject> analysImages(vector<Imageobject> imageVector);
 
 
 using namespace cv;
@@ -52,97 +50,6 @@ int main( int argc, char **argv ) {
 
 
 
-map<pair<string, string>, vector< DMatch> > calculateMatches(vector<Imageobject> imageVector) {
-    cout << "matching" << endl;
-    FlannBasedMatcher flannMatcher;
-    map<pair<string, string>, vector< DMatch> > matchLookUp;
-
-    std::vector< DMatch > matches;
-    for (int i = 0; i <= imageVector.size() ; ++i) {
-        for (int k = i + 1; k < imageVector.size(); ++k) {
-
-            std::vector< DMatch > good_matches;
-            double max_dist = 0; double min_dist = 100;
-            flannMatcher.match(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches);
-            std::vector<vector<DMatch > > matches2;
-            flannMatcher.knnMatch(imageVector[i].getDescriptors(), imageVector[k].getDescriptors(), matches2, 10);
-            // flann::Index flannIndex(imageVector[i].getDescriptors(), flann::KDTreeIndexParams());
-
-            // float sum = 0.0f;
-            // for (int idx = 0; idx < 10; ++idx) {
-            //     sum += matches2[0][idx].distance;
-            // }
-            // cout << "Mean       " << sum / 10 << endl;
-
-            // for (int z = 0; z < 10; ++z) {
-            //     matches2[z]
-            // }
-            // float mean = 0.0f;
-            // for (int x = 0; x < matches2.size(); ++x) {
-
-
-            //     // cout << matches2[x][0].distance << endl;
-            //     // for (int y = 0; y < matches2[x].size(); ++y) {
-            //     //     mean += matches2[x][y].distance;
-            //     // }
-
-            //     // mean = mean/10;
-            //     // cout <<"mean            " <<mean << endl;
-
-            // }
-
-
-            // for (int i = 0; i < min(des_image.rows - 1, (int) matches.size()); i++) { //THIS LOOP IS SENSITIVE TO SEGFAULTS
-            //     if ((matches[i][0].distance < 0.6 * (matches[i][1].distance)) && ((int) matches[i].size() <= 2 && (int) matches[i].size() > 0)) {
-            //         good_matches.push_back(matches[i][0]);
-            //     }
-            // }
-
-
-
-            // std::vector<int> idx;
-            // std::vector<float> dist;
-            // int K = 5;
-            // flannIndex.knnSearch(imageVector[k].getDescriptors(), idx, dist, K, cv::flann::SearchParams(5));
-
-            // for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
-            //     double dist = matches[x].distance;
-            //     if ( dist < min_dist ) min_dist = dist;
-            //     if ( dist > max_dist ) max_dist = dist;
-            // }
-
-            // double second_min = 1000;
-
-            // for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
-            //     double dist = matches[x].distance;
-            //     if ( dist < second_min && dist > min_dist ) second_min = dist;
-            // }
-
-
-            // double ratio = min_dist / second_min;
-            // // printf("-- Max dist : %f \n", max_dist );
-            // // printf("-- Min dist : %f \n", min_dist );
-            // // printf("-- Second dist : %f \n", second_min );
-            // // printf("-- ratio : %f \n", ratio );
-
-            // if (ratio > 0.9) {
-            //     cout << "Match " << imageVector[i].getFileName() << "          " << imageVector[k].getFileName() << "    " << ratio << endl;
-            // }
-
-
-            for ( int x = 0; x < imageVector[i].getDescriptors().rows; x++ ) {
-                if ( matches[x].distance <= max(2 * min_dist, 0.02) ) {
-                    good_matches.push_back( matches[x]);
-                }
-            }
-
-            matchLookUp[make_pair(imageVector[i].getFileName(), imageVector[k].getFileName())] = good_matches;
-        }
-    }
-    cout << "done." << endl;
-    return matchLookUp;
-};
-
 double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
     double x1 = vec1[0];
     double x2 = vec2[0];
@@ -163,7 +70,7 @@ std::vector<string> findCandidates(vector<Imageobject> imageVector) {
         for (int k = 0; k < imageVector.size(); ++k) {
             magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
 
-            if (magDiff > 25.0 && magDiff < 70.0) {
+            if (magDiff > 25.0 && magDiff < 55.0) {
                 tmp.insert(std::map<string, string>::value_type(imageVector[i].getFileName(), imageVector[k].getFileName()));
             }
 
@@ -219,27 +126,3 @@ void stitchTest(vector<string> filesToStitch, string PATH) {
     waitKey(0);
 
 };
-
-std::vector<Imageobject> analysImages(vector<Imageobject> imageVector) {
-
-    vector<KeyPoint> keypoints;
-    Mat descriptors;
-
-    vector< vector < KeyPoint > > keyPointVector;
-    std::vector<Mat> descriptorsVector;
-    SiftFeatureDetector featureDetector;
-    SiftDescriptorExtractor featureExtractor;
-
-    cout << "Calculating descriptors" << endl;
-    for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
-        featureDetector.detect(i->getImage(), keypoints);
-        i->setKeyPoints(keypoints);
-        featureExtractor.compute(i->getImage(), keypoints, descriptors);
-        i->setDescriptors(descriptors);
-    }
-    cout << "done." << endl;
-
-    map<pair<string, string>, vector< DMatch> >  matchLookUp = calculateMatches(imageVector);
-
-
-}
