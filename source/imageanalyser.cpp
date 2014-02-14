@@ -31,7 +31,8 @@ std::vector<Imageobject> ImageAnalyser::calculateDescriptors(std::vector<Imageob
 };
 
 std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
-    int numberOfMatches = 0;
+    int MATCHTRESH = 25;
+    int numberOfMatches = MATCHTRESH;
     int numberOfMatches2 = -1;
     int firstMatch = -1;
     int secondMatch = -1;
@@ -52,8 +53,9 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
         matcher->clear(); //Remove previous descriptors
         matcher->add( imageVector[id1].getDescriptors() );
         matcher->train();
-        numberOfMatches = 0;
+        numberOfMatches = MATCHTRESH;
         numberOfMatches2 = -1;
+
 
         for (int id2 = 0; id2 < imageVector.size(); ++id2) {
             if (id1 == id2) {
@@ -70,8 +72,11 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
                 //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
                 if (good_matches.size() > numberOfMatches) {
+                    numberOfMatches2 = numberOfMatches;
+
                     numberOfMatches = good_matches.size();
                     BestMatches = good_matches;
+
                     secondMatch = firstMatch;
                     firstMatch = id2;
                 }
@@ -99,10 +104,10 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
         firstImage.clear();
         secondImage.clear();
 
-        if (secondMatch > 0) {
-            cout << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << endl; /* code */
+        if (numberOfMatches2 > MATCHTRESH) {
+            cout << "[" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << "[" << numberOfMatches2 << "] " << endl; /* code */
         } else {
-        	cout << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() <<"]"<< endl; 
+            cout << "[" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]" << endl;
         }
 
 
