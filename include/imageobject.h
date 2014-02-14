@@ -35,6 +35,7 @@ public:
         image_ = image;
     };
 
+
     void setKeyPoints(std::vector<KeyPoint> keyPoints);
     void setDescriptors(Mat descriptors);
 
@@ -43,6 +44,19 @@ public:
     };
     vector<KeyPoint> getKeypoints() const {
         return keyPointVec_;
+    };
+    int getFirstMatch() const {
+        return firstMatch_;
+    };
+    int getSecondMatch() const {
+        return secondMatch_;
+    };
+
+    void setFirstMatch(int match){
+        firstMatch_ = match;
+    };
+    void setSecondMatch(int match){
+        secondMatch_ = match;
     };
 
 private:
@@ -54,6 +68,8 @@ private:
     std::vector<KeyPoint> keyPointVec_;
     Mat descriptors_;
     string triggerMethod_;
+    int firstMatch_;
+    int secondMatch_;
 };
 
 

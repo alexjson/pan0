@@ -19,7 +19,8 @@ public:
     ~ImageAnalyser();
 
     std::vector<Imageobject> calculateDescriptors(std::vector<Imageobject> imageVector);
-    void analyse(std::vector<Imageobject> imageVector);
+    std::vector<Imageobject> analyse(std::vector<Imageobject> imageVector);
+    void findPanoramas(std::vector<Imageobject> imageVector);
 
 private:
     Ptr<DescriptorMatcher> matcher;

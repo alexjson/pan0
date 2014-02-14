@@ -5,7 +5,7 @@ using namespace cv;
 
 ImageAnalyser::ImageAnalyser() {
 
-    matcher = DescriptorMatcher::create("BruteForce"); // FlannBased
+    matcher = DescriptorMatcher::create("FlannBased"); // FlannBased
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
 
@@ -30,13 +30,16 @@ std::vector<Imageobject> ImageAnalyser::calculateDescriptors(std::vector<Imageob
     return imageVector;
 };
 
-void ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
+std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
     int numberOfMatches = 0;
-    int matchID = -1;
+    int numberOfMatches2 = -1;
+    int firstMatch = -1;
+    int secondMatch = -1;
     // vector<DMatch> matches;
     std::vector< std::vector < cv::DMatch > > matches;
 
     vector<DMatch> BestMatches;
+    vector<DMatch> SecondBestMatches;
     std::vector<int> matchIDvec;
     std::vector<Point2f> firstImage;
     std::vector<Point2f> secondImage;
@@ -50,6 +53,7 @@ void ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
         matcher->add( imageVector[id1].getDescriptors() );
         matcher->train();
         numberOfMatches = 0;
+        numberOfMatches2 = -1;
 
         for (int id2 = 0; id2 < imageVector.size(); ++id2) {
             if (id1 == id2) {
@@ -63,11 +67,13 @@ void ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
                         good_matches.push_back(matches[i][0]);
                     }
                 }
-
+                //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
+                // firstMatch secondMatch.
                 if (good_matches.size() > numberOfMatches) {
                     numberOfMatches = good_matches.size();
                     BestMatches = good_matches;
-                    matchID = id2;
+                    secondMatch = firstMatch;
+                    firstMatch = id2;
                 }
                 //Clear out vectors for next iteration
                 good_matches.clear();
@@ -76,7 +82,7 @@ void ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
             }
             for (int i = 0; i < BestMatches.size(); ++i) {
                 firstImage.push_back( imageVector[id1].getKeypoints()[BestMatches[i].queryIdx].pt);
-                secondImage.push_back( imageVector[matchID].getKeypoints()[BestMatches[i].trainIdx].pt);
+                secondImage.push_back( imageVector[firstMatch].getKeypoints()[BestMatches[i].trainIdx].pt);
             }
         } //END INNER LOOP
 
@@ -85,22 +91,75 @@ void ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
         //Find homography with RANSAC
         H = findHomography( firstImage, secondImage, match_mask, RANSAC );
 
-        matchIDvec.push_back(matchID);
+        // imageVector[id1].setMatchID(firstMatch);
+        imageVector[id1].setFirstMatch(firstMatch);
+        imageVector[id1].setSecondMatch(secondMatch);
 
         //Clear up vectors for next iteration
         firstImage.clear();
         secondImage.clear();
 
-
-        //Verify image matches using probabilistic model FIXA FEL ?
-        int numberOfInliers = countNonZero(Mat(match_mask));
-        double test = (5.9 + 0.22 * (double)numberOfMatches);
-
-        if ((double)numberOfInliers > (5.9 + 0.22 * (double)numberOfMatches)) {
-        cout << "True match" << imageVector[id1].getFileName() << "        " << imageVector[matchID].getFileName() << endl;
-        }else{
-         cout << "False match" << imageVector[id1].getFileName() << "        " << imageVector[matchID].getFileName() << endl;
+        if (secondMatch > 0) {
+            cout << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << endl; /* code */
+        } else {
+        	cout << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() <<"]"<< endl; 
         }
+
+
+
+        // -----------------------------------------------------------------------------------------------------------------
+        // ***********************************Verify image matches using probabilistic model?**********************************
+        // -----------------------------------------------------------------------------------------------------------------
+
+        // int numberOfInliers = countNonZero(Mat(match_mask));
+        // double test = (5.9 + 0.22 * (double)numberOfMatches);
+
+        // if ((double)numberOfInliers > (5.9 + 0.22 * (double)numberOfMatches)) {
+        // cout << "True match" << imageVector[id1].getFileName() << "        " << imageVector[firstMatch].getFileName() << endl;
+        // }else{
+        //  cout << "False match" << imageVector[id1].getFileName() << "        " << imageVector[firstMatch].getFileName() << endl;
+        // }
     } //END BIG LOOP
 
+    return imageVector;
+
+};
+void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
+
+    std::vector<int> panoramaList;
+
+    bool done = false;
+    int id = 0;
+    int id2 = 0;
+    panoramaList.push_back(id);
+
+    while (!done) {
+        id2 = imageVector[id].getFirstMatch();
+
+        if (std::find(panoramaList.begin(), panoramaList.end(), id2) != panoramaList.end()) {
+            for (int i = 0; i < panoramaList.size(); ++i) {
+                cout << "inne" << endl;
+                cout << i << endl;
+                if (std::find(panoramaList.begin(), panoramaList.end(), i) != panoramaList.end()) {
+                    done = true;
+                } else {
+                    cout << "inne2" << endl;
+                    id = i;
+                }
+            }
+        } else {
+            panoramaList.push_back(id2);
+            id = id2;
+        }
+    }
+
+    for (int x = 0; x < panoramaList.size(); ++x) {
+        cout << imageVector[panoramaList[x]].getFileName() << endl;
+    }
+
+
+    // for (int id = 0; id < imageVector.size(); ++id) {
+    //     int id2 = imageVector[id].getFirstMatch();
+    //     cout << imageVector[id].getFileName() << " ===> " << imageVector[id2].getFileName() << endl;
+    // }
 }

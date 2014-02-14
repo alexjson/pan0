@@ -37,8 +37,8 @@ int main( int argc, char **argv ) {
 
     imageVector = analyser->calculateDescriptors(imageVector);
     
-    analyser->analyse(imageVector);
-
+    imageVector = analyser->analyse(imageVector);
+    analyser->findPanoramas(imageVector);
 
     return 0;
     // if (imageNames.size() > SIZE) {
