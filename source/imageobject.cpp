@@ -6,7 +6,8 @@ using namespace cv;
 Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName) :
     jsonRoot_(jsonRoot),
     image_(image),
-    fileName_(fileName) {
+    fileName_(fileName),
+    secondMatch_(-1) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
         mag_data.push_back(jsonRoot_["meta"]["mag_data"]["samples"][idx][i].asInt());
@@ -17,7 +18,8 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName) :
 };
 Imageobject::Imageobject(Json::Value jsonRoot, string fileName) :
     jsonRoot_(jsonRoot),
-    fileName_(fileName) {
+    fileName_(fileName),
+    secondMatch_(-1) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
         mag_data.push_back(jsonRoot_["meta"]["mag_data"]["samples"][idx][i].asInt());

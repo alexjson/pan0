@@ -73,8 +73,9 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
                 // firstMatch secondMatch.
                 if (good_matches.size() > numberOfMatches) {
                     numberOfMatches2 = numberOfMatches;
-
                     numberOfMatches = good_matches.size();
+
+                    SecondBestMatches = BestMatches;
                     BestMatches = good_matches;
 
                     secondMatch = firstMatch;
@@ -104,6 +105,17 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
         firstImage.clear();
         secondImage.clear();
 
+        // if (imageVector[id1].getFileName() == "123.jpg" && imageVector[secondMatch].getFileName() == "122.jpg") {
+        //     Mat outImg;
+        //     cout << "Mathces size " << SecondBestMatches.size() << "     " << BestMatches.size() << endl;
+        //     drawMatches(imageVector[secondMatch].getImage(), imageVector[secondMatch].getKeypoints(),
+        //                 imageVector[id1].getImage(), imageVector[id1].getKeypoints(), SecondBestMatches, outImg);
+
+        //     imshow("Matches?", outImg);
+        //     waitKey(0);
+
+        // }
+
         if (numberOfMatches2 > MATCHTRESH) {
             cout << "[" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << "[" << numberOfMatches2 << "] " << endl; /* code */
         } else {
@@ -131,40 +143,35 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
 };
 void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
 
-    std::vector<int> panoramaList;
+    //Ta intersect först, om intersect ta unionen av båda och spara resultaten i en resultat vector med ID över bilder
+    // Hur lösa om det är flera panorama?
+    std::vector<int> tmpVec;
+    std::vector<int> ID;
+    std::vector<int>::iterator it;
 
-    bool done = false;
-    int id = 0;
-    int id2 = 0;
-    panoramaList.push_back(id);
+    for (int current = 0; current < imageVector.size(); ++current) {
+        tmpVec.push_back(imageVector[current].getFirstMatch());
+        tmpVec.push_back(imageVector[current].getSecondMatch());
 
-    while (!done) {
-        id2 = imageVector[id].getFirstMatch();
+        std::sort (ID, ID.size());
+        std::sort (tmpVec, tmpVec.size());
 
-        if (std::find(panoramaList.begin(), panoramaList.end(), id2) != panoramaList.end()) {
-            for (int i = 0; i < panoramaList.size(); ++i) {
-                cout << "inne" << endl;
-                cout << i << endl;
-                if (std::find(panoramaList.begin(), panoramaList.end(), i) != panoramaList.end()) {
-                    done = true;
-                } else {
-                    cout << "inne2" << endl;
-                    id = i;
-                }
+        it = std::set_intersection (ID, ID.size(), tmpVec, tmpVec.size(), v.begin());
+
+        tmpVec.resize(it - tmpVec.begin());
+
+        if (tmpVec.size() > 0) {
+            for (int idx = 0; idx < tmpVec.size(); ++idx) {
+                ID.push_back(tmpVec[i]);
             }
-        } else {
-            panoramaList.push_back(id2);
-            id = id2;
         }
+
+        std::cout << "The intersection has " << (tmpVec.size()) << " elements:\n";
+        for (it = v.begin(); it != v.end(); ++it)
+            std::cout << ' ' << *it;
+        std::cout << '\n';
+
+
     }
 
-    for (int x = 0; x < panoramaList.size(); ++x) {
-        cout << imageVector[panoramaList[x]].getFileName() << endl;
-    }
-
-
-    // for (int id = 0; id < imageVector.size(); ++id) {
-    //     int id2 = imageVector[id].getFirstMatch();
-    //     cout << imageVector[id].getFileName() << " ===> " << imageVector[id2].getFileName() << endl;
-    // }
 }

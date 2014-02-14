@@ -17,10 +17,9 @@ int main( int argc, char **argv ) {
         PATH = "/home/alex/xjobb/images/test/";
         // std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
         // return 1;
-    }else{
+    } else {
         PATH = argv[1];
     }
-
 
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
@@ -33,10 +32,10 @@ int main( int argc, char **argv ) {
     parser->parseImages(PATH, imageNames);
     imageVector = parser->getImageVector();
 
-    ImageAnalyser* analyser = new ImageAnalyser();
+    ImageAnalyser *analyser = new ImageAnalyser();
 
     imageVector = analyser->calculateDescriptors(imageVector);
-    
+
     imageVector = analyser->analyse(imageVector);
     analyser->findPanoramas(imageVector);
 
