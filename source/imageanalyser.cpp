@@ -31,7 +31,7 @@ std::vector<Imageobject> ImageAnalyser::calculateDescriptors(std::vector<Imageob
 };
 
 std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
-    int MATCHTRESH = 25;
+    int MATCHTRESH = 50;
     int numberOfMatches = MATCHTRESH;
     int numberOfMatches2 = -1;
     int firstMatch = -1;
@@ -49,13 +49,13 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
 
     for (int id1 = 0; id1 < imageVector.size(); ++id1) {
 
+
         // Train the matcher with the query descriptors
         matcher->clear(); //Remove previous descriptors
         matcher->add( imageVector[id1].getDescriptors() );
         matcher->train();
         numberOfMatches = MATCHTRESH;
         numberOfMatches2 = -1;
-
 
         for (int id2 = 0; id2 < imageVector.size(); ++id2) {
             if (id1 == id2) {
@@ -99,7 +99,8 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
 
         // imageVector[id1].setMatchID(firstMatch);
         imageVector[id1].setFirstMatch(firstMatch);
-        imageVector[id1].setSecondMatch(secondMatch);
+        if (numberOfMatches2 > MATCHTRESH)
+            imageVector[id1].setSecondMatch(secondMatch);
 
         //Clear up vectors for next iteration
         firstImage.clear();
@@ -117,9 +118,12 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
         // }
 
         if (numberOfMatches2 > MATCHTRESH) {
-            cout << "[" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << "[" << numberOfMatches2 << "] " << endl; /* code */
+            cout << " [" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() <<
+                 "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << "[" << numberOfMatches2 << "] " <<
+                 "      " << firstMatch << "    " << id1 << "     " <<  secondMatch << endl;
         } else {
-            cout << "[" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]" << endl;
+            cout << " [" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]" <<
+                 "      " << firstMatch << "    " << id1 << "     " << endl;
         }
 
 
@@ -147,31 +151,77 @@ void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
     // Hur lösa om det är flera panorama?
     std::vector<int> tmpVec;
     std::vector<int> ID;
+    std::vector< std::vector<int> > panoramas;
+    std::vector<int> currentID;
     std::vector<int>::iterator it;
+    bool intersect;
+
 
     for (int current = 0; current < imageVector.size(); ++current) {
-        tmpVec.push_back(imageVector[current].getFirstMatch());
-        tmpVec.push_back(imageVector[current].getSecondMatch());
-
-        std::sort (ID, ID.size());
-        std::sort (tmpVec, tmpVec.size());
-
-        it = std::set_intersection (ID, ID.size(), tmpVec, tmpVec.size(), v.begin());
-
-        tmpVec.resize(it - tmpVec.begin());
-
-        if (tmpVec.size() > 0) {
-            for (int idx = 0; idx < tmpVec.size(); ++idx) {
-                ID.push_back(tmpVec[i]);
-            }
+        if (current == 0) {
+            ID.push_back(imageVector[current].getFirstMatch());
+            ID.push_back(current);
         }
 
-        std::cout << "The intersection has " << (tmpVec.size()) << " elements:\n";
-        for (it = v.begin(); it != v.end(); ++it)
-            std::cout << ' ' << *it;
-        std::cout << '\n';
+        currentID.push_back(current);
+        currentID.push_back(imageVector[current].getFirstMatch());
+        tmpVec.push_back(current);
+        tmpVec.push_back(imageVector[current].getFirstMatch());
+        if (imageVector[current].getSecondMatch() != -1) {
+            currentID.push_back(imageVector[current].getSecondMatch());
+            tmpVec.push_back(imageVector[current].getSecondMatch());
+        }
 
 
+        intersect = hasIntersections(ID,tmpVec);
+
+
+        if (intersect) {
+            for (int idx = 0; idx < currentID.size(); ++idx) {
+                // cout << currentID[idx] << " ";
+                ID.push_back(currentID[idx]);
+            }
+        } else {
+
+        }
+
+        // for (it = ID.begin(); it != ID.end(); ++it)
+        //     std::cout << ' ' << *it;
+        // std::cout << '\n';
+        currentID.clear();
+        tmpVec.clear();
     }
+
+    cout << "Removing duplicates" << endl;
+    sort( ID.begin(), ID.end() );
+    ID.erase( unique( ID.begin(), ID.end() ), ID.end() );
+    cout << "done." << endl;
+
+    printf("ID contains: ");
+    for (int idx = 0; idx < ID.size(); ++idx) {
+        cout << ID[idx] << " ";
+    }
+
+    imshow("Result", imageVector[0].getImage());
+
+    imshow("Result2", imageVector[7].getImage());
+
+
+    waitKey(0);
+
+}
+
+bool ImageAnalyser::hasIntersections(std::vector<int> v1, std::vector<int> v2) {
+
+    std::vector<int>::iterator it;
+
+    std::sort (v1.begin(), v1.begin() + v1.size());
+    std::sort (v2.begin(), v2.begin() + v2.size());
+
+    //Get the intersection
+    it = std::set_intersection (v1.begin(), v1.begin() + v1.size(), v2.begin(), v2.begin() + v2.size(), v2.begin());
+    v2.resize(it - v2.begin());
+
+    return v2.size() > 0;
 
 }

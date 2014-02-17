@@ -21,6 +21,7 @@ public:
     std::vector<Imageobject> calculateDescriptors(std::vector<Imageobject> imageVector);
     std::vector<Imageobject> analyse(std::vector<Imageobject> imageVector);
     void findPanoramas(std::vector<Imageobject> imageVector);
+    bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
 
 private:
     Ptr<DescriptorMatcher> matcher;
