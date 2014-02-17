@@ -22,6 +22,7 @@ public:
     std::vector<Imageobject> analyse(std::vector<Imageobject> imageVector);
     void findPanoramas(std::vector<Imageobject> imageVector);
     bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
+    std::vector< std::vector<int> > removeDuplicates( std::vector< std::vector<int> > Vec);
 
 private:
     Ptr<DescriptorMatcher> matcher;

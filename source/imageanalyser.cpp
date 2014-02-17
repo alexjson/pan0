@@ -161,6 +161,8 @@ void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
         if (current == 0) {
             ID.push_back(imageVector[current].getFirstMatch());
             ID.push_back(current);
+            panoramas.push_back(ID);
+            continue;
         }
 
         currentID.push_back(current);
@@ -172,42 +174,34 @@ void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
             tmpVec.push_back(imageVector[current].getSecondMatch());
         }
 
+        for (int panoID = 0; panoID < panoramas.size(); ++panoID) {
+            intersect = hasIntersections(panoramas[panoID], tmpVec);
 
-        intersect = hasIntersections(ID,tmpVec);
-
-
-        if (intersect) {
-            for (int idx = 0; idx < currentID.size(); ++idx) {
-                // cout << currentID[idx] << " ";
-                ID.push_back(currentID[idx]);
+            if (intersect) {
+                for (int idx = 0; idx < currentID.size(); ++idx) {
+                    panoramas[panoID].push_back(currentID[idx]);
+                    break;
+                }
             }
-        } else {
-
         }
+        if (!intersect)
+            panoramas.push_back(tmpVec);
 
-        // for (it = ID.begin(); it != ID.end(); ++it)
-        //     std::cout << ' ' << *it;
-        // std::cout << '\n';
         currentID.clear();
         tmpVec.clear();
     }
 
-    cout << "Removing duplicates" << endl;
-    sort( ID.begin(), ID.end() );
-    ID.erase( unique( ID.begin(), ID.end() ), ID.end() );
-    cout << "done." << endl;
+    panoramas = removeDuplicates(panoramas);
 
-    printf("ID contains: ");
-    for (int idx = 0; idx < ID.size(); ++idx) {
-        cout << ID[idx] << " ";
+    cout << "panoSize   " << panoramas.size() << endl;
+    for (int y = 0; y < panoramas.size(); ++y) {
+        printf("Pano contains: ");
+        for (int idx = 0; idx < panoramas[y].size(); ++idx) {
+            cout << panoramas[y][idx] << " ";
+        }
+        printf("\n");
     }
 
-    imshow("Result", imageVector[0].getImage());
-
-    imshow("Result2", imageVector[7].getImage());
-
-
-    waitKey(0);
 
 }
 
@@ -224,4 +218,12 @@ bool ImageAnalyser::hasIntersections(std::vector<int> v1, std::vector<int> v2) {
 
     return v2.size() > 0;
 
+}
+std::vector< std::vector<int> > ImageAnalyser::removeDuplicates( std::vector< std::vector<int> > vec) {
+
+    for (int idx = 0; idx < vec.size(); ++idx) {
+        sort( vec[idx].begin(), vec[idx].end() );
+        vec[idx].erase( unique( vec[idx].begin(), vec[idx].end() ), vec[idx].end() );
+    }
+    return vec;
 }
