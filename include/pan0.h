@@ -8,6 +8,8 @@
 #include </usr/local/include/opencv2/stitching/stitcher.hpp>
 #include </home/alex/xjobb/c++/include/dataparser.h>
 #include </home/alex/xjobb/c++/include/imageanalyser.h>
+#include </home/alex/xjobb/c++/include/pan0stitcher.h>
+
 
 
 #endif

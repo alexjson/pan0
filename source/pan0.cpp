@@ -37,7 +37,11 @@ int main( int argc, char **argv ) {
     analyser->calculateDescriptors();
 
     analyser->analyse();
-    std::vector< std::vector<int> > panoIDVec = analyser->findPanoramas();
+    std::vector< std::vector<int> >* panoIDVec = analyser->findPanoramas();
+
+    Pan0Stitcher* stitcher = new Pan0Stitcher(imageVector);
+    stitcher->setPanoIDs(panoIDVec);
+    stitcher->stitch();
 
     return 0;
     // if (imageNames.size() > SIZE) {
