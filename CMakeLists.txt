@@ -6,6 +6,7 @@ set(HEADERS
    include/dataparser.h
    include/imageanalyser.h
    include/imageobject.h
+   include/pan0stitcher.h
 
 )
 
@@ -14,6 +15,7 @@ set(SOURCE
  	source/dataparser.cpp
  	source/imageanalyser.cpp
  	source/imageobject.cpp
+ 	source/pan0stitcher.cpp
 )
 add_executable( pan0  ${SOURCE} ${HEADER_FILES})
 TARGET_LINK_LIBRARIES(pan0 /home/alex/xjobb/c++/libjson/libjson.a)

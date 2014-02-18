@@ -11,23 +11,25 @@
 
 using namespace std;
 using namespace cv;
-class ImageObject;
+class Imageobject;
 
 class ImageAnalyser {
 public:
-    ImageAnalyser();
+    ImageAnalyser(std::vector<Imageobject>* imageVector);
     ~ImageAnalyser();
 
-    std::vector<Imageobject> calculateDescriptors(std::vector<Imageobject> imageVector);
-    std::vector<Imageobject> analyse(std::vector<Imageobject> imageVector);
-    void findPanoramas(std::vector<Imageobject> imageVector);
+    void calculateDescriptors();
+    void analyse();
+    void findPanoramas();
     bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
     std::vector< std::vector<int> > removeDuplicates( std::vector< std::vector<int> > Vec);
+    // void generateHomography();
 
 private:
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
+    std::vector<Imageobject>* imageVector_;
 };
 
 

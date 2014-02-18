@@ -70,6 +70,9 @@ private:
     string triggerMethod_;
     int firstMatch_;
     int secondMatch_;
+    Mat homographyFirstMatch_;
+    Mat homographySecondtMatch_;
+
 };
 
 

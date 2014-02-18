@@ -4,7 +4,7 @@ int SIZE = 4;
 string PATH = "";
 double eDistance(vector<int> vec1, vector<int> vec2);
 void stitchTest(vector<string> filesToStitch, string PATH);
-std::vector<string> findCandidates(vector<Imageobject> imageVector);
+std::vector<string> findCandidates(vector<Imageobject> *imageVector);
 
 
 using namespace cv;
@@ -24,20 +24,20 @@ int main( int argc, char **argv ) {
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
 
-    vector<Imageobject> imageVector = parser->getImageVector();
+    vector<Imageobject> *imageVector = parser->getImageVector();
 
 
     std::vector<string>  imageNames = findCandidates(imageVector);
-    imageVector.clear();
+    imageVector->clear();
     parser->parseImages(PATH, imageNames);
     imageVector = parser->getImageVector();
 
-    ImageAnalyser *analyser = new ImageAnalyser();
+    ImageAnalyser *analyser = new ImageAnalyser(imageVector);
 
-    imageVector = analyser->calculateDescriptors(imageVector);
+    analyser->calculateDescriptors();
 
-    imageVector = analyser->analyse(imageVector);
-    analyser->findPanoramas(imageVector);
+    analyser->analyse();
+    analyser->findPanoramas();
 
     return 0;
     // if (imageNames.size() > SIZE) {
@@ -62,15 +62,16 @@ double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
 };
 
 
-std::vector<string> findCandidates(vector<Imageobject> imageVector) {
+std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     double magDiff = 0.0;
     std::map<string, string> tmp;
-    for (int i = 0; i < imageVector.size(); ++i) {
-        for (int k = 0; k < imageVector.size(); ++k) {
-            magDiff = eDistance(imageVector[i].getMag_data(), imageVector[k].getMag_data());
+    for (int i = 0; i < imageVector->size(); ++i) {
+        for (int k = 0; k < imageVector->size(); ++k) {
+            magDiff = eDistance((*imageVector)[i].getMag_data(), (*imageVector)[k].getMag_data());
 
             if (magDiff > 25.0 && magDiff < 55.0) {
-                tmp.insert(std::map<string, string>::value_type(imageVector[i].getFileName(), imageVector[k].getFileName()));
+                tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
+                           (*imageVector)[k].getFileName()));
             }
 
         }

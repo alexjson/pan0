@@ -3,22 +3,20 @@
 using namespace std;
 using namespace cv;
 
-ImageAnalyser::ImageAnalyser() {
+ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
 
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
-
-
 };
 
-std::vector<Imageobject> ImageAnalyser::calculateDescriptors(std::vector<Imageobject> imageVector) {
+void ImageAnalyser::calculateDescriptors() {
 
     vector<KeyPoint> keypoints;
     Mat descriptors;
 
     cout << "Calculating descriptors" << endl;
-    for (std::vector<Imageobject>::iterator i = imageVector.begin(); i != imageVector.end(); ++i) {
+    for (std::vector<Imageobject>::iterator i = imageVector_->begin(); i != imageVector_->end(); ++i) {
         detector->detect(i->getImage(), keypoints);
         i->setKeyPoints(keypoints);
         extractor->compute(i->getImage(), keypoints, descriptors);
@@ -26,11 +24,9 @@ std::vector<Imageobject> ImageAnalyser::calculateDescriptors(std::vector<Imageob
         keypoints.clear();
     }
     cout << "done." << endl;
-
-    return imageVector;
 };
 
-std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVector) {
+void ImageAnalyser::analyse() {
     int MATCHTRESH = 50;
     int numberOfMatches = MATCHTRESH;
     int numberOfMatches2 = -1;
@@ -42,26 +38,25 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
     vector<DMatch> BestMatches;
     vector<DMatch> SecondBestMatches;
     std::vector<int> matchIDvec;
-    std::vector<Point2f> firstImage;
-    std::vector<Point2f> secondImage;
+
     int id1 = 0;
     // int id2 = 27;
 
-    for (int id1 = 0; id1 < imageVector.size(); ++id1) {
+    for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
 
 
         // Train the matcher with the query descriptors
         matcher->clear(); //Remove previous descriptors
-        matcher->add( imageVector[id1].getDescriptors() );
+        matcher->add((*imageVector_)[id1].getDescriptors() );
         matcher->train();
         numberOfMatches = MATCHTRESH;
         numberOfMatches2 = -1;
 
-        for (int id2 = 0; id2 < imageVector.size(); ++id2) {
+        for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
                 continue;
             } else {
-                matcher->knnMatch(imageVector[id2].getDescriptors(), matches, 2);  // Find two nearest matches
+                matcher->knnMatch((*imageVector_)[id2].getDescriptors(), matches, 2);  // Find two nearest matches
                 vector<cv::DMatch> good_matches;
                 for (int i = 0; i < matches.size(); ++i) {
                     const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
@@ -86,43 +81,37 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
                 matches.clear();
 
             }
-            for (int i = 0; i < BestMatches.size(); ++i) {
-                firstImage.push_back( imageVector[id1].getKeypoints()[BestMatches[i].queryIdx].pt);
-                secondImage.push_back( imageVector[firstMatch].getKeypoints()[BestMatches[i].trainIdx].pt);
-            }
         } //END INNER LOOP
+
+        std::vector<Point2f> firstImage;
+        std::vector<Point2f> secondImage;
+        for (int i = 0; i < BestMatches.size(); ++i) {
+            firstImage.push_back( (*imageVector_)[id1].getKeypoints()[BestMatches[i].queryIdx].pt);
+            secondImage.push_back( (*imageVector_)[firstMatch].getKeypoints()[BestMatches[i].trainIdx].pt);
+        }
 
         Mat H;
         std::vector<uchar> match_mask;
         //Find homography with RANSAC
         H = findHomography( firstImage, secondImage, match_mask, RANSAC );
 
-        // imageVector[id1].setMatchID(firstMatch);
-        imageVector[id1].setFirstMatch(firstMatch);
+        // imageVector_[id1].setMatchID(firstMatch);
+        (*imageVector_)[id1].setFirstMatch(firstMatch);
         if (numberOfMatches2 > MATCHTRESH)
-            imageVector[id1].setSecondMatch(secondMatch);
+            (*imageVector_)[id1].setSecondMatch(secondMatch);
 
         //Clear up vectors for next iteration
         firstImage.clear();
         secondImage.clear();
 
-        // if (imageVector[id1].getFileName() == "123.jpg" && imageVector[secondMatch].getFileName() == "122.jpg") {
-        //     Mat outImg;
-        //     cout << "Mathces size " << SecondBestMatches.size() << "     " << BestMatches.size() << endl;
-        //     drawMatches(imageVector[secondMatch].getImage(), imageVector[secondMatch].getKeypoints(),
-        //                 imageVector[id1].getImage(), imageVector[id1].getKeypoints(), SecondBestMatches, outImg);
-
-        //     imshow("Matches?", outImg);
-        //     waitKey(0);
-
-        // }
-
         if (numberOfMatches2 > MATCHTRESH) {
-            cout << " [" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() <<
-                 "<====[" << imageVector[id1].getFileName() << "]====>" << imageVector[secondMatch].getFileName() << "[" << numberOfMatches2 << "] " <<
+            cout << " [" << numberOfMatches << "] " << (*imageVector_)[firstMatch].getFileName() <<
+                 "<====[" << (*imageVector_)[id1].getFileName() << "]====>" << (*imageVector_)[secondMatch].getFileName()
+                 << "[" << numberOfMatches2 << "] " <<
                  "      " << firstMatch << "    " << id1 << "     " <<  secondMatch << endl;
         } else {
-            cout << " [" << numberOfMatches << "] " << imageVector[firstMatch].getFileName() << "<====[" << imageVector[id1].getFileName() << "]" <<
+            cout << " [" << numberOfMatches << "] " << (*imageVector_)[firstMatch].getFileName() << "<====[" <<
+                 (*imageVector_)[id1].getFileName() << "]" <<
                  "      " << firstMatch << "    " << id1 << "     " << endl;
         }
 
@@ -142,13 +131,9 @@ std::vector<Imageobject> ImageAnalyser::analyse(std::vector<Imageobject> imageVe
         // }
     } //END BIG LOOP
 
-    return imageVector;
-
 };
-void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
+void ImageAnalyser::findPanoramas() {
 
-    //Ta intersect först, om intersect ta unionen av båda och spara resultaten i en resultat vector med ID över bilder
-    // Hur lösa om det är flera panorama?
     std::vector<int> tmpVec;
     std::vector<int> ID;
     std::vector< std::vector<int> > panoramas;
@@ -157,21 +142,21 @@ void ImageAnalyser::findPanoramas(std::vector<Imageobject> imageVector) {
     bool intersect;
 
 
-    for (int current = 0; current < imageVector.size(); ++current) {
+    for (int current = 0; current < imageVector_->size(); ++current) {
         if (current == 0) {
-            ID.push_back(imageVector[current].getFirstMatch());
+            ID.push_back((*imageVector_)[current].getFirstMatch());
             ID.push_back(current);
             panoramas.push_back(ID);
             continue;
         }
 
         currentID.push_back(current);
-        currentID.push_back(imageVector[current].getFirstMatch());
+        currentID.push_back((*imageVector_)[current].getFirstMatch());
         tmpVec.push_back(current);
-        tmpVec.push_back(imageVector[current].getFirstMatch());
-        if (imageVector[current].getSecondMatch() != -1) {
-            currentID.push_back(imageVector[current].getSecondMatch());
-            tmpVec.push_back(imageVector[current].getSecondMatch());
+        tmpVec.push_back((*imageVector_)[current].getFirstMatch());
+        if ((*imageVector_)[current].getSecondMatch() != -1) {
+            currentID.push_back((*imageVector_)[current].getSecondMatch());
+            tmpVec.push_back((*imageVector_)[current].getSecondMatch());
         }
 
         for (int panoID = 0; panoID < panoramas.size(); ++panoID) {
