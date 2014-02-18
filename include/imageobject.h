@@ -66,6 +66,14 @@ public:
         secondBestMatches_ = matches;
     };
 
+    std::vector<DMatch> getFirstMatches(){
+        return firstBestMatches_;
+    };
+    std::vector<DMatch> getSecondMatches(){
+        return secondBestMatches_;
+    };
+
+
 private:
     Json::Value jsonRoot_;
     Mat image_;

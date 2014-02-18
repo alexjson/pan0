@@ -37,7 +37,7 @@ int main( int argc, char **argv ) {
     analyser->calculateDescriptors();
 
     analyser->analyse();
-    analyser->findPanoramas();
+    std::vector< std::vector<int> > panoIDVec = analyser->findPanoramas();
 
     return 0;
     // if (imageNames.size() > SIZE) {

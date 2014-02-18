@@ -15,12 +15,12 @@ class Imageobject;
 
 class ImageAnalyser {
 public:
-    ImageAnalyser(std::vector<Imageobject>* imageVector);
+    ImageAnalyser(std::vector<Imageobject> *imageVector);
     ~ImageAnalyser();
 
     void calculateDescriptors();
     void analyse();
-    void findPanoramas();
+    std::vector< std::vector<int> > findPanoramas();
     bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
     std::vector< std::vector<int> > removeDuplicates( std::vector< std::vector<int> > Vec);
     // void generateHomography();
@@ -29,7 +29,7 @@ private:
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
-    std::vector<Imageobject>* imageVector_;
+    std::vector<Imageobject> *imageVector_;
 };
 
 

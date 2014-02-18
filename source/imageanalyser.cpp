@@ -79,23 +79,10 @@ void ImageAnalyser::analyse() {
             }
         } //END INNER LOOP
 
-        std::vector<Point2f> firstImage;
-        std::vector<Point2f> secondImage;
-        for (int i = 0; i < BestMatches.size(); ++i) {
-            firstImage.push_back( (*imageVector_)[id1].getKeypoints()[BestMatches[i].queryIdx].pt);
-            secondImage.push_back( (*imageVector_)[firstMatch].getKeypoints()[BestMatches[i].trainIdx].pt);
-        }
-
-        Mat H;
-        std::vector<uchar> match_mask;
-        //Find homography with RANSAC
-        H = findHomography( firstImage, secondImage, match_mask, RANSAC );
-
-
         (*imageVector_)[id1].setFirstMatchID(firstMatch);
         (*imageVector_)[id1].setFirstMatches(BestMatches);
 
-        if (numberOfMatches2 > MATCHTRESH){
+        if (numberOfMatches2 > MATCHTRESH) {
             (*imageVector_)[id1].setSecondMatchID(secondMatch);
             (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
 
@@ -133,7 +120,7 @@ void ImageAnalyser::analyse() {
     } //END BIG LOOP
 
 };
-void ImageAnalyser::findPanoramas() {
+std::vector< std::vector<int> > ImageAnalyser::findPanoramas() {
 
     std::vector<int> tmpVec;
     std::vector<int> ID;
@@ -188,7 +175,7 @@ void ImageAnalyser::findPanoramas() {
         printf("\n");
     }
 
-
+    return panoramas;
 }
 
 bool ImageAnalyser::hasIntersections(std::vector<int> v1, std::vector<int> v2) {
