@@ -45,18 +45,25 @@ public:
     vector<KeyPoint> getKeypoints() const {
         return keyPointVec_;
     };
-    int getFirstMatch() const {
-        return firstMatch_;
+    int getFirstMatchID() const {
+        return firstMatchID_;
     };
-    int getSecondMatch() const {
-        return secondMatch_;
+    int getSecondMatchID() const {
+        return secondMatchID_;
     };
 
-    void setFirstMatch(int match){
-        firstMatch_ = match;
+    void setFirstMatchID(int match){
+        firstMatchID_ = match;
     };
-    void setSecondMatch(int match){
-        secondMatch_ = match;
+    void setSecondMatchID(int match){
+        secondMatchID_ = match;
+    };
+
+    void setFirstMatches(vector<DMatch> matches){
+        firstBestMatches_ = matches;
+    };
+    void setSecondMatches(vector<DMatch> matches){
+        secondBestMatches_ = matches;
     };
 
 private:
@@ -68,10 +75,12 @@ private:
     std::vector<KeyPoint> keyPointVec_;
     Mat descriptors_;
     string triggerMethod_;
-    int firstMatch_;
-    int secondMatch_;
+    int firstMatchID_;
+    int secondMatchID_;
     Mat homographyFirstMatch_;
     Mat homographySecondtMatch_;
+    vector<DMatch> firstBestMatches_;
+    vector<DMatch> secondBestMatches_;
 
 };
 

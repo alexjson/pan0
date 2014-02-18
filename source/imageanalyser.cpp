@@ -32,15 +32,11 @@ void ImageAnalyser::analyse() {
     int numberOfMatches2 = -1;
     int firstMatch = -1;
     int secondMatch = -1;
-    // vector<DMatch> matches;
     std::vector< std::vector < cv::DMatch > > matches;
 
     vector<DMatch> BestMatches;
     vector<DMatch> SecondBestMatches;
     std::vector<int> matchIDvec;
-
-    int id1 = 0;
-    // int id2 = 27;
 
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
 
@@ -95,10 +91,15 @@ void ImageAnalyser::analyse() {
         //Find homography with RANSAC
         H = findHomography( firstImage, secondImage, match_mask, RANSAC );
 
-        // imageVector_[id1].setMatchID(firstMatch);
-        (*imageVector_)[id1].setFirstMatch(firstMatch);
-        if (numberOfMatches2 > MATCHTRESH)
-            (*imageVector_)[id1].setSecondMatch(secondMatch);
+
+        (*imageVector_)[id1].setFirstMatchID(firstMatch);
+        (*imageVector_)[id1].setFirstMatches(BestMatches);
+
+        if (numberOfMatches2 > MATCHTRESH){
+            (*imageVector_)[id1].setSecondMatchID(secondMatch);
+            (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
+
+        }
 
         //Clear up vectors for next iteration
         firstImage.clear();
@@ -144,19 +145,19 @@ void ImageAnalyser::findPanoramas() {
 
     for (int current = 0; current < imageVector_->size(); ++current) {
         if (current == 0) {
-            ID.push_back((*imageVector_)[current].getFirstMatch());
+            ID.push_back((*imageVector_)[current].getFirstMatchID());
             ID.push_back(current);
             panoramas.push_back(ID);
             continue;
         }
 
         currentID.push_back(current);
-        currentID.push_back((*imageVector_)[current].getFirstMatch());
+        currentID.push_back((*imageVector_)[current].getFirstMatchID());
         tmpVec.push_back(current);
-        tmpVec.push_back((*imageVector_)[current].getFirstMatch());
-        if ((*imageVector_)[current].getSecondMatch() != -1) {
-            currentID.push_back((*imageVector_)[current].getSecondMatch());
-            tmpVec.push_back((*imageVector_)[current].getSecondMatch());
+        tmpVec.push_back((*imageVector_)[current].getFirstMatchID());
+        if ((*imageVector_)[current].getSecondMatchID() != -1) {
+            currentID.push_back((*imageVector_)[current].getSecondMatchID());
+            tmpVec.push_back((*imageVector_)[current].getSecondMatchID());
         }
 
         for (int panoID = 0; panoID < panoramas.size(); ++panoID) {
