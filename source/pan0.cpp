@@ -21,7 +21,6 @@ int main( int argc, char **argv ) {
         PATH = argv[1];
     }
 
-
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
 
