@@ -23,7 +23,6 @@ public:
     std::vector< std::vector<int> >* findPanoramas();
     bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
     void removeDuplicates( std::vector< std::vector<int> >* Vec);
-    // void generateHomography();
 
 private:
     Ptr<DescriptorMatcher> matcher;

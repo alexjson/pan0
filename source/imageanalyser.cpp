@@ -43,9 +43,9 @@ void ImageAnalyser::analyse() {
 
 
         // Train the matcher with the query descriptors
-        matcher->clear(); //Remove previous descriptors
-        matcher->add((*imageVector_)[id1].getDescriptors() );
-        matcher->train();
+        // matcher->clear(); //Remove previous descriptors
+        // matcher->add((*imageVector_)[id1].getDescriptors() );
+        // matcher->train();
         numberOfMatches = MATCHTRESH;
         numberOfMatches2 = -1;
 
@@ -53,7 +53,8 @@ void ImageAnalyser::analyse() {
             if (id1 == id2) {
                 continue;
             } else {
-                matcher->knnMatch((*imageVector_)[id2].getDescriptors(), matches, 2);  // Find two nearest matches
+                // FIXME, good_matches blir fel
+                matcher->knnMatch((*imageVector_)[id1].getDescriptors(),(*imageVector_)[id2].getDescriptors(), matches, 2);  // Find two nearest matches
                 vector<cv::DMatch> good_matches;
                 for (int i = 0; i < matches.size(); ++i) {
                     const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
