@@ -21,7 +21,7 @@ public:
     void setPanoIDs(std::vector< std::vector<int> >* panoIDVec) {
         panoIDVec_ = panoIDVec;
     };
-    Mat getHomography(int id1, int id2);
+    Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
 
 private:
     std::vector<Imageobject> *imageVector_;

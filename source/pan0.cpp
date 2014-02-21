@@ -39,6 +39,8 @@ int main( int argc, char **argv ) {
     analyser->analyse();
     std::vector< std::vector<int> > *panoIDVec = analyser->findPanoramas();
 
+    
+
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector);
     stitcher->setPanoIDs(panoIDVec);
     stitcher->stitch();
