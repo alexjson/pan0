@@ -60,20 +60,25 @@ void Pan0Stitcher::stitch() {
             addWeighted(result,0.5,result2,0.5,0.0,dst);
 
             // warpPerspective(result, dst, M, Size(result.cols, result.rows), INTER_CUBIC);
-            imshow("Test", dst);
+            imshow("dst", dst);
             imshow("current", img1);
             imshow("firstMatch", img2);
 
             if (secondMatchID != -1) {
                 Mat result3;
+                Mat test;
                 Mat img3 = imageVector_->at(secondMatchID).getImage();
-                Mat roi2(result, Rect(0, 0,  img3.cols, img3.rows));
+                // Mat roi2(result, Rect(0, 0,  img3.cols, img3.rows));
                 Mat H2 = getHomography(current, secondMatchID, currentObject.getSecondMatches());
                 // H2 = H2 * prev_H;
                 H2 = H2 * M;
                 warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
-                result3.copyTo(roi2);
+                // result3.copyTo(roi2);
+                addWeighted(dst,0.5,result3,0.5,0.0,test);
+                imshow("test",test);
             }
+
+
 
             // imshow("result", result);
 
