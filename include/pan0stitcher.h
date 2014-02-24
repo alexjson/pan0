@@ -8,6 +8,9 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #include </home/alex/xjobb/c++/include/imageobject.h>
+#include <opencv2/stitching/warpers.hpp>
+#include </usr/local/include/opencv2/stitching/stitcher.hpp>
+
 
 using namespace std;
 using namespace cv;
@@ -21,6 +24,7 @@ public:
     void setPanoIDs(std::vector< std::vector<int> >* panoIDVec) {
         panoIDVec_ = panoIDVec;
     };
+    void estimateCameraParams();
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
 
 private:
