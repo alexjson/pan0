@@ -1,6 +1,8 @@
 #ifndef PAN0STITCHER_H
 #define PAN0STITCHER_H
+#define _USE_MATH_DEFINES
 
+#include <math.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
@@ -26,6 +28,7 @@ public:
     };
     void estimateCameraParams();
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
+    void cartToCyl(int x, int y);
 
 private:
     std::vector<Imageobject> *imageVector_;

@@ -48,21 +48,34 @@ void Pan0Stitcher::stitch() {
             Mat HM = H * M;
 
 
+            // Mat mask = Mat::zeros(img1.rows,img1.cols, 0);
+            // Mat warpedMask;
+            // warpPerspective(mask, warpedMask, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
+
+
+
             Mat result;
             Mat result2;
+            Mat slask;
             Mat dst;
+            // warpPerspective(img2, slask, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
+            // Mat roi(slask, cv::Rect(0, 0, slask.cols, slask.rows));
+
+
+
             warpPerspective(img2, result, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
             warpPerspective(img1, result2, M, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-            Mat roi(result, cv::Rect(0,0, result2.cols, result2.rows));
-            // result2.copyTo(roi);
 
+            // bitwise_or(result,result2, slask);
+            // result2.copyTo(roi, warpedMask);
+            // imshow("slask", slask);
 
-            addWeighted(result,0.5,result2,0.5,0.0,dst);
+            addWeighted(result, 0.5, result2, 0.5, 0.0, dst);
 
             // warpPerspective(result, dst, M, Size(result.cols, result.rows), INTER_CUBIC);
             imshow("dst", dst);
-            imshow("current", img1);
-            imshow("firstMatch", img2);
+            // imshow("current", img1);
+            // imshow("firstMatch", img2);
 
             if (secondMatchID != -1) {
                 Mat result3;
@@ -74,12 +87,9 @@ void Pan0Stitcher::stitch() {
                 H2 = H2 * M;
                 warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
                 // result3.copyTo(roi2);
-                addWeighted(dst,0.5,result3,0.5,0.0,test);
-                imshow("test",test);
+                addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
+                imshow("test", test);
             }
-
-
-
             // imshow("result", result);
 
             prev_H = H;
@@ -114,7 +124,6 @@ Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_match
 };
 
 void Pan0Stitcher::estimateCameraParams() {
-
     int current = panoIDVec_->at(0)[0];
     Imageobject currentObject = imageVector_->at(current);
     int firstMatchID =  currentObject.getFirstMatchID();
@@ -125,5 +134,17 @@ void Pan0Stitcher::estimateCameraParams() {
 
     Mat H = getHomography(current, firstMatchID, currentObject.getFirstMatches());
 
+};
+
+void Pan0Stitcher::cartToCyl(int x, int y) {
+    double x1, y1,f;
+
+     // (image_width_in_pixels * 0.5) / tan(FOV * 0.5 * PI/180)
+    // FOV 65 grader diagonalt ==> 55.8 horisontellt 
+
+    f = 612;
+
+    x1 = atan(x/f);
+    y1 = y/(sqrt(pow(x,2)+pow(f,2)));
 
 };
