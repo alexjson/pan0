@@ -39,6 +39,7 @@ void Pan0Stitcher::stitch() {
             int secondMatchID = currentObject.getSecondMatchID();
 
             Mat img1 = currentObject.getImage();
+
             Mat img2 = imageVector_->at(firstMatchID).getImage();
 
             Mat H = getHomography(current, firstMatchID, currentObject.getFirstMatches());
@@ -136,15 +137,65 @@ void Pan0Stitcher::estimateCameraParams() {
 
 };
 
-void Pan0Stitcher::cartToCyl(int x, int y) {
-    double x1, y1,f;
+cv::Point2f Pan0Stitcher::convertPoints(cv::Point2f points) {
+    float x1, y1, f, x, y;
+    f = 612.0;
+    x = points.x;
+    y = points.y;
+    // (image_width_in_pixels * 0.5) / tan(FOV * 0.5 * PI/180)
+    // FOV 65 grader diagonalt ==> 55.8 horisontellt
+    x1 = atan(x / f);
+    y1 = y / (sqrt(pow(x, 2) + pow(f, 2)));
 
-     // (image_width_in_pixels * 0.5) / tan(FOV * 0.5 * PI/180)
-    // FOV 65 grader diagonalt ==> 55.8 horisontellt 
+    cv::Point2f ret(x1, y1);
+    return ret;
+};
 
-    f = 612;
+void Pan0Stitcher::mapImgToCyl(Mat image) {
 
-    x1 = atan(x/f);
-    y1 = y/(sqrt(pow(x,2)+pow(f,2)));
+
+
+    // Fel här, implementera om bilinear interpolation
+    int height = image.rows;
+    int width = image.cols;
+
+    Mat dest_im = Mat::zeros(height, width, CV_8U);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            cv::Point2f current_pos(x, y);
+            current_pos = convertPoints(current_pos);
+
+            cv::Point2i top_left((int)current_pos.x, (int)current_pos.y); //top left because of integer rounding
+
+            //make sure the point is actually inside the original image
+            if (top_left.x < 0 ||
+                    top_left.x > width - 2 ||
+                    top_left.y < 0 ||
+                    top_left.y > height - 2) {
+                continue;
+            }
+
+            //bilinear interpolation
+            float dx = current_pos.x - top_left.x;
+            float dy = current_pos.y - top_left.y;
+
+            float weight_tl = (1.0 - dx) * (1.0 - dy);
+            float weight_tr = (dx)       * (1.0 - dy);
+            float weight_bl = (1.0 - dx) * (dy);
+            float weight_br = (dx)       * (dy);
+
+            uchar value =   weight_tl * image.at<uchar>(top_left) +
+                            weight_tr * image.at<uchar>(top_left.y, top_left.x + 1) +
+                            weight_bl * image.at<uchar>(top_left.y + 1, top_left.x) +
+                            weight_br * image.at<uchar>(top_left.y + 1, top_left.x + 1);
+
+            dest_im.at<uchar>(y, x) = value;
+        }
+    }
+
+    // imshow("im", image);
+    // imshow("dest_im", dest_im);
+    // waitKey(0);
 
 };

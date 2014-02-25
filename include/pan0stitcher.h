@@ -28,7 +28,8 @@ public:
     };
     void estimateCameraParams();
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
-    void cartToCyl(int x, int y);
+    cv::Point2f convertPoints(cv::Point2f points);
+    void mapImgToCyl(Mat img);
 
 private:
     std::vector<Imageobject> *imageVector_;
