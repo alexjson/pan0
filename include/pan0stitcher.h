@@ -14,14 +14,16 @@
 #include <opencv2/stitching/warpers.hpp>
 #include </usr/local/include/opencv2/stitching/stitcher.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/topological_sort.hpp>
-
+#include <boost/graph/breadth_first_search.hpp>
 
 using namespace std;
 using namespace cv;
 using namespace boost;
 typedef adjacency_list<vecS, vecS, undirectedS> UndirectedGraph;
 typedef boost::graph_traits<UndirectedGraph>::vertex_descriptor MyVertex;
+typedef boost::graph_traits<UndirectedGraph>::edge_descriptor MyEdge;
+typedef std::pair<int, int> Edge;
+
 
 class Pan0Stitcher {
 public:
@@ -44,11 +46,10 @@ private:
     std::vector< std::vector<int> > *panoIDVec_;
 };
 
-class MyVisitor : public boost::default_dfs_visitor {
+class BFSVertexVisitor : public boost::default_bfs_visitor {
 public:
-    void discover_vertex(MyVertex v, const UndirectedGraph &g) const {
-        cout << "woop " << v << endl;
-        return;
+    void discover_vertex(MyVertex v, UndirectedGraph g) {
+        std::cout << v << std::endl;
     }
 };
 

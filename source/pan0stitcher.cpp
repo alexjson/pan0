@@ -150,10 +150,6 @@ Mat Pan0Stitcher::mapImgToCyl(Mat image) {
 
 void Pan0Stitcher::GraphTest(std::vector<int> G) {
 
-    //create an -undirected- graph type, using vectors as the underlying containers
-    //and an adjacency_list as the basic representation
-    cout << "Size G  " << G.size() << endl;
-    typedef std::pair<int, int> Edge;
 
     std::vector<Edge> edgeVec;
     for (std::vector<int>::iterator it = G.begin(); it != G.end(); ++it) {
@@ -165,19 +161,13 @@ void Pan0Stitcher::GraphTest(std::vector<int> G) {
         }
     }
 
-    //Now we can initialize our graph using iterators from our above vector
     UndirectedGraph g(edgeVec.begin(), edgeVec.end(), G.size());
 
-    std::cout << "Edges  "<<num_edges(g) << "\n";
-    std::cout <<"Verts  " <<num_vertices(g) << "\n";
-    MyVisitor vis;
-    boost::depth_first_search(g, boost::visitor(vis));
+    BFSVertexVisitor v2;
+    cout << "breadth_first_search" << "\n";
+    boost::breadth_first_search(g,boost::vertex(G.at(0), g), boost::visitor(v2));
 
-    cout << "clear?" << endl;
     edgeVec.clear();
     g.clear();
-
-    std::cout << num_edges(g) << "\n";
-    std::cout << num_vertices(g) << "\n";
 
 };
