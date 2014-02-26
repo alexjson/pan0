@@ -89,7 +89,6 @@ private:
     Mat homographySecondtMatch_;
     vector<DMatch> firstBestMatches_;
     vector<DMatch> secondBestMatches_;
-
 };
 
 

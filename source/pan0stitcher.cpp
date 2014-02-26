@@ -11,25 +11,19 @@ void Pan0Stitcher::stitch() {
     Mat prev_H;
     Mat M = (Mat_<double>(3, 3) << 1, 0, 100, 0, 1, 25, 0, 0, 1);
 
+
     for (std::vector< std::vector <int> >::iterator it = panoIDVec_->begin(); it != panoIDVec_->end(); ++it) {
         if ((*it).size() < 3) {
             printf("To few pictures, not stitching\n");
             continue;
         }
+        GraphTest(*it);
         prev_H = Mat::eye(3, 3, 6);
-        // Mat final(Size(img_scene.cols + img_object.cols, img_scene.rows*2),CV_8UC3)
         int numberOfImages = (*it).size();
-        // Mat final = Mat::zeros(imageVector_->at(0).getImage().rows * 2,
-        //                        imageVector_->at(0).getImage().cols * numberOfImages, 0);
         Mat final = Mat::zeros(imageVector_->at(0).getImage().rows * 1.2,
-                               imageVector_->at(0).getImage().cols * 2, 0);
+                               imageVector_->at(0).getImage().cols * 2, CV_8U);
 
-        // Mat refImg = imageVector_->at((*it)[0]).getImage();
-        // Mat refMat;
-        // //Gör för första bilden i loopen bara. Använd som ref bild
-        // warpPerspective(refImg, refMat, M, Size(refImg.cols * 2, refImg.rows * 1.2), INTER_CUBIC);
-        // Mat roiRef(final, Rect(0, 0, refMat.cols, refMat.rows));
-        // refMat.copyTo(roiRef);
+
 
         for (int idx = 0; idx < (*it).size(); ++idx) {
 
@@ -39,19 +33,13 @@ void Pan0Stitcher::stitch() {
             int secondMatchID = currentObject.getSecondMatchID();
 
             Mat img1 = currentObject.getImage();
-
             Mat img2 = imageVector_->at(firstMatchID).getImage();
+            img1 = mapImgToCyl(img1);
+            img2 = mapImgToCyl(img2);
 
             Mat H = getHomography(current, firstMatchID, currentObject.getFirstMatches());
 
-
-            // H = H * prev_H;
             Mat HM = H * M;
-
-
-            // Mat mask = Mat::zeros(img1.rows,img1.cols, 0);
-            // Mat warpedMask;
-            // warpPerspective(mask, warpedMask, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
 
 
 
@@ -59,29 +47,20 @@ void Pan0Stitcher::stitch() {
             Mat result2;
             Mat slask;
             Mat dst;
-            // warpPerspective(img2, slask, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-            // Mat roi(slask, cv::Rect(0, 0, slask.cols, slask.rows));
-
 
 
             warpPerspective(img2, result, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
             warpPerspective(img1, result2, M, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
 
-            // bitwise_or(result,result2, slask);
-            // result2.copyTo(roi, warpedMask);
-            // imshow("slask", slask);
-
             addWeighted(result, 0.5, result2, 0.5, 0.0, dst);
 
-            // warpPerspective(result, dst, M, Size(result.cols, result.rows), INTER_CUBIC);
             imshow("dst", dst);
-            // imshow("current", img1);
-            // imshow("firstMatch", img2);
+
 
             if (secondMatchID != -1) {
                 Mat result3;
                 Mat test;
-                Mat img3 = imageVector_->at(secondMatchID).getImage();
+                Mat img3 = mapImgToCyl(imageVector_->at(secondMatchID).getImage());
                 // Mat roi2(result, Rect(0, 0,  img3.cols, img3.rows));
                 Mat H2 = getHomography(current, secondMatchID, currentObject.getSecondMatches());
                 // H2 = H2 * prev_H;
@@ -91,19 +70,10 @@ void Pan0Stitcher::stitch() {
                 addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
                 imshow("test", test);
             }
-            // imshow("result", result);
 
             prev_H = H;
             Mat roiFINAL(final, Rect(0, 0, result.cols, result.rows));
 
-            // // result.copyTo(roiFINAL);
-            // Mat dst;
-            // double alpha = 0.5;
-            // double beta = ( 1.0 - alpha );
-            // addWeighted( result, alpha, final, beta, 0.0, dst);
-            // namedWindow( "Final", WINDOW_AUTOSIZE );
-            // imshow("Final", dst);
-            // tmpResult.copyTo(half);
             waitKey(0);
         }
     }
@@ -137,65 +107,77 @@ void Pan0Stitcher::estimateCameraParams() {
 
 };
 
-cv::Point2f Pan0Stitcher::convertPoints(cv::Point2f points) {
-    float x1, y1, f, x, y;
-    f = 612.0;
-    x = points.x;
-    y = points.y;
+cv::Point2f Pan0Stitcher::convertPoints(cv::Point2f points, int w, int h) {
+
+    float x1, y1, f, x, y, s;
+
+    f = 630;
+    s = f + 100;
+    x = points.x - w / 2;
+    y = points.y - h / 2;
     // (image_width_in_pixels * 0.5) / tan(FOV * 0.5 * PI/180)
     // FOV 65 grader diagonalt ==> 55.8 horisontellt
-    x1 = atan(x / f);
-    y1 = y / (sqrt(pow(x, 2) + pow(f, 2)));
+    x1 = s * atan2(x , f);
+    y1 = s * (y / (sqrt(x * x + f * f)));
 
-    cv::Point2f ret(x1, y1);
+    cv::Point2f ret(x1 + w / 2, y1 + h / 2);
     return ret;
 };
 
-void Pan0Stitcher::mapImgToCyl(Mat image) {
+Mat Pan0Stitcher::mapImgToCyl(Mat image) {
 
-
-
-    // Fel här, implementera om bilinear interpolation
+    Mat map_x, map_y;
     int height = image.rows;
     int width = image.cols;
 
-    Mat dest_im = Mat::zeros(height, width, CV_8U);
-
+    Mat dst = Mat::zeros(height, width, CV_32FC1);
+    map_x.create( image.size(), CV_32FC1 );
+    map_y.create( image.size(), CV_32FC1 );
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             cv::Point2f current_pos(x, y);
-            current_pos = convertPoints(current_pos);
+            Point2f convPoints = convertPoints(current_pos, height, width);
 
-            cv::Point2i top_left((int)current_pos.x, (int)current_pos.y); //top left because of integer rounding
+            map_x.at<float>(y, x) = convPoints.x;
+            map_y.at<float>(y, x) = convPoints.y;
+        }
+    }
+    // Remapping with bilinear interpolation
+    remap( image, dst, map_x, map_y, INTER_LINEAR, BORDER_CONSTANT, Scalar(0, 0, 0) );
 
-            //make sure the point is actually inside the original image
-            if (top_left.x < 0 ||
-                    top_left.x > width - 2 ||
-                    top_left.y < 0 ||
-                    top_left.y > height - 2) {
-                continue;
-            }
+    return dst;
+};
 
-            //bilinear interpolation
-            float dx = current_pos.x - top_left.x;
-            float dy = current_pos.y - top_left.y;
+void Pan0Stitcher::GraphTest(std::vector<int> G) {
 
-            float weight_tl = (1.0 - dx) * (1.0 - dy);
-            float weight_tr = (dx)       * (1.0 - dy);
-            float weight_bl = (1.0 - dx) * (dy);
-            float weight_br = (dx)       * (dy);
+    //create an -undirected- graph type, using vectors as the underlying containers
+    //and an adjacency_list as the basic representation
+    cout << "Size G  " << G.size() << endl;
+    typedef std::pair<int, int> Edge;
 
-            uchar value =   weight_tl * image.at<uchar>(top_left) +
-                            weight_tr * image.at<uchar>(top_left.y, top_left.x + 1) +
-                            weight_bl * image.at<uchar>(top_left.y + 1, top_left.x) +
-                            weight_br * image.at<uchar>(top_left.y + 1, top_left.x + 1);
-
-            dest_im.at<uchar>(y, x) = value;
+    std::vector<Edge> edgeVec;
+    for (std::vector<int>::iterator it = G.begin(); it != G.end(); ++it) {
+        int current = *it;
+        int first = imageVector_->at(*it).getFirstMatchID();
+        edgeVec.push_back(Edge(current, first));
+        if (imageVector_->at(*it).getSecondMatchID() != -1) {
+            edgeVec.push_back(Edge(current, imageVector_->at(*it).getSecondMatchID()));
         }
     }
 
-    // imshow("im", image);
-    // imshow("dest_im", dest_im);
-    // waitKey(0);
+    //Now we can initialize our graph using iterators from our above vector
+    UndirectedGraph g(edgeVec.begin(), edgeVec.end(), G.size());
+
+    std::cout << "Edges  "<<num_edges(g) << "\n";
+    std::cout <<"Verts  " <<num_vertices(g) << "\n";
+    MyVisitor vis;
+    boost::depth_first_search(g, boost::visitor(vis));
+
+    cout << "clear?" << endl;
+    edgeVec.clear();
+    g.clear();
+
+    std::cout << num_edges(g) << "\n";
+    std::cout << num_vertices(g) << "\n";
 
 };

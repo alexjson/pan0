@@ -81,7 +81,6 @@ void ImageAnalyser::analyse() {
         if (numberOfMatches2 > MATCHTRESH) {
             (*imageVector_)[id1].setSecondMatchID(secondMatch);
             (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
-
         }
 
 
