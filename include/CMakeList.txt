@@ -1,5 +1,1 @@
-set(HEADERS
-   ${HEADERS}
-   ${CMAKE_CURRENT_SOURCE_DIR}/pan0.hpp
-   PARENT_SCOPE
-)
+#include

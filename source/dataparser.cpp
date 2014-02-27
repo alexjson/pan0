@@ -1,5 +1,5 @@
 // dataparser.cpp
-#include </home/alex/xjobb/c++/include/dataparser.h>
+#include <dataparser.h>
 
 using namespace std;
 using namespace cv;

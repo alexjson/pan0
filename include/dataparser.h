@@ -8,7 +8,7 @@
 #include <opencv2/opencv.hpp>
 #include <dirent.h>
 #include <fstream>
-#include </home/alex/xjobb/c++/include/imageobject.h>
+#include <imageobject.h>
 
 
 using namespace cv;

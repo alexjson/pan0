@@ -11,7 +11,7 @@ public:
     Imageobject(Json::Value jsonRoot, Mat image, string fielName);
     Imageobject(Json::Value jsonRoot, string fielName);
     ~Imageobject();
-    
+
     bool operator==(const Imageobject &rhs) {
         return this->getFileName() == rhs.getFileName();
     };
@@ -55,22 +55,28 @@ public:
     void setFirstMatchID(int match){
         firstMatchID_ = match;
     };
-    void setSecondMatchID(int match){
+    void setSecondMatchID(int match) {
         secondMatchID_ = match;
     };
 
-    void setFirstMatches(vector<DMatch> matches){
+    void setFirstMatches(vector<DMatch> matches) {
         firstBestMatches_ = matches;
     };
-    void setSecondMatches(vector<DMatch> matches){
+    void setSecondMatches(vector<DMatch> matches) {
         secondBestMatches_ = matches;
     };
 
-    std::vector<DMatch> getFirstMatches(){
+    std::vector<DMatch> getFirstMatches() {
         return firstBestMatches_;
     };
-    std::vector<DMatch> getSecondMatches(){
+    std::vector<DMatch> getSecondMatches() {
         return secondBestMatches_;
+    };
+    void setMakred(bool marked) {
+        marked_ = marked;
+    };
+    bool getMarked() {
+        return marked_;
     };
 
 
@@ -89,6 +95,7 @@ private:
     Mat homographySecondtMatch_;
     vector<DMatch> firstBestMatches_;
     vector<DMatch> secondBestMatches_;
+    bool marked_;
 };
 
 

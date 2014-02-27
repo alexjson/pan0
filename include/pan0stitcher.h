@@ -10,20 +10,14 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
-#include </home/alex/xjobb/c++/include/imageobject.h>
+#include <imageobject.h>
+#include <bfsvertexvisitor.h>
 #include <opencv2/stitching/warpers.hpp>
 #include </usr/local/include/opencv2/stitching/stitcher.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/breadth_first_search.hpp>
 
 using namespace std;
 using namespace cv;
 using namespace boost;
-typedef adjacency_list<vecS, vecS, undirectedS> UndirectedGraph;
-typedef boost::graph_traits<UndirectedGraph>::vertex_descriptor MyVertex;
-typedef boost::graph_traits<UndirectedGraph>::edge_descriptor MyEdge;
-typedef std::pair<int, int> Edge;
-
 
 class Pan0Stitcher {
 public:
@@ -34,24 +28,16 @@ public:
     void setPanoIDs(std::vector< std::vector<int> > *panoIDVec) {
         panoIDVec_ = panoIDVec;
     };
-    void estimateCameraParams();
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
     cv::Point2f convertPoints(cv::Point2f points, int w, int h);
     Mat mapImgToCyl(Mat img);
     cv::Point2f convertTest(cv::Point2f point, int w, int h);
     void GraphTest(std::vector<int> G);
+    void add(int id);
 
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector< std::vector<int> > *panoIDVec_;
 };
-
-class BFSVertexVisitor : public boost::default_bfs_visitor {
-public:
-    void discover_vertex(MyVertex v, UndirectedGraph g) {
-        std::cout << v << std::endl;
-    }
-};
-
 
 #endif //PAN0STITCHER_H

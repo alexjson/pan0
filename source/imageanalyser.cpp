@@ -1,4 +1,4 @@
-#include </home/alex/xjobb/c++/include/imageanalyser.h>
+#include <imageanalyser.h>
 
 using namespace std;
 using namespace cv;

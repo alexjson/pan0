@@ -1,4 +1,4 @@
-#include </home/alex/xjobb/c++/include/imageobject.h>
+#include <imageobject.h>
 
 using namespace std;
 using namespace cv;

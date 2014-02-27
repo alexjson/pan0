@@ -7,7 +7,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
-#include </home/alex/xjobb/c++/include/imageobject.h>
+#include <imageobject.h>
 
 using namespace std;
 using namespace cv;

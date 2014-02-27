@@ -1,4 +1,4 @@
-#include </home/alex/xjobb/c++/include/pan0.h>
+#include <pan0.h>
 
 int SIZE = 4;
 string PATH = "";
