@@ -2,13 +2,14 @@
 #define BFSVERTEXVISITOR_H
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/breadth_first_search.hpp>
+#include <boost/graph/connected_components.hpp>
 #include <pan0stitcher.h>
 
 using namespace boost;
 
-typedef adjacency_list<vecS, vecS, undirectedS> UndirectedGraph;
-typedef boost::graph_traits<UndirectedGraph>::vertex_descriptor MyVertex;
-typedef boost::graph_traits<UndirectedGraph>::edge_descriptor MyEdge;
+typedef adjacency_list<vecS, vecS, undirectedS> Graph;
+typedef boost::graph_traits<Graph>::vertex_descriptor MyVertex;
+typedef boost::graph_traits<Graph>::edge_descriptor MyEdge;
 typedef std::pair<int, int> Edge;
 
 class Pan0Stitcher;
@@ -16,7 +17,7 @@ class Pan0Stitcher;
 class BFSVertexVisitor : public boost::default_bfs_visitor {
 public:
 	void setPan0Stitcher(Pan0Stitcher* stitcher);
-    void discover_vertex(MyVertex v, UndirectedGraph g);
+    void discover_vertex(MyVertex v, Graph g);
 
 private:
 	Pan0Stitcher* stitcher_;

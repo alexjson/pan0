@@ -8,8 +8,8 @@ using namespace cv;
 using namespace std;
 class Imageobject {
 public:
-    Imageobject(Json::Value jsonRoot, Mat image, string fielName);
-    Imageobject(Json::Value jsonRoot, string fielName);
+    Imageobject(Json::Value jsonRoot, Mat image, string fielName, int id);
+    Imageobject(Json::Value jsonRoot, string fielName, int id);
     ~Imageobject();
 
     bool operator==(const Imageobject &rhs) {
@@ -52,7 +52,8 @@ public:
         return secondMatchID_;
     };
 
-    void setFirstMatchID(int match){
+
+    void setFirstMatchID(int match) {
         firstMatchID_ = match;
     };
     void setSecondMatchID(int match) {
@@ -79,6 +80,10 @@ public:
         return marked_;
     };
 
+    int getID() {
+        return currentID_;
+    };
+
 
 private:
     Json::Value jsonRoot_;
@@ -89,6 +94,7 @@ private:
     std::vector<KeyPoint> keyPointVec_;
     Mat descriptors_;
     string triggerMethod_;
+    int currentID_;
     int firstMatchID_;
     int secondMatchID_;
     Mat homographyFirstMatch_;

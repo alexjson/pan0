@@ -25,7 +25,7 @@ void Dataparser::parseData(std::string dataPath) {
                 jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
                 ifstream test(jsonFile.c_str(), ifstream::binary);
                 reader.parse(test, root, false);
-                Imageobject imgObj(root, tmp);
+                Imageobject imgObj(root, tmp, imageVector_->size());
                 imageVector_->push_back(imgObj);
             }
         }
@@ -51,7 +51,7 @@ void Dataparser::parseImages(std::string dataPath, std::vector<string> imageName
         jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
         ifstream test(jsonFile.c_str(), ifstream::binary);
         reader.parse(test, root, false);
-        Imageobject imgObj(root, img, tmp);
+        Imageobject imgObj(root, img, tmp, imageVector_->size());
         imageVector_->push_back(imgObj);
     }
 }

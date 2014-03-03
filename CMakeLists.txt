@@ -13,6 +13,8 @@ set(HEADERS
    include/imageobject.h
    include/pan0stitcher.h
    include/bfsvertexvisitor.h
+   include/utils.h
+
 
 )
 
@@ -23,6 +25,7 @@ set(SOURCE
  	source/imageobject.cpp
  	source/pan0stitcher.cpp
  	source/bfsvertexvisitor.cpp
+ 	source/utils.cpp
 )
 add_executable( pan0  ${SOURCE} ${HEADER_FILES})
 

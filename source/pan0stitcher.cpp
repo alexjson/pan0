@@ -1,11 +1,13 @@
 #include <pan0stitcher.h>
 
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
-
+    prev_H = Mat::eye(3, 3, 6);
 };
 
 
 void Pan0Stitcher::add(int id) {
+
+    // BundleAdjusterBase::estimate ? Använd function för bundle adjustment
 
     //Translation matrix
     Mat T = (Mat_<double>(3, 3) << 1, 0, 100, 0, 1, 25, 0, 0, 1);
@@ -24,11 +26,17 @@ void Pan0Stitcher::add(int id) {
         id2 = current.getSecondMatchID();
 
 
-    Mat img1 =  mapImgToCyl(current.getImage());
-    Mat img2 = mapImgToCyl(imageVector_->at(id1).getImage());
+    // Mat img1 =  mapImgToCyl(current.getImage());
+    // Mat img2 = mapImgToCyl(imageVector_->at(id1).getImage());
+
+    // detail::BundleAdjusterBase ba;
+
+
+    Mat img1 =  current.getImage();
+    Mat img2 = imageVector_->at(id1).getImage();
 
     Mat H1 = getHomography(id, id1, current.getFirstMatches());
-
+    // H1 = H1 * prev_H;
     warpPerspective(img2, result, (H1 * T), Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
     warpPerspective(img1, result2, T, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
 
@@ -37,20 +45,20 @@ void Pan0Stitcher::add(int id) {
     imshow("dst", dst);
 
 
-    if (id2 != -1) {
-        Mat test;
-        Mat img3 = imageVector_->at(id2).getImage();
-        Mat H2 = getHomography(id, id2, current.getSecondMatches());
+    // if (id2 != -1) {
+    //     Mat test;
+    //     Mat img3 = imageVector_->at(id2).getImage();
+    //     Mat H2 = getHomography(id, id2, current.getSecondMatches());
 
-        warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
-        addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
-        imshow("test", test);
-    }
+    //     warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
+    //     addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
+    //     imshow("dst", test);
+    // }
 
     waitKey(0);
 
 
-
+    // prev_H = H1;
 
     current.setMakred(true);
     imageVector_->at(id1).setMakred(true);
@@ -66,73 +74,26 @@ void Pan0Stitcher::stitch() {
     Mat prev_H;
     Mat M = (Mat_<double>(3, 3) << 1, 0, 100, 0, 1, 25, 0, 0, 1);
 
+    std::vector<int> component(num_vertices(*graph_));
+    int num = boost::connected_components(*graph_, &component[0]);
 
-    for (std::vector< std::vector <int> >::iterator it = panoIDVec_->begin(); it != panoIDVec_->end(); ++it) {
-        if ((*it).size() < 3) {
-            printf("To few pictures, not stitching\n");
-            continue;
-        }
-        GraphTest(*it);
-        // prev_H = Mat::eye(3, 3, 6);
-        // int numberOfImages = (*it).size();
-        // Mat final = Mat::zeros(imageVector_->at(0).getImage().rows * 1.2,
-        //                        imageVector_->at(0).getImage().cols * 2, CV_8U);
+    std::vector<int>::size_type i;
+    cout << "Total number of components: " << num << endl;
+    for (i = 0; i != component.size(); ++i)
+        cout << "Vertex " << i << " is in component " << component[i] << endl;
+    cout << endl;
 
+    std::vector<int>::iterator it;
+    BFSVertexVisitor visitor;
+    visitor.setPan0Stitcher(this);
+    cout << "breadth_first_search" << "\n";
+    for (int idx = 0; idx < num; ++idx) {
+        it = find(component.begin(), component.end(), idx);
 
+        cout << "idx " << idx << "it val  " << distance(component.begin(),it)<< endl;
+        boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(),it), *graph_), boost::visitor(visitor));
 
-        // for (int idx = 0; idx < (*it).size(); ++idx) {
-
-        //     int current = (*it)[idx];
-        //     Imageobject currentObject = imageVector_->at(current);
-        //     int firstMatchID =  currentObject.getFirstMatchID();
-        //     int secondMatchID = currentObject.getSecondMatchID();
-
-        //     Mat img1 = currentObject.getImage();
-        //     Mat img2 = imageVector_->at(firstMatchID).getImage();
-        //     img1 = mapImgToCyl(img1);
-        //     img2 = mapImgToCyl(img2);
-
-        //     Mat H = getHomography(current, firstMatchID, currentObject.getFirstMatches());
-
-        //     Mat HM = H * M;
-
-
-
-        //     Mat result;
-        //     Mat result2;
-        //     Mat slask;
-        //     Mat dst;
-
-
-        //     warpPerspective(img2, result, HM, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-        //     warpPerspective(img1, result2, M, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-
-        //     addWeighted(result, 0.5, result2, 0.5, 0.0, dst);
-
-        //     imshow("dst", dst);
-
-
-        //     if (secondMatchID != -1) {
-        //         Mat result3;
-        //         Mat test;
-        //         Mat img3 = mapImgToCyl(imageVector_->at(secondMatchID).getImage());
-        //         // Mat roi2(result, Rect(0, 0,  img3.cols, img3.rows));
-        //         Mat H2 = getHomography(current, secondMatchID, currentObject.getSecondMatches());
-        //         // H2 = H2 * prev_H;
-        //         H2 = H2 * M;
-        //         warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
-        //         // result3.copyTo(roi2);
-        //         addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
-        //         imshow("test", test);
-        //     }
-
-        //     prev_H = H;
-        //     Mat roiFINAL(final, Rect(0, 0, result.cols, result.rows));
-
-        //     waitKey(0);
-        // }
     }
-
 };
 
 Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_matches) {
@@ -152,16 +113,17 @@ Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_match
 
 cv::Point2f Pan0Stitcher::convertPoints(cv::Point2f points, int w, int h) {
 
+    //Reverse mapping cylindrical
     float x1, y1, f, x, y, s;
 
-    f = 630;
-    s = f + 100;
+    f = 644.82;
+    s = f;
     x = points.x - w / 2;
     y = points.y - h / 2;
     // (image_width_in_pixels * 0.5) / tan(FOV * 0.5 * PI/180)
     // FOV 65 grader diagonalt ==> 55.8 horisontellt
-    x1 = s * atan2(x , f);
-    y1 = s * (y / (sqrt(x * x + f * f)));
+    x1 = f * tan(x / s);
+    y1 = f * (y / s) * (1 / cos(x / s));
 
     cv::Point2f ret(x1 + w / 2, y1 + h / 2);
     return ret;
@@ -191,7 +153,7 @@ Mat Pan0Stitcher::mapImgToCyl(Mat image) {
     return dst;
 };
 
-void Pan0Stitcher::GraphTest(std::vector<int> G) {
+void Pan0Stitcher::GraphTraverse(std::vector<int> G) {
 
 
     std::vector<Edge> edgeVec;
@@ -204,7 +166,7 @@ void Pan0Stitcher::GraphTest(std::vector<int> G) {
         }
     }
 
-    UndirectedGraph g(edgeVec.begin(), edgeVec.end(), G.size());
+    Graph g(edgeVec.begin(), edgeVec.end(), G.size());
 
     BFSVertexVisitor visitor;
     visitor.setPan0Stitcher(this);

@@ -37,12 +37,12 @@ int main( int argc, char **argv ) {
     analyser->calculateDescriptors();
 
     analyser->analyse();
-    std::vector< std::vector<int> > *panoIDVec = analyser->findPanoramas();
+    Graph* G = analyser->findPanoramas();
 
     
 
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector);
-    stitcher->setPanoIDs(panoIDVec);
+    stitcher->setGraph(G);
     stitcher->stitch();
 
     return 0;

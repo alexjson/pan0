@@ -8,6 +8,10 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #include <imageobject.h>
+#include <opencv2/stitching/stitcher.hpp>
+#include <utils.h>
+#include <bfsvertexvisitor.h>
+
 
 using namespace std;
 using namespace cv;
@@ -20,9 +24,9 @@ public:
 
     void calculateDescriptors();
     void analyse();
-    std::vector< std::vector<int> >* findPanoramas();
+    Graph *findPanoramas();
     bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
-    void removeDuplicates( std::vector< std::vector<int> >* Vec);
+    bool verifyImage(int id1, int id2, vector<DMatch> matches);
 
 private:
     Ptr<DescriptorMatcher> matcher;

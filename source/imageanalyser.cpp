@@ -5,7 +5,7 @@ using namespace cv;
 
 ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
 
-    matcher = DescriptorMatcher::create("FlannBased"); // FlannBased
+    matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
 };
@@ -15,7 +15,9 @@ void ImageAnalyser::calculateDescriptors() {
     vector<KeyPoint> keypoints;
     Mat descriptors;
 
-    cout << "Calculating descriptors" << endl;
+    double wall0 = get_wall_time();
+    double cpu0  = get_cpu_time();
+
     for (std::vector<Imageobject>::iterator i = imageVector_->begin(); i != imageVector_->end(); ++i) {
         detector->detect(i->getImage(), keypoints);
         i->setKeyPoints(keypoints);
@@ -23,12 +25,18 @@ void ImageAnalyser::calculateDescriptors() {
         i->setDescriptors(descriptors);
         keypoints.clear();
     }
-    cout << "done." << endl;
+
+    double wall1 = get_wall_time();
+    double cpu1  = get_cpu_time();
+
+    cout << "Wall Time = " << wall1 - wall0 << endl;
+    cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 };
 
 void ImageAnalyser::analyse() {
     printf("Analysing\n");
-    int MATCHTRESH = 50;
+    const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
+    const int MATCHTRESH = 50;
     int numberOfMatches = MATCHTRESH;
     int numberOfMatches2 = -1;
     int firstMatch = -1;
@@ -39,6 +47,10 @@ void ImageAnalyser::analyse() {
     vector<DMatch> SecondBestMatches;
     std::vector<int> matchIDvec;
 
+
+    double wall0 = get_wall_time();
+    double cpu0  = get_cpu_time();
+
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
 
         numberOfMatches = MATCHTRESH;
@@ -48,32 +60,58 @@ void ImageAnalyser::analyse() {
             if (id1 == id2) {
                 continue;
             } else {
-                matcher->knnMatch((*imageVector_)[id1].getDescriptors(),(*imageVector_)[id2].getDescriptors(), matches, 2);  // Find two nearest matches
+                matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
                 vector<cv::DMatch> good_matches;
                 for (int i = 0; i < matches.size(); ++i) {
-                    const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
                     if (matches[i][0].distance < ratio * matches[i][1].distance) {
                         good_matches.push_back(matches[i][0]);
                     }
                 }
+
+                if (good_matches.size() > MATCHTRESH) {
+                    bool good = verifyImage(id1, id2, good_matches);
+                }
+
+
                 //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
                 if (good_matches.size() > numberOfMatches) {
-                    numberOfMatches2 = numberOfMatches;
-                    numberOfMatches = good_matches.size();
 
-                    SecondBestMatches = BestMatches;
-                    BestMatches = good_matches;
+                    if (verifyImage(id1, id2, good_matches)) {
 
-                    secondMatch = firstMatch;
-                    firstMatch = id2;
+                        numberOfMatches2 = numberOfMatches;
+                        numberOfMatches = good_matches.size();
+
+                        SecondBestMatches = BestMatches;
+                        BestMatches = good_matches;
+
+                        secondMatch = firstMatch;
+                        firstMatch = id2;
+                    }
+
                 }
+                // if (good_matches.size() > numberOfMatches) {
+
+                //     numberOfMatches2 = numberOfMatches;
+                //     numberOfMatches = good_matches.size();
+
+                //     SecondBestMatches = BestMatches;
+                //     BestMatches = good_matches;
+
+                //     secondMatch = firstMatch;
+                //     firstMatch = id2;
+                // }
                 //Clear out vectors for next iteration
                 good_matches.clear();
                 matches.clear();
-
             }
+
+            // for (int i = 0; i < BestMatches.size(); ++i) {
+            //     firstImage.push_back( imageVector_->at(id1).getKeypoints()[BestMatches[i].queryIdx].pt);
+            //     secondImage.push_back( imageVector_->at(firstMatch).getKeypoints()[BestMatches[i].trainIdx].pt);
+            // }
         } //END INNER LOOP
+
 
         (*imageVector_)[id1].setFirstMatchID(firstMatch);
         (*imageVector_)[id1].setFirstMatches(BestMatches);
@@ -96,101 +134,72 @@ void ImageAnalyser::analyse() {
         // }
 
 
-
-        // -----------------------------------------------------------------------------------------------------------------
-        // ***********************************Verify image matches using probabilistic model?**********************************
-        // -----------------------------------------------------------------------------------------------------------------
-
-        // int numberOfInliers = countNonZero(Mat(match_mask));
-        // double test = (5.9 + 0.22 * (double)numberOfMatches);
-
-        // if ((double)numberOfInliers > (5.9 + 0.22 * (double)numberOfMatches)) {
-        // cout << "True match" << imageVector[id1].getFileName() << "        " << imageVector[firstMatch].getFileName() << endl;
-        // }else{
-        //  cout << "False match" << imageVector[id1].getFileName() << "        " << imageVector[firstMatch].getFileName() << endl;
-        // }
     } //END BIG LOOP
+
+    double wall1 = get_wall_time();
+    double cpu1  = get_cpu_time();
+
+    cout << "Wall Time = " << wall1 - wall0 << endl;
+    cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
 
 };
-std::vector< std::vector<int> > *ImageAnalyser::findPanoramas() {
-
-    printf("Finding panoramas\n");
-
-    std::vector<int> tmpVec;
-    std::vector<int> ID;
-    std::vector< std::vector<int> > *panoramas = new std::vector<std::vector<int> >();
-    std::vector<int> currentID;
-    std::vector<int>::iterator it;
-    bool intersect;
-
-
-    for (int current = 0; current < imageVector_->size(); ++current) {
-        if (current == 0) {
-            ID.push_back((*imageVector_)[current].getFirstMatchID());
-            ID.push_back(current);
-            panoramas->push_back(ID);
-            continue;
+Graph *ImageAnalyser::findPanoramas() {
+    Graph *G = new Graph();
+    //Use boost with graphs
+    std::vector<Edge> edgeVec;
+    for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
+        Imageobject current = *it;
+        int first = current.getFirstMatchID();
+        int currentID = current.getID();
+        boost::add_edge(currentID,first, *G);
+        if (current.getSecondMatchID() != -1) {
+            boost::add_edge(currentID,current.getSecondMatchID(), *G);
         }
-
-        currentID.push_back(current);
-        currentID.push_back((*imageVector_)[current].getFirstMatchID());
-        tmpVec.push_back(current);
-        tmpVec.push_back((*imageVector_)[current].getFirstMatchID());
-        if ((*imageVector_)[current].getSecondMatchID() != -1) {
-            currentID.push_back((*imageVector_)[current].getSecondMatchID());
-            tmpVec.push_back((*imageVector_)[current].getSecondMatchID());
-        }
-
-        for (int panoID = 0; panoID < panoramas->size(); ++panoID) {
-            intersect = hasIntersections((*panoramas)[panoID], tmpVec);
-
-            if (intersect) {
-                for (int idx = 0; idx < currentID.size(); ++idx) {
-                    (*panoramas)[panoID].push_back(currentID[idx]);
-                    break;
-                }
-            }
-        }
-        if (!intersect)
-            panoramas->push_back(tmpVec);
-
-        currentID.clear();
-        tmpVec.clear();
     }
 
-    removeDuplicates(panoramas);
 
-    cout << "panoSize   " << panoramas->size() << endl;
-    for (int y = 0; y < panoramas->size(); ++y) {
-        printf("Pano contains: ");
-        for (int idx = 0; idx < (*panoramas)[y].size(); ++idx) {
-            cout << (*panoramas)[y][idx] << " ";
-        }
-        printf("\n");
+    return G;
+}
+
+bool ImageAnalyser::verifyImage(int id1, int id2, vector<DMatch> matches) {
+
+    Mat H;
+    std::vector<Point2f> firstImage;
+    std::vector<Point2f> secondImage;
+    std::vector<uchar> match_mask;
+
+
+    for (int i = 0; i < matches.size(); ++i) {
+        firstImage.push_back( imageVector_->at(id1).getKeypoints()[matches[i].queryIdx].pt);
+        secondImage.push_back( imageVector_->at(id2).getKeypoints()[matches[i].trainIdx].pt);
     }
 
-    printf("Done.\n");
-    return panoramas;
-}
 
-bool ImageAnalyser::hasIntersections(std::vector<int> v1, std::vector<int> v2) {
+    //Find homography with RANSAC
+    H = findHomography( firstImage, secondImage, match_mask, RANSAC);
+    //Clear up vectors for next iteration
+    firstImage.clear();
+    secondImage.clear();
 
-    std::vector<int>::iterator it;
 
-    std::sort (v1.begin(), v1.begin() + v1.size());
-    std::sort (v2.begin(), v2.begin() + v2.size());
+    // -----------------------------------------------------------------------------------------------------------------
+    // ***********************************Verify image matches using probabilistic model**********************************
+    // -----------------------------------------------------------------------------------------------------------------
 
-    //Get the intersection
-    it = std::set_intersection (v1.begin(), v1.begin() + v1.size(), v2.begin(), v2.begin() + v2.size(), v2.begin());
-    v2.resize(it - v2.begin());
+    int numberOfInliers = countNonZero(Mat(match_mask));
+    double test = numberOfInliers / (8 + 0.3 * (double)matches.size());
 
-    return v2.size() > 0;
+    // These coeffs are from paper M. Brown and D. Lowe. "Automatic Panoramic Image Stitching
+    //  using Invariant Features
 
-}
-void ImageAnalyser::removeDuplicates( std::vector< std::vector<int> > *vec) {
-    for (int idx = 0; idx < vec->size(); ++idx) {
-        sort( (*vec)[idx].begin(), (*vec)[idx].end() );
-        (*vec)[idx].erase( unique( (*vec)[idx].begin(), (*vec)[idx].end() ), (*vec)[idx].end() );
+    if (test > 2.9) {
+        // cout << "To small overlap" << imageVector_->at(id1).getFileName() <<
+        //      "        " << imageVector_->at(id2).getFileName() << endl;
+        return false;
+    } else {
+        // cout << "ok overlap" << imageVector_->at(id1).getFileName() <<
+        //      "        " << imageVector_->at(id2).getFileName() << endl;
+        return true;
     }
 }

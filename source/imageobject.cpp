@@ -3,10 +3,11 @@
 using namespace std;
 using namespace cv;
 
-Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName) :
+Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName, int id) :
     jsonRoot_(jsonRoot),
     image_(image),
     fileName_(fileName),
+    currentID_(id),
     secondMatchID_(-1) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
@@ -16,9 +17,10 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName) :
     triggerMethod_ = jsonRoot_["meta"]["trigger"].asString();
 
 };
-Imageobject::Imageobject(Json::Value jsonRoot, string fileName) :
+Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
     jsonRoot_(jsonRoot),
     fileName_(fileName),
+    currentID_(id),
     secondMatchID_(-1) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {

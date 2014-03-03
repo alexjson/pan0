@@ -2,6 +2,7 @@
 #define PAN0STITCHER_H
 #define _USE_MATH_DEFINES
 
+#include <bfsvertexvisitor.h>
 #include <math.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
@@ -11,13 +12,15 @@
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #include <imageobject.h>
-#include <bfsvertexvisitor.h>
 #include <opencv2/stitching/warpers.hpp>
-#include </usr/local/include/opencv2/stitching/stitcher.hpp>
+#include <opencv2/stitching/stitcher.hpp>
 
 using namespace std;
 using namespace cv;
 using namespace boost;
+
+typedef adjacency_list<vecS, vecS, undirectedS> Graph;
+
 
 class Pan0Stitcher {
 public:
@@ -25,19 +28,20 @@ public:
     ~Pan0Stitcher();
 
     void stitch();
-    void setPanoIDs(std::vector< std::vector<int> > *panoIDVec) {
-        panoIDVec_ = panoIDVec;
+    void setGraph(Graph* g){
+        graph_=g;
     };
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
     cv::Point2f convertPoints(cv::Point2f points, int w, int h);
     Mat mapImgToCyl(Mat img);
     cv::Point2f convertTest(cv::Point2f point, int w, int h);
-    void GraphTest(std::vector<int> G);
+    void GraphTraverse(std::vector<int> G);
     void add(int id);
 
 private:
     std::vector<Imageobject> *imageVector_;
-    std::vector< std::vector<int> > *panoIDVec_;
+    Graph* graph_;
+    Mat prev_H;
 };
 
 #endif //PAN0STITCHER_H
