@@ -47,7 +47,11 @@ void Dataparser::parseImages(std::string dataPath, std::vector<string> imageName
     for (std::vector<string>::iterator it = imageNames.begin(); it != imageNames.end(); ++it) {
         tmp = *it;
         //Read as grayscale
-        Mat img = imread(dataPath + "/" + tmp,0);
+        Mat img = imread(dataPath + "/" + tmp,CV_8U);
+        //Resize image
+        Mat dst = Mat::zeros(img.rows/2, img.cols/2, CV_8U);
+        resize(img, dst, dst.size(), 0, 0);
+
         jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
         ifstream test(jsonFile.c_str(), ifstream::binary);
         reader.parse(test, root, false);

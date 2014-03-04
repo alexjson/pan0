@@ -20,13 +20,12 @@ void Pan0Stitcher::stitch() {
     int num = boost::connected_components(*graph_, &component[0]);
 
     std::vector<int>::size_type i;
-    cout << "Total number of components: " << num << endl;
-    for (i = 0; i != component.size(); ++i)
-        cout << "Vertex " << i << " is in component " << component[i] << endl;
-    cout << endl;
+    cout << "Total number of components in graph: " << num << endl;
+    // for (i = 0; i != component.size(); ++i)
+    //     cout << "Vertex " << i << " is in component " << component[i] << endl;
+    // cout << endl;
 
     Stitcher stitcher = Stitcher::createDefault(1);
-
 
     Mat dst;
     std::vector<int>::iterator it;

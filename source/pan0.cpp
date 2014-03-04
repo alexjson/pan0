@@ -24,22 +24,34 @@ int main( int argc, char **argv ) {
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
 
+    cout << "Parsing data... ";
     vector<Imageobject> *imageVector = parser->getImageVector();
-
+    cout << "Done." << endl;
 
     std::vector<string>  imageNames = findCandidates(imageVector);
     imageVector->clear();
+
+    cout << "Parsing images... ";
     parser->parseImages(PATH, imageNames);
+    cout << "Done." << endl;
     imageVector = parser->getImageVector();
 
+    cout << "Init analyser... ";
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
+    cout << "Done." << endl;
 
+    cout << "Calculate descriptors... ";
     analyser->calculateDescriptors();
+    cout << "Done." << endl;
 
+
+    cout << " analyse... ";
     analyser->analyse();
-    Graph* G = analyser->findPanoramas();
+    cout << "Done." << endl;
 
-    
+    Graph *G = analyser->findPanoramas();
+
+
 
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
     stitcher->setGraph(G);
