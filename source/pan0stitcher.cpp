@@ -1,79 +1,20 @@
 #include <pan0stitcher.h>
 
-Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
-    prev_H = Mat::eye(3, 3, 6);
-};
-
+Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector, string PATH) : imageVector_(imageVector),
+    path_(PATH) {};
 
 void Pan0Stitcher::add(int id) {
 
-    // BundleAdjusterBase::estimate ? Använd function för bundle adjustment
-
-    //Translation matrix
-    Mat T = (Mat_<double>(3, 3) << 1, 0, 100, 0, 1, 25, 0, 0, 1);
-
-    Mat result;
-    Mat result2;
-    Mat result3;
-    Mat slask;
-    Mat dst;
-
-
     Imageobject current = imageVector_->at(id);
-    int id1 = current.getFirstMatchID();
-    int id2 = -1;
-    if (current.getSecondMatchID() != -1)
-        id2 = current.getSecondMatchID();
 
-
-    // Mat img1 =  mapImgToCyl(current.getImage());
-    // Mat img2 = mapImgToCyl(imageVector_->at(id1).getImage());
-
-    // detail::BundleAdjusterBase ba;
-
-
-    Mat img1 =  current.getImage();
-    Mat img2 = imageVector_->at(id1).getImage();
-
-    Mat H1 = getHomography(id, id1, current.getFirstMatches());
-    // H1 = H1 * prev_H;
-    warpPerspective(img2, result, (H1 * T), Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-    warpPerspective(img1, result2, T, Size(img1.cols * 2, img1.rows * 1.2), INTER_CUBIC);
-
-    addWeighted(result, 0.5, result2, 0.5, 0.0, dst);
-
-    imshow("dst", dst);
-
-
-    // if (id2 != -1) {
-    //     Mat test;
-    //     Mat img3 = imageVector_->at(id2).getImage();
-    //     Mat H2 = getHomography(id, id2, current.getSecondMatches());
-
-    //     warpPerspective(img3, result3, H2, Size(img3.cols * 2, img3.rows * 1.2), INTER_CUBIC);
-    //     addWeighted(dst, 0.5, result3, 0.5, 0.0, test);
-    //     imshow("dst", test);
-    // }
-
-
-
-    // prev_H = H1;
-
-    current.setMakred(true);
-    imageVector_->at(id1).setMakred(true);
-    if (id2 != -1)
-        imageVector_->at(id2).setMakred(true);
-
-    waitKey(0);
+    string img1 =  current.getFileName();
+    img1 = path_ + img1;
+    imagesToStitch_.push_back(imread(img1));
 
 };
 
 void Pan0Stitcher::stitch() {
 
-    Mat result;
-    Mat tmpResult;
-    Mat prev_H;
-    Mat M = (Mat_<double>(3, 3) << 1, 0, 100, 0, 1, 25, 0, 0, 1);
 
     std::vector<int> component(num_vertices(*graph_));
     int num = boost::connected_components(*graph_, &component[0]);
@@ -84,7 +25,10 @@ void Pan0Stitcher::stitch() {
         cout << "Vertex " << i << " is in component " << component[i] << endl;
     cout << endl;
 
+    Stitcher stitcher = Stitcher::createDefault(1);
 
+
+    Mat dst;
     std::vector<int>::iterator it;
     BFSVertexVisitor visitor;
     visitor.setPan0Stitcher(this);
@@ -94,9 +38,15 @@ void Pan0Stitcher::stitch() {
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
 
+        cout << "Stitching...." << endl;
+        stitcher.stitch(imagesToStitch_, dst);
+        imshow("Stitching Result", dst);
+        imagesToStitch_.clear();
+
+        waitKey(0);
+
     }
-
-
+    waitKey(0);
 
 };
 

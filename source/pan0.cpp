@@ -41,16 +41,11 @@ int main( int argc, char **argv ) {
 
     
 
-    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector);
+    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
     stitcher->setGraph(G);
     stitcher->stitch();
 
     return 0;
-    // if (imageNames.size() > SIZE) {
-    //     stitchTest(imageNames, PATH);
-    // } else {
-    //     cout << "To few matching images" << endl;
-    // }
 };
 
 

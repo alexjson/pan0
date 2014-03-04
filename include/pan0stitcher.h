@@ -24,7 +24,7 @@ typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 
 class Pan0Stitcher {
 public:
-    Pan0Stitcher(std::vector<Imageobject> *imageVector);
+    Pan0Stitcher(std::vector<Imageobject> *imageVector, string PATH);
     ~Pan0Stitcher();
 
     void stitch();
@@ -40,8 +40,9 @@ public:
 
 private:
     std::vector<Imageobject> *imageVector_;
+    std::vector<Mat> imagesToStitch_;
     Graph* graph_;
-    Mat prev_H;
+    string path_;
 };
 
 #endif //PAN0STITCHER_H
