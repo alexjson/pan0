@@ -55,7 +55,6 @@ void Pan0Stitcher::add(int id) {
     //     imshow("dst", test);
     // }
 
-    waitKey(0);
 
 
     // prev_H = H1;
@@ -64,6 +63,8 @@ void Pan0Stitcher::add(int id) {
     imageVector_->at(id1).setMakred(true);
     if (id2 != -1)
         imageVector_->at(id2).setMakred(true);
+
+    waitKey(0);
 
 };
 
@@ -83,17 +84,20 @@ void Pan0Stitcher::stitch() {
         cout << "Vertex " << i << " is in component " << component[i] << endl;
     cout << endl;
 
+
     std::vector<int>::iterator it;
     BFSVertexVisitor visitor;
     visitor.setPan0Stitcher(this);
     cout << "breadth_first_search" << "\n";
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
-
-        cout << "idx " << idx << "it val  " << distance(component.begin(),it)<< endl;
-        boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(),it), *graph_), boost::visitor(visitor));
+        boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
+                                    *graph_), boost::visitor(visitor));
 
     }
+
+
+
 };
 
 Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_matches) {

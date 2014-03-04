@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(MyProject)
 find_package( OpenCV REQUIRED )
+find_package(Boost 1.45.0 COMPONENTS graph REQUIRED) 
 include_directories(${MyProject_SOURCE_DIR}/include)
 include_directories(${MyProject_SOURCE_DIR}/source)
 include_directories(${MyProject_SOURCE_DIR}/libjson)
@@ -32,4 +33,5 @@ add_executable( pan0  ${SOURCE} ${HEADER_FILES})
 
 TARGET_LINK_LIBRARIES(pan0 ${MyProject_SOURCE_DIR}/libjson/libjson.a)
 TARGET_LINK_LIBRARIES( pan0 ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES( pan0 ${Boost_LIBRARIES})
 target_link_libraries(pan0)
