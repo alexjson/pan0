@@ -16,11 +16,11 @@ class Pan0Stitcher;
 
 class BFSVertexVisitor : public boost::default_bfs_visitor {
 public:
-	void setPan0Stitcher(Pan0Stitcher* stitcher);
+    void setPan0Stitcher(Pan0Stitcher *stitcher);
     void discover_vertex(MyVertex v, Graph g);
 
 private:
-	Pan0Stitcher* stitcher_;
+    Pan0Stitcher *stitcher_;
 };
 
 

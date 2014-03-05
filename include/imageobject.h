@@ -6,6 +6,9 @@
 
 using namespace cv;
 using namespace std;
+
+enum nodeStatus { NONE, INCLUDED, REJECTED  };
+
 class Imageobject {
 public:
     Imageobject(Json::Value jsonRoot, Mat image, string fielName, int id);
@@ -73,16 +76,18 @@ public:
     std::vector<DMatch> getSecondMatches() {
         return secondBestMatches_;
     };
-    void setMakred(bool marked) {
-        marked_ = marked;
-    };
-    bool getMarked() {
-        return marked_;
-    };
 
     int getID() {
         return currentID_;
     };
+
+    nodeStatus getStatus(){
+        return status_;
+    };
+
+    void setStatus(nodeStatus status){
+        status_ = status;
+    }
 
 
 private:
@@ -101,7 +106,8 @@ private:
     Mat homographySecondtMatch_;
     vector<DMatch> firstBestMatches_;
     vector<DMatch> secondBestMatches_;
-    bool marked_;
+    nodeStatus status_;
+    
 };
 
 

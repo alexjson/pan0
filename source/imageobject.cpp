@@ -8,7 +8,8 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName, int i
     image_(image),
     fileName_(fileName),
     currentID_(id),
-    secondMatchID_(-1) {
+    secondMatchID_(-1),
+    status_(NONE) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
         mag_data.push_back(jsonRoot_["meta"]["mag_data"]["samples"][idx][i].asInt());
@@ -21,7 +22,8 @@ Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
     jsonRoot_(jsonRoot),
     fileName_(fileName),
     currentID_(id),
-    secondMatchID_(-1) {
+    secondMatchID_(-1),
+    status_(NONE) {
     unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
         mag_data.push_back(jsonRoot_["meta"]["mag_data"]["samples"][idx][i].asInt());

@@ -27,12 +27,15 @@ public:
     Graph *findPanoramas();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
+    void initGraph();
+    void filterPanoramas();
 
 private:
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
     std::vector<Imageobject> *imageVector_;
+    Graph *G_;
 };
 
 

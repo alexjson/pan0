@@ -45,11 +45,8 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
         }
     }
 
-
     return good_matches.size();
-
-
-}
+};
 
 void ImageAnalyser::analyse() {
     printf("Analysing\n");
@@ -126,11 +123,52 @@ void ImageAnalyser::analyse() {
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
 
+    initGraph();
+    filterPanoramas();
+
+};
+
+void ImageAnalyser::initGraph() {
+
+    G_ = new Graph();
+    //Use boost with graphs
+    for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
+        Imageobject current = *it;
+        int first = current.getFirstMatchID();
+        int currentID = current.getID();
+        boost::add_edge(currentID, first, *G_);
+        if (current.getSecondMatchID() != -1) {
+            boost::add_edge(currentID, current.getSecondMatchID(), *G_);
+        }
+    }
+
+
+};
+
+
+//Method for removing none contributing images
+void ImageAnalyser::filterPanoramas() {
+
+    std::vector<int>::iterator it;
+    std::vector<int>::iterator it2;
+
+    std::vector<int> component(num_vertices(*G_));
+    int num = boost::connected_components(*G_, &component[0]);
+
+    for (int idx = 0; idx < num; ++idx) {
+        it = find(component.begin(), component.end(), idx);
+        int end = std::count (component.begin(), component.end(), idx);
+        int beg = std::distance( component.begin(), it);
+
+        for (std::vector<int>::iterator it2 = component.begin() + beg; it2 != component.begin() + beg + end; ++it2) {
+            cout << *it << endl;
+        }
+    }
+
 };
 Graph *ImageAnalyser::findPanoramas() {
     Graph *G = new Graph();
     //Use boost with graphs
-    std::vector<Edge> edgeVec;
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
         Imageobject current = *it;
         int first = current.getFirstMatchID();
