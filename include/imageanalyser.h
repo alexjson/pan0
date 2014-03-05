@@ -29,13 +29,17 @@ public:
     int checkMatches(int id1, int id2);
     void initGraph();
     void filterPanoramas();
+    bool checkMagDiff(int id1, int id2);
+    Graph* getGraph(){
+        return G_;
+    }
 
 private:
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
     std::vector<Imageobject> *imageVector_;
-    Graph *G_;
+    Graph* G_;
 };
 
 

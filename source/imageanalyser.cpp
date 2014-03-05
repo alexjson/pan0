@@ -155,24 +155,58 @@ void ImageAnalyser::filterPanoramas() {
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
 
+
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
-        int end = std::count (component.begin(), component.end(), idx);
         int beg = std::distance( component.begin(), it);
+        int end = std::count(component.begin(), component.end(), idx) + beg - 1;
 
-        for (int id1 = beg; id1 < beg + end; ++id1) {
-            cout << id1 << endl;
-            for (int id2 = beg; id2 < beg + end; ++id2) {
-                if(id1 == id2)
+        for (int id1 = beg; id1 <  end; ++id1) {
+            if (imageVector_->at(id1).getStatus() != NONE )
+                continue;
+
+            for (int id2 = beg; id2 <  end; ++id2) {
+
+                //If it is the last picture in the sequence
+                if (id2 + 1 ==  end) {
+                    imageVector_->at(id1).setStatus(INCLUDED);
+                    imageVector_->at(id1).setFirstMatchID(id2);
+                }
+                if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE)
                     continue;
 
-                
+                if ( !checkMagDiff(id1, id2) )
+                    imageVector_->at(id2).setStatus(REJECTED);
+                else {
+                    imageVector_->at(id1).setStatus(INCLUDED);
+                    imageVector_->at(id1).setFirstMatchID(id2);
+                }
+
             }
         }
 
     }
 
+    //Recreate graph to prevent missing connections after deletions.
+
+    G_ = new Graph();
+
+    for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
+        Imageobject current = *it;
+        if (current.getStatus() == INCLUDED) {
+            boost::add_edge(current.getID(), current.getFirstMatchID(), *G_);
+        }
+    }
+
 };
+
+bool ImageAnalyser::checkMagDiff(int id1, int id2) {
+    double magDiff = 0.0;
+    magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
+
+    return magDiff > 25.0;
+};
+
 Graph *ImageAnalyser::findPanoramas() {
     Graph *G = new Graph();
     //Use boost with graphs
@@ -185,6 +219,12 @@ Graph *ImageAnalyser::findPanoramas() {
             boost::add_edge(currentID, current.getSecondMatchID(), *G);
         }
     }
+
+
+    std::vector<int> component(num_vertices(*G));
+    int num = boost::connected_components(*G, &component[0]);
+
+    cout << "findPanoramas   " << num << endl;
 
 
     return G;

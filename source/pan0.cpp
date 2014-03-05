@@ -47,7 +47,9 @@ int main( int argc, char **argv ) {
     analyser->analyse();
     cout << "Done." << endl;
 
-    Graph *G = analyser->findPanoramas();
+    // Graph *G = analyser->findPanoramas();
+
+    Graph *G = analyser->getGraph();
 
 
 

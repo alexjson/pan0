@@ -5,11 +5,15 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector, string PATH) :
 
 void Pan0Stitcher::add(int id) {
 
+
     Imageobject current = imageVector_->at(id);
 
-    string img1 =  current.getFileName();
-    img1 = path_ + img1;
-    imagesToStitch_.push_back(imread(img1));
+    if (current.getStatus() == INCLUDED) {
+        string img1 =  current.getFileName();
+        img1 = path_ + img1;
+        imagesToStitch_.push_back(imread(img1));
+    }
+
 
 };
 
@@ -37,12 +41,14 @@ void Pan0Stitcher::stitch() {
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
 
-        cout << "Stitching...." << endl;
-        stitcher.stitch(imagesToStitch_, dst);
-        imshow("Stitching Result", dst);
-        imagesToStitch_.clear();
-
-        waitKey(0);
+        if (imagesToStitch_.size() > 1) {
+            cout << "Stitching...." << endl;
+            cout << "Number of iamges:  " << imagesToStitch_.size() << endl;
+            stitcher.stitch(imagesToStitch_, dst);
+            imshow("Stitching Result", dst);
+            imagesToStitch_.clear();
+            waitKey(0);
+        }
 
     }
     waitKey(0);
