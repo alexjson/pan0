@@ -25,8 +25,8 @@ public:
     void calculateDescriptors();
     void analyse();
     Graph *findPanoramas();
-    bool hasIntersections(std::vector<int> v1, std::vector<int> v2);
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
+    int checkMatches(int id1, int id2);
 
 private:
     Ptr<DescriptorMatcher> matcher;

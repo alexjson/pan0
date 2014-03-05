@@ -33,15 +33,32 @@ void ImageAnalyser::calculateDescriptors() {
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 };
 
+int ImageAnalyser::checkMatches(int id1, int id2) {
+    std::vector< std::vector < cv::DMatch > > matches;
+    const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
+
+    matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
+    vector<cv::DMatch> good_matches;
+    for (int i = 0; i < matches.size(); ++i) {
+        if (matches[i][0].distance < ratio * matches[i][1].distance) {
+            good_matches.push_back(matches[i][0]);
+        }
+    }
+
+
+    return good_matches.size();
+
+
+}
+
 void ImageAnalyser::analyse() {
     printf("Analysing\n");
-    const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
     const int MATCHTRESH = 50;
     int numberOfMatches = MATCHTRESH;
     int numberOfMatches2 = -1;
     int firstMatch = -1;
     int secondMatch = -1;
-    std::vector< std::vector < cv::DMatch > > matches;
+    int currentNum = -1;
 
     vector<DMatch> BestMatches;
     vector<DMatch> SecondBestMatches;
@@ -60,65 +77,31 @@ void ImageAnalyser::analyse() {
             if (id1 == id2) {
                 continue;
             } else {
-                matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
-                vector<cv::DMatch> good_matches;
-                for (int i = 0; i < matches.size(); ++i) {
-                    if (matches[i][0].distance < ratio * matches[i][1].distance) {
-                        good_matches.push_back(matches[i][0]);
-                    }
-                }
-
-                if (good_matches.size() > MATCHTRESH) {
-                    bool good = verifyImage(id1, id2, good_matches);
-                }
-
-
                 //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
-                if (good_matches.size() > numberOfMatches) {
 
-                    if (verifyImage(id1, id2, good_matches)) {
+                currentNum = checkMatches(id1, id2);
 
-                        numberOfMatches2 = numberOfMatches;
-                        numberOfMatches = good_matches.size();
+                if (currentNum > numberOfMatches) {
 
-                        SecondBestMatches = BestMatches;
-                        BestMatches = good_matches;
+                    numberOfMatches2 = numberOfMatches;
+                    numberOfMatches = currentNum;
 
-                        secondMatch = firstMatch;
-                        firstMatch = id2;
-                    }
-
+                    secondMatch = firstMatch;
+                    firstMatch = id2;
                 }
-                // if (good_matches.size() > numberOfMatches) {
 
-                //     numberOfMatches2 = numberOfMatches;
-                //     numberOfMatches = good_matches.size();
-
-                //     SecondBestMatches = BestMatches;
-                //     BestMatches = good_matches;
-
-                //     secondMatch = firstMatch;
-                //     firstMatch = id2;
-                // }
-                //Clear out vectors for next iteration
-                good_matches.clear();
-                matches.clear();
             }
 
-            // for (int i = 0; i < BestMatches.size(); ++i) {
-            //     firstImage.push_back( imageVector_->at(id1).getKeypoints()[BestMatches[i].queryIdx].pt);
-            //     secondImage.push_back( imageVector_->at(firstMatch).getKeypoints()[BestMatches[i].trainIdx].pt);
-            // }
         } //END INNER LOOP
 
 
         (*imageVector_)[id1].setFirstMatchID(firstMatch);
-        (*imageVector_)[id1].setFirstMatches(BestMatches);
+        // (*imageVector_)[id1].setFirstMatches(BestMatches);
 
         if (numberOfMatches2 > MATCHTRESH) {
             (*imageVector_)[id1].setSecondMatchID(secondMatch);
-            (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
+            // (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
         }
 
 
@@ -152,9 +135,9 @@ Graph *ImageAnalyser::findPanoramas() {
         Imageobject current = *it;
         int first = current.getFirstMatchID();
         int currentID = current.getID();
-        boost::add_edge(currentID,first, *G);
+        boost::add_edge(currentID, first, *G);
         if (current.getSecondMatchID() != -1) {
-            boost::add_edge(currentID,current.getSecondMatchID(), *G);
+            boost::add_edge(currentID, current.getSecondMatchID(), *G);
         }
     }
 

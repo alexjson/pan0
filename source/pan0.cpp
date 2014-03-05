@@ -2,8 +2,6 @@
 
 int SIZE = 4;
 string PATH = "";
-double eDistance(vector<int> vec1, vector<int> vec2);
-void stitchTest(vector<string> filesToStitch, string PATH);
 std::vector<string> findCandidates(vector<Imageobject> *imageVector);
 
 
@@ -62,17 +60,6 @@ int main( int argc, char **argv ) {
 
 
 
-double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
-    double x1 = vec1[0];
-    double x2 = vec2[0];
-    double y1 = vec1[1];
-    double y2 = vec2[1];
-    double z1 = vec1[2];
-    double z2 = vec2[2];
-    double dist = sqrt(pow(x1 - x2, 2) + pow(y1 - y2, 2) + pow(z1 - z2, 2));
-
-    return dist;
-};
 
 
 std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
@@ -110,32 +97,3 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     return result;
 }
 
-
-void stitchTest(vector<string> filesToStitch, string PATH) {
-
-    cout << "stitching!" << endl;
-    string tmpPath = PATH;
-    vector< Mat > vImg;
-    Mat rImg;
-
-    for (int i = 0; i < filesToStitch.size(); ++i) {
-        vImg.push_back( imread(tmpPath + filesToStitch[i]));
-    }
-
-
-    Stitcher stitcher = Stitcher::createDefault();
-
-
-    unsigned long AAtime = 0, BBtime = 0; //check processing time
-    AAtime = getTickCount(); //check processing time
-
-    stitcher.stitch(vImg, rImg);
-
-    BBtime = getTickCount(); //check processing time
-    printf("%.2lf sec \n",  (BBtime - AAtime) / getTickFrequency() ); //check processing time
-
-    imshow("Stitching Result", rImg);
-
-    waitKey(0);
-
-};
