@@ -160,9 +160,16 @@ void ImageAnalyser::filterPanoramas() {
         int end = std::count (component.begin(), component.end(), idx);
         int beg = std::distance( component.begin(), it);
 
-        for (std::vector<int>::iterator it2 = component.begin() + beg; it2 != component.begin() + beg + end; ++it2) {
-            cout << *it << endl;
+        for (int id1 = beg; id1 < beg + end; ++id1) {
+            cout << id1 << endl;
+            for (int id2 = beg; id2 < beg + end; ++id2) {
+                if(id1 == id2)
+                    continue;
+
+                
+            }
         }
+
     }
 
 };
