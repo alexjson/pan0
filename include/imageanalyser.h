@@ -24,7 +24,6 @@ public:
 
     void calculateDescriptors();
     void analyse();
-    Graph *findPanoramas();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
     void initGraph();

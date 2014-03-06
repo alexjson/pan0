@@ -47,10 +47,7 @@ int main( int argc, char **argv ) {
     analyser->analyse();
     cout << "Done." << endl;
 
-    // Graph *G = analyser->findPanoramas();
-
     Graph *G = analyser->getGraph();
-
 
 
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
@@ -59,8 +56,6 @@ int main( int argc, char **argv ) {
 
     return 0;
 };
-
-
 
 
 
@@ -91,10 +86,6 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     sort( result.begin(), result.end() );
     result.erase( unique( result.begin(), result.end() ), result.end() );
     cout << "done." << endl;
-
-    // for (std::vector<string>::iterator it = result.begin(); it != result.end(); ++it) {
-    //     cout << *it << endl;
-    // }
 
     return result;
 }

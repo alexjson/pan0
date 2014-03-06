@@ -25,9 +25,6 @@ void Pan0Stitcher::stitch() {
 
     std::vector<int>::size_type i;
     cout << "Total number of components in graph: " << num << endl;
-    // for (i = 0; i != component.size(); ++i)
-    //     cout << "Vertex " << i << " is in component " << component[i] << endl;
-    // cout << endl;
 
     Stitcher stitcher = Stitcher::createDefault(1);
 
@@ -129,7 +126,6 @@ void Pan0Stitcher::GraphTraverse(std::vector<int> G) {
 
     BFSVertexVisitor visitor;
     visitor.setPan0Stitcher(this);
-    cout << "breadth_first_search" << "\n";
     boost::breadth_first_search(g, boost::vertex(G.at(0), g), boost::visitor(visitor));
 
     edgeVec.clear();

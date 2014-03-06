@@ -102,18 +102,6 @@ void ImageAnalyser::analyse() {
         }
 
 
-        // if (numberOfMatches2 > MATCHTRESH) {
-        //     cout << " [" << numberOfMatches << "] " << (*imageVector_)[firstMatch].getFileName() <<
-        //          "<====[" << (*imageVector_)[id1].getFileName() << "]====>" << (*imageVector_)[secondMatch].getFileName()
-        //          << "[" << numberOfMatches2 << "] " <<
-        //          "      " << firstMatch << "    " << id1 << "     " <<  secondMatch << endl;
-        // } else {
-        //     cout << " [" << numberOfMatches << "] " << (*imageVector_)[firstMatch].getFileName() << "<====[" <<
-        //          (*imageVector_)[id1].getFileName() << "]" <<
-        //          "      " << firstMatch << "    " << id1 << "     " << endl;
-        // }
-
-
     } //END BIG LOOP
 
     double wall1 = get_wall_time();
@@ -206,68 +194,3 @@ bool ImageAnalyser::checkMagDiff(int id1, int id2) {
 
     return magDiff > 25.0;
 };
-
-Graph *ImageAnalyser::findPanoramas() {
-    Graph *G = new Graph();
-    //Use boost with graphs
-    for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
-        Imageobject current = *it;
-        int first = current.getFirstMatchID();
-        int currentID = current.getID();
-        boost::add_edge(currentID, first, *G);
-        if (current.getSecondMatchID() != -1) {
-            boost::add_edge(currentID, current.getSecondMatchID(), *G);
-        }
-    }
-
-
-    std::vector<int> component(num_vertices(*G));
-    int num = boost::connected_components(*G, &component[0]);
-
-    cout << "findPanoramas   " << num << endl;
-
-
-    return G;
-}
-
-bool ImageAnalyser::verifyImage(int id1, int id2, vector<DMatch> matches) {
-
-    Mat H;
-    std::vector<Point2f> firstImage;
-    std::vector<Point2f> secondImage;
-    std::vector<uchar> match_mask;
-
-
-    for (int i = 0; i < matches.size(); ++i) {
-        firstImage.push_back( imageVector_->at(id1).getKeypoints()[matches[i].queryIdx].pt);
-        secondImage.push_back( imageVector_->at(id2).getKeypoints()[matches[i].trainIdx].pt);
-    }
-
-
-    //Find homography with RANSAC
-    H = findHomography( firstImage, secondImage, match_mask, RANSAC);
-    //Clear up vectors for next iteration
-    firstImage.clear();
-    secondImage.clear();
-
-
-    // -----------------------------------------------------------------------------------------------------------------
-    // ***********************************Verify image matches using probabilistic model**********************************
-    // -----------------------------------------------------------------------------------------------------------------
-
-    int numberOfInliers = countNonZero(Mat(match_mask));
-    double test = numberOfInliers / (8 + 0.3 * (double)matches.size());
-
-    // These coeffs are from paper M. Brown and D. Lowe. "Automatic Panoramic Image Stitching
-    //  using Invariant Features
-
-    if (test > 2.9) {
-        // cout << "To small overlap" << imageVector_->at(id1).getFileName() <<
-        //      "        " << imageVector_->at(id2).getFileName() << endl;
-        return false;
-    } else {
-        // cout << "ok overlap" << imageVector_->at(id1).getFileName() <<
-        //      "        " << imageVector_->at(id2).getFileName() << endl;
-        return true;
-    }
-}
