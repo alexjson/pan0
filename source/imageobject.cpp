@@ -24,12 +24,15 @@ Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
     currentID_(id),
     secondMatchID_(-1),
     status_(NONE) {
-    unsigned int idx = 0;
+    const unsigned int idx = 0;
     for (int i = 0; i <= 2; ++i) {
         mag_data.push_back(jsonRoot_["meta"]["mag_data"]["samples"][idx][i].asInt());
         acc_data.push_back(jsonRoot_["meta"]["acc_data"]["samples"][idx][i].asInt());
     }
     triggerMethod_ = jsonRoot_["meta"]["trigger"].asString();
+
+    const unsigned int idx2 = 0;
+    tilt_ = jsonRoot_["meta"]["rotation"][idx2].asDouble();
 };
 
 Imageobject::~Imageobject() {};

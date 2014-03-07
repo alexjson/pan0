@@ -34,6 +34,10 @@ public:
         return image_;
     };
 
+    double getTilt() const {
+        return tilt_;
+    };
+
     void setImage(Mat image) {
         image_ = image;
     };
@@ -90,12 +94,14 @@ public:
     }
 
 
+
 private:
     Json::Value jsonRoot_;
     Mat image_;
     string fileName_;
     vector<int> mag_data;
     vector<int> acc_data;
+    double tilt_;
     std::vector<KeyPoint> keyPointVec_;
     Mat descriptors_;
     string triggerMethod_;

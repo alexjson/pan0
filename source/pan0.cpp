@@ -3,6 +3,9 @@
 int SIZE = 4;
 string PATH = "";
 std::vector<string> findCandidates(vector<Imageobject> *imageVector);
+bool checkMagDiff(int id1, int id2,    vector<Imageobject> *imageVector);
+bool CheckTiltDiff(int id1, int id2,    vector<Imageobject> *imageVector);
+
 
 
 using namespace cv;
@@ -64,9 +67,8 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     std::map<string, string> tmp;
     for (int i = 0; i < imageVector->size(); ++i) {
         for (int k = 0; k < imageVector->size(); ++k) {
-            magDiff = eDistance((*imageVector)[i].getMag_data(), (*imageVector)[k].getMag_data());
 
-            if (magDiff > 25.0 && magDiff < 55.0) {
+            if (checkMagDiff(i, k, imageVector)) {
                 tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
                            (*imageVector)[k].getFileName()));
             }
@@ -89,4 +91,17 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
 
     return result;
 }
+
+bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
+    double magDiff = 0.0;
+    magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+
+    return (magDiff > 21.0 && magDiff < 45.0);
+};
+bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
+
+    double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
+    return tiltDiff < 2.5;
+    
+};
 

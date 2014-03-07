@@ -192,5 +192,5 @@ bool ImageAnalyser::checkMagDiff(int id1, int id2) {
     double magDiff = 0.0;
     magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
 
-    return magDiff > 25.0;
+    return magDiff > 21.0;
 };
