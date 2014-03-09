@@ -63,12 +63,11 @@ int main( int argc, char **argv ) {
 
 
 std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
-    double magDiff = 0.0;
     std::map<string, string> tmp;
     for (int i = 0; i < imageVector->size(); ++i) {
         for (int k = 0; k < imageVector->size(); ++k) {
 
-            if (checkMagDiff(i, k, imageVector)) {
+            if (checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector)) {
                 tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
                            (*imageVector)[k].getFileName()));
             }
@@ -93,8 +92,7 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
 }
 
 bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
-    double magDiff = 0.0;
-    magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+    double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
 
     return (magDiff > 21.0 && magDiff < 45.0);
 };
@@ -102,6 +100,6 @@ bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
 
     double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
     return tiltDiff < 2.5;
-    
+
 };
 

@@ -4,17 +4,14 @@ using namespace std;
 using namespace cv;
 
 ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
-
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
 };
 
 void ImageAnalyser::calculateDescriptors() {
-
     vector<KeyPoint> keypoints;
     Mat descriptors;
-
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
@@ -25,10 +22,8 @@ void ImageAnalyser::calculateDescriptors() {
         i->setDescriptors(descriptors);
         keypoints.clear();
     }
-
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
-
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 };
@@ -36,7 +31,6 @@ void ImageAnalyser::calculateDescriptors() {
 int ImageAnalyser::checkMatches(int id1, int id2) {
     std::vector< std::vector < cv::DMatch > > matches;
     const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
-
     matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
     vector<cv::DMatch> good_matches;
     for (int i = 0; i < matches.size(); ++i) {
@@ -56,17 +50,13 @@ void ImageAnalyser::analyse() {
     int firstMatch = -1;
     int secondMatch = -1;
     int currentNum = -1;
-
-    vector<DMatch> BestMatches;
-    vector<DMatch> SecondBestMatches;
-    std::vector<int> matchIDvec;
-
-
+    // vector<DMatch> BestMatches;
+    // vector<DMatch> SecondBestMatches;
+    // std::vector<int> matchIDvec;
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
-
         numberOfMatches = MATCHTRESH;
         numberOfMatches2 = -1;
 
@@ -91,8 +81,7 @@ void ImageAnalyser::analyse() {
             }
 
         } //END INNER LOOP
-
-
+        //Lägg till i GRAPH här istället för firstMatchID och secondMatchID, ta bort GRAPH init
         (*imageVector_)[id1].setFirstMatchID(firstMatch);
         // (*imageVector_)[id1].setFirstMatches(BestMatches);
 
@@ -100,8 +89,6 @@ void ImageAnalyser::analyse() {
             (*imageVector_)[id1].setSecondMatchID(secondMatch);
             // (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
         }
-
-
     } //END BIG LOOP
 
     double wall1 = get_wall_time();
@@ -110,14 +97,11 @@ void ImageAnalyser::analyse() {
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
-
     initGraph();
     filterPanoramas();
-
 };
 
 void ImageAnalyser::initGraph() {
-
     G_ = new Graph();
     //Use boost with graphs
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
@@ -129,20 +113,13 @@ void ImageAnalyser::initGraph() {
             boost::add_edge(currentID, current.getSecondMatchID(), *G_);
         }
     }
-
-
 };
-
 
 //Method for removing none contributing images
 void ImageAnalyser::filterPanoramas() {
-
     std::vector<int>::iterator it;
-    std::vector<int>::iterator it2;
-
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
-
 
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
@@ -154,7 +131,6 @@ void ImageAnalyser::filterPanoramas() {
                 continue;
 
             for (int id2 = beg; id2 <  end; ++id2) {
-
                 //If it is the last picture in the sequence
                 if (id2 + 1 ==  end) {
                     imageVector_->at(id1).setStatus(INCLUDED);
@@ -172,11 +148,8 @@ void ImageAnalyser::filterPanoramas() {
 
             }
         }
-
     }
-
     //Recreate graph to prevent missing connections after deletions.
-
     G_ = new Graph();
 
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
@@ -189,8 +162,6 @@ void ImageAnalyser::filterPanoramas() {
 };
 
 bool ImageAnalyser::checkMagDiff(int id1, int id2) {
-    double magDiff = 0.0;
-    magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
-
+    double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
     return magDiff > 21.0;
 };

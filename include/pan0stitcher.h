@@ -14,6 +14,7 @@
 #include <imageobject.h>
 #include <opencv2/stitching/warpers.hpp>
 #include <opencv2/stitching/stitcher.hpp>
+#include <utils.h>
 
 using namespace std;
 using namespace cv;
@@ -37,12 +38,14 @@ public:
     cv::Point2f convertTest(cv::Point2f point, int w, int h);
     void GraphTraverse(std::vector<int> G);
     void add(int id);
+    bool checkSequence();
 
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
     Graph* graph_;
     string path_;
+    std::vector<int> idsToStitch_;
 };
 
 #endif //PAN0STITCHER_H
