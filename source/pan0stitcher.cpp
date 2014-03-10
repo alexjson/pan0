@@ -32,8 +32,10 @@ void Pan0Stitcher::stitch() {
         if (checkSequence()) {
             cout << "Stitching...." << endl;
             cout << "Number of iamges:  " << imagesToStitch_.size() << endl;
+            printID();
             stitcher.stitch(imagesToStitch_, dst);
             imshow("Stitching Result", dst);
+            writeImg(idx, dst);
             imagesToStitch_.clear();
             idsToStitch_.clear();
             waitKey(0);
@@ -41,6 +43,23 @@ void Pan0Stitcher::stitch() {
         }
     }
 };
+
+void Pan0Stitcher::printID() {
+    cout << "Printing IDs" << endl;
+    for (int idx = 0; idx < idsToStitch_.size(); ++idx) {
+        cout << imageVector_->at(idsToStitch_.at(idx)).getFileName() << endl;
+    }
+};
+
+void Pan0Stitcher::writeImg(int id, Mat img){
+    vector<int> compression_params;
+    compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+    string outfile = to_string(id) + "pano.png";
+    imwrite(outfile, img, compression_params);
+
+    cout << "saved file as: "<<outfile << endl; 
+}
 
 Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_matches) {
     std::vector<Point2f> firstImage, secondImage;

@@ -39,7 +39,8 @@ public:
     void GraphTraverse(std::vector<int> G);
     void add(int id);
     bool checkSequence();
-
+    void printID();
+    void writeImg(int id, Mat img);
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
