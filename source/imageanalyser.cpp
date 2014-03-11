@@ -160,41 +160,37 @@ void ImageAnalyser::filterPanoramas() {
         }
     }
 
-    //TODO: Fortfarande något fel här, för många bilder tas bort
+    refineGraph();
+    printGraph();
+};
+
+void ImageAnalyser::refineGraph() {
     G_ = new Graph();
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
         Imageobject current = *it;
         if (current.getStatus() == INCLUDED) {
             if (lookUpMap_.find(current.getID()) != lookUpMap_.end() &&
-                    lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //Om båda finns i Map
-
+                    lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //if both exist in map
                 boost::add_edge(lookUpMap_.find(current.getID())->second,
                                 lookUpMap_.find(current.getFirstMatchID())->second, *G_);
-
-            } else if (lookUpMap_.find(current.getID()) != lookUpMap_.end()) { // Om endast currentID finns i map
-
+            } else if (lookUpMap_.find(current.getID()) != lookUpMap_.end()) { // if only currentID exist in map
                 lookUpMap_.emplace(current.getFirstMatchID(), num_vertices(*G_));
                 boost::add_edge(num_vertices(*G_),
                                 lookUpMap_.find(current.getID())->second, *G_);
 
-
-            } else if (lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //Om endast firstMatch finns i map
-
-                lookUpMap_.emplace(current.getID(), num_vertices(*G_));
+            } else if (lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //If onlyfirstMatch exist in map
+            lookUpMap_.emplace(current.getID(), num_vertices(*G_));
                 boost::add_edge(lookUpMap_.find(current.getFirstMatchID())->second,
                                 num_vertices(*G_), *G_);
-
-            } else { //Om ingen finns i map
+            } else { // if none exist in map
                 lookUpMap_.emplace(current.getID(), num_vertices(*G_));
                 lookUpMap_.emplace(current.getFirstMatchID(), num_vertices(*G_) + 1);
                 boost::add_edge(num_vertices(*G_), num_vertices(*G_) + 1, *G_);
             }
 
-
         }
     }
 
-    printGraph();
 };
 
 bool ImageAnalyser::checkMagDiff(int id1, int id2) {
@@ -208,7 +204,8 @@ bool ImageAnalyser::checkTimeDiff(int id1, int id2) {
     ptime t2 = (*imageVector_)[id2].getTime();
     time_duration diff = t2 - t1;
 
-    return diff.total_seconds() < 480;
+    cout <<"Time diff " <<diff.total_seconds() <<"  "<<id1 <<"  " <<id2<< endl;
+    return abs(diff.total_seconds()) < 480;
 };
 
 std::map<int, int>::iterator ImageAnalyser::findSecond(int id) {
@@ -216,7 +213,5 @@ std::map<int, int>::iterator ImageAnalyser::findSecond(int id) {
         if (it->second == id)
             return it;
     }
-
-
     return lookUpMap_.end();
 };

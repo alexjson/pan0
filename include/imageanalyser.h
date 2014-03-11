@@ -31,6 +31,7 @@ public:
     void filterPanoramas();
     bool checkMagDiff(int id1, int id2);
     bool checkTimeDiff(int id1, int id2);
+    void refineGraph();
     void printGraph();
     Graph *getGraph() {
         return G_;
