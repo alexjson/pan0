@@ -109,14 +109,23 @@ void ImageAnalyser::initGraph() {
         int first = current.getFirstMatchID();
         int currentID = current.getID();
         boost::add_edge(currentID, first, *G_);
+
         if (current.getSecondMatchID() != -1) {
             boost::add_edge(currentID, current.getSecondMatchID(), *G_);
         }
     }
+    // printGraph();
 };
+
+void ImageAnalyser::printGraph() {
+    std::ofstream dmp;
+    dmp.open("dmp.dot");
+    boost::write_graphviz(dmp, (*G_));
+}
 
 //Method for removing none contributing images
 void ImageAnalyser::filterPanoramas() {
+    cout << "Filtering";
     std::vector<int>::iterator it;
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
@@ -139,29 +148,75 @@ void ImageAnalyser::filterPanoramas() {
                 if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE)
                     continue;
 
-                if ( !checkMagDiff(id1, id2) )
-                    imageVector_->at(id2).setStatus(REJECTED);
-                else {
+
+                if (checkMagDiff(id1, id2) && checkTimeDiff(id1, id2)) {
                     imageVector_->at(id1).setStatus(INCLUDED);
                     imageVector_->at(id1).setFirstMatchID(id2);
+                } else {
+                    imageVector_->at(id2).setStatus(REJECTED);
+                    remove_vertex(id2, (*G_));
                 }
-
             }
         }
     }
-    //Recreate graph to prevent missing connections after deletions.
-    G_ = new Graph();
 
+    //TODO: Fortfarande något fel här, för många bilder tas bort
+    G_ = new Graph();
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
         Imageobject current = *it;
         if (current.getStatus() == INCLUDED) {
-            boost::add_edge(current.getID(), current.getFirstMatchID(), *G_);
+            if (lookUpMap_.find(current.getID()) != lookUpMap_.end() &&
+                    lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //Om båda finns i Map
+
+                boost::add_edge(lookUpMap_.find(current.getID())->second,
+                                lookUpMap_.find(current.getFirstMatchID())->second, *G_);
+
+            } else if (lookUpMap_.find(current.getID()) != lookUpMap_.end()) { // Om endast currentID finns i map
+
+                lookUpMap_.emplace(current.getFirstMatchID(), num_vertices(*G_));
+                boost::add_edge(num_vertices(*G_),
+                                lookUpMap_.find(current.getID())->second, *G_);
+
+
+            } else if (lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //Om endast firstMatch finns i map
+
+                lookUpMap_.emplace(current.getID(), num_vertices(*G_));
+                boost::add_edge(lookUpMap_.find(current.getFirstMatchID())->second,
+                                num_vertices(*G_), *G_);
+
+            } else { //Om ingen finns i map
+                lookUpMap_.emplace(current.getID(), num_vertices(*G_));
+                lookUpMap_.emplace(current.getFirstMatchID(), num_vertices(*G_) + 1);
+                boost::add_edge(num_vertices(*G_), num_vertices(*G_) + 1, *G_);
+            }
+
+
         }
     }
 
+    printGraph();
 };
 
 bool ImageAnalyser::checkMagDiff(int id1, int id2) {
     double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
     return magDiff > 21.0;
+};
+
+bool ImageAnalyser::checkTimeDiff(int id1, int id2) {
+    using namespace boost::posix_time;
+    ptime t1 = (*imageVector_)[id1].getTime();
+    ptime t2 = (*imageVector_)[id2].getTime();
+    time_duration diff = t2 - t1;
+
+    return diff.total_seconds() < 480;
+};
+
+std::map<int, int>::iterator ImageAnalyser::findSecond(int id) {
+    for (std::map<int, int>::iterator it = lookUpMap_.begin(); it != lookUpMap_.end(); ++it ) {
+        if (it->second == id)
+            return it;
+    }
+
+
+    return lookUpMap_.end();
 };

@@ -3,7 +3,11 @@ cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 project(MyProject)
 find_package( OpenCV REQUIRED )
-find_package(Boost 1.45.0 COMPONENTS graph REQUIRED) 
+set(BOOSTCOMPONENTS
+	date_time
+	graph
+)
+find_package(Boost 1.45.0 COMPONENTS ${BOOSTCOMPONENTS} REQUIRED) 
 include_directories(${MyProject_SOURCE_DIR}/include)
 include_directories(${MyProject_SOURCE_DIR}/source)
 include_directories(${MyProject_SOURCE_DIR}/libjson)

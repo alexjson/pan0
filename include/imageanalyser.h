@@ -11,6 +11,7 @@
 #include <opencv2/stitching/stitcher.hpp>
 #include <utils.h>
 #include <bfsvertexvisitor.h>
+#include <boost/graph/graphviz.hpp>
 
 
 using namespace std;
@@ -29,16 +30,24 @@ public:
     void initGraph();
     void filterPanoramas();
     bool checkMagDiff(int id1, int id2);
-    Graph* getGraph(){
+    bool checkTimeDiff(int id1, int id2);
+    void printGraph();
+    Graph *getGraph() {
         return G_;
     }
+    std::map<int, int> getLookUpMap() {
+        return lookUpMap_;
+    };
 
 private:
+    std::map<int, int>::iterator findSecond(int id);
+
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
     std::vector<Imageobject> *imageVector_;
-    Graph* G_;
+    std::map<int, int> lookUpMap_;
+    Graph *G_;
 };
 
 

@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include </usr/include/jsoncpp/json.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace cv;
 using namespace std;
@@ -93,8 +94,9 @@ public:
         status_ = status;
     }
 
-
-
+    boost::posix_time::ptime getTime(){
+        return taken_at;
+    };
 private:
     Json::Value jsonRoot_;
     Mat image_;
@@ -113,7 +115,7 @@ private:
     vector<DMatch> firstBestMatches_;
     vector<DMatch> secondBestMatches_;
     nodeStatus status_;
-    
+    boost::posix_time::ptime taken_at;
 };
 
 

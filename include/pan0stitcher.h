@@ -32,6 +32,9 @@ public:
     void setGraph(Graph* g){
         graph_=g;
     };
+    void setLookUpMap(std::map<int, int> map){
+        lookUpMap_ = map;
+    };
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
     cv::Point2f convertPoints(cv::Point2f points, int w, int h);
     Mat mapImgToCyl(Mat img);
@@ -45,6 +48,7 @@ private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
     Graph* graph_;
+    std::map<int, int> lookUpMap_;
     string path_;
     std::vector<int> idsToStitch_;
 };

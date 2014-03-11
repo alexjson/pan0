@@ -55,6 +55,7 @@ int main( int argc, char **argv ) {
 
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
     stitcher->setGraph(G);
+    stitcher->setLookUpMap(analyser->getLookUpMap());
     stitcher->stitch();
 
     return 0;

@@ -23,7 +23,4 @@ private:
     Pan0Stitcher *stitcher_;
 };
 
-
 #endif // BFSVERTEXVISITOR_H
-
-

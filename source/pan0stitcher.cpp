@@ -4,13 +4,19 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector, string PATH) :
     path_(PATH) {};
 
 void Pan0Stitcher::add(int id) {
-    Imageobject current = imageVector_->at(id);
-    if (current.getStatus() == INCLUDED) {
-        string img1 =  current.getFileName();
-        img1 = path_ + img1;
-        imagesToStitch_.push_back(imread(img1));
-        idsToStitch_.push_back(id);
+    int imgID = 0;
+    for (std::map<int, int>::iterator it = lookUpMap_.begin(); it != lookUpMap_.end(); ++it ) {
+        if (it->second == id)
+            imgID = it->first;
     }
+
+    Imageobject current = imageVector_->at(imgID);
+    string img1 =  current.getFileName();
+    img1 = path_ + img1;
+    imagesToStitch_.push_back(imread(img1));
+    cout << "push_back  " << imgID << endl;
+    idsToStitch_.push_back(imgID);
+
 };
 
 void Pan0Stitcher::stitch() {
@@ -23,9 +29,10 @@ void Pan0Stitcher::stitch() {
     std::vector<int>::iterator it;
     BFSVertexVisitor visitor;
     visitor.setPan0Stitcher(this);
-    cout << "breadth_first_search" << "\n";
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
+        // cout << "breadth_first_search" << "\n";
+
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
 
@@ -36,11 +43,11 @@ void Pan0Stitcher::stitch() {
             stitcher.stitch(imagesToStitch_, dst);
             imshow("Stitching Result", dst);
             writeImg(idx, dst);
-            imagesToStitch_.clear();
-            idsToStitch_.clear();
             waitKey(0);
             destroyAllWindows();
         }
+        imagesToStitch_.clear();
+        idsToStitch_.clear();
     }
 };
 
@@ -51,14 +58,14 @@ void Pan0Stitcher::printID() {
     }
 };
 
-void Pan0Stitcher::writeImg(int id, Mat img){
+void Pan0Stitcher::writeImg(int id, Mat img) {
     vector<int> compression_params;
     compression_params.push_back(IMWRITE_PNG_COMPRESSION);
     compression_params.push_back(9);
     string outfile = to_string(id) + "pano.png";
     imwrite(outfile, img, compression_params);
 
-    cout << "saved file as: "<<outfile << endl; 
+    cout << "saved file as: " << outfile << endl;
 }
 
 Mat Pan0Stitcher::getHomography(int id1, int id2, std::vector<DMatch> good_matches) {
@@ -146,6 +153,8 @@ bool Pan0Stitcher::checkSequence() {
         }
     }
 
-    return maxDist > 90;
+    cout << "maxDist  " << maxDist << endl;
+
+    return maxDist > 60;
 };
 
