@@ -15,12 +15,16 @@ void ImageAnalyser::calculateDescriptors() {
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
+    progress_display show_progress( imageVector_->size() );
+
+
     for (std::vector<Imageobject>::iterator i = imageVector_->begin(); i != imageVector_->end(); ++i) {
         detector->detect(i->getImage(), keypoints);
         i->setKeyPoints(keypoints);
         extractor->compute(i->getImage(), keypoints, descriptors);
         i->setDescriptors(descriptors);
         keypoints.clear();
+        ++show_progress;
     }
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
@@ -44,11 +48,10 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
 
 void ImageAnalyser::analyse() {
     printf("Analysing\n");
-    const int MATCHTRESH = 50;
+    const int MATCHTRESH = 10;
     int numberOfMatches = MATCHTRESH;
-    int numberOfMatches2 = -1;
     int firstMatch = -1;
-    int secondMatch = -1;
+    // int secondMatch = -1;
     int currentNum = -1;
     // vector<DMatch> BestMatches;
     // vector<DMatch> SecondBestMatches;
@@ -56,9 +59,11 @@ void ImageAnalyser::analyse() {
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
+    progress_display show_progress( imageVector_->size() );
+    imageVector_->at(0).setMatched(true);
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
         numberOfMatches = MATCHTRESH;
-        numberOfMatches2 = -1;
+        // int numberOfMatches2 = -1;
 
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
@@ -66,30 +71,32 @@ void ImageAnalyser::analyse() {
             } else {
                 //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
+                if (imageVector_->at(id2).getFirstMatchID() != id1 && !imageVector_->at(id2).getMatched() ) {
+                    if (checkMagDiffMax(id1, id2)) {
+                        currentNum = checkMatches(id1, id2);
 
-                currentNum = checkMatches(id1, id2);
+                        if (currentNum > numberOfMatches) {
 
-                if (currentNum > numberOfMatches) {
+                            // numberOfMatches2 = numberOfMatches;
+                            numberOfMatches = currentNum;
 
-                    numberOfMatches2 = numberOfMatches;
-                    numberOfMatches = currentNum;
-
-                    secondMatch = firstMatch;
-                    firstMatch = id2;
+                            // secondMatch = firstMatch;
+                            firstMatch = id2;
+                        }
+                    }
                 }
 
             }
-
-        } //END INNER LOOP
-        //Lägg till i GRAPH här istället för firstMatchID och secondMatchID, ta bort GRAPH init
-        (*imageVector_)[id1].setFirstMatchID(firstMatch);
-        // (*imageVector_)[id1].setFirstMatches(BestMatches);
-
-        if (numberOfMatches2 > MATCHTRESH) {
-            (*imageVector_)[id1].setSecondMatchID(secondMatch);
-            // (*imageVector_)[id1].setSecondMatches(SecondBestMatches);
         }
-    } //END BIG LOOP
+        //TODO Lägg till i GRAPH här istället för firstMatchID och secondMatchID, ta bort GRAPH init
+        (*imageVector_)[id1].setFirstMatchID(firstMatch);
+        (*imageVector_)[firstMatch].setMatched(true);
+
+        // if (numberOfMatches2 > MATCHTRESH) {
+        //     (*imageVector_)[id1].setSecondMatchID(secondMatch);
+        // }
+        ++show_progress;
+    }
 
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
@@ -98,6 +105,7 @@ void ImageAnalyser::analyse() {
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
     initGraph();
+    printGraph("before");
     filterPanoramas();
 };
 
@@ -107,34 +115,41 @@ void ImageAnalyser::initGraph() {
     for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
         Imageobject current = *it;
         int first = current.getFirstMatchID();
-        int currentID = current.getID();
-        boost::add_edge(currentID, first, *G_);
 
-        if (current.getSecondMatchID() != -1) {
-            boost::add_edge(currentID, current.getSecondMatchID(), *G_);
+        if (first != -1) {
+            int currentID = current.getID();
+            boost::add_edge(currentID, first, *G_);
         }
+
+
+        // if (current.getSecondMatchID() != -1) {
+        //     boost::add_edge(currentID, current.getSecondMatchID(), *G_);
+        // }
     }
     // printGraph();
 };
 
-void ImageAnalyser::printGraph() {
+void ImageAnalyser::printGraph(string fileName) {
     std::ofstream dmp;
-    dmp.open("dmp.dot");
+    dmp.open(fileName + ".dot");
     boost::write_graphviz(dmp, (*G_));
 }
 
 //Method for removing none contributing images
 void ImageAnalyser::filterPanoramas() {
-    cout << "Filtering";
     std::vector<int>::iterator it;
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
-
+    cout << "components in graph  " << num << endl;
+    // cout << "component size   " << component.size() << endl;
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
         int beg = std::distance( component.begin(), it);
         int end = std::count(component.begin(), component.end(), idx) + beg - 1;
 
+        // cout << "beg  " << beg << "   end   " << end << endl;
+
+        //TODO: Fel här, tar bort för mycket noder
         for (int id1 = beg; id1 <  end; ++id1) {
             if (imageVector_->at(id1).getStatus() != NONE )
                 continue;
@@ -144,14 +159,12 @@ void ImageAnalyser::filterPanoramas() {
                 if (id2 + 1 ==  end) {
                     imageVector_->at(id1).setStatus(INCLUDED);
                     imageVector_->at(id1).setFirstMatchID(id2);
-                }
-                if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE)
+                } else if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
                     continue;
-
-
-                if (checkMagDiff(id1, id2) && checkTimeDiff(id1, id2)) {
+                } else if (checkMagDiff(id1, id2) && checkTimeDiff(id1, id2)) {
                     imageVector_->at(id1).setStatus(INCLUDED);
                     imageVector_->at(id1).setFirstMatchID(id2);
+                    break;
                 } else {
                     imageVector_->at(id2).setStatus(REJECTED);
                     remove_vertex(id2, (*G_));
@@ -160,8 +173,16 @@ void ImageAnalyser::filterPanoramas() {
         }
     }
 
+    // cout << "INCLUDED" << endl;
+    // for (std::vector<Imageobject>::iterator itTmp = imageVector_->begin(); itTmp != imageVector_->end(); ++itTmp) {
+    //     if (itTmp->getStatus() == INCLUDED) {
+    //         cout << itTmp->getFileName() << endl;
+    //     }
+    // }
+
     refineGraph();
-    printGraph();
+    printGraph("after");
+
 };
 
 void ImageAnalyser::refineGraph() {
@@ -179,7 +200,7 @@ void ImageAnalyser::refineGraph() {
                                 lookUpMap_.find(current.getID())->second, *G_);
 
             } else if (lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //If onlyfirstMatch exist in map
-            lookUpMap_.emplace(current.getID(), num_vertices(*G_));
+                lookUpMap_.emplace(current.getID(), num_vertices(*G_));
                 boost::add_edge(lookUpMap_.find(current.getFirstMatchID())->second,
                                 num_vertices(*G_), *G_);
             } else { // if none exist in map
@@ -198,13 +219,17 @@ bool ImageAnalyser::checkMagDiff(int id1, int id2) {
     return magDiff > 21.0;
 };
 
+bool ImageAnalyser::checkMagDiffMax(int id1, int id2) {
+    double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
+    return magDiff < 45.0;
+};
+
 bool ImageAnalyser::checkTimeDiff(int id1, int id2) {
     using namespace boost::posix_time;
     ptime t1 = (*imageVector_)[id1].getTime();
     ptime t2 = (*imageVector_)[id2].getTime();
     time_duration diff = t2 - t1;
 
-    cout <<"Time diff " <<diff.total_seconds() <<"  "<<id1 <<"  " <<id2<< endl;
     return abs(diff.total_seconds()) < 480;
 };
 

@@ -8,7 +8,9 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName, int i
     image_(image),
     fileName_(fileName),
     currentID_(id),
+    firstMatchID_(-1),
     secondMatchID_(-1),
+    matched_(false),
     status_(NONE) {
     using namespace boost::posix_time;
 
@@ -30,7 +32,9 @@ Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
     jsonRoot_(jsonRoot),
     fileName_(fileName),
     currentID_(id),
+    firstMatchID_(-1),
     secondMatchID_(-1),
+    matched_(false),
     status_(NONE) {
     using namespace boost::posix_time;
 

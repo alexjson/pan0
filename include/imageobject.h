@@ -97,6 +97,13 @@ public:
     boost::posix_time::ptime getTime(){
         return taken_at;
     };
+
+    bool getMatched(){
+        return matched_;
+    }
+    void setMatched(bool matched){
+        matched_ = matched;
+    }
 private:
     Json::Value jsonRoot_;
     Mat image_;
@@ -116,6 +123,7 @@ private:
     vector<DMatch> secondBestMatches_;
     nodeStatus status_;
     boost::posix_time::ptime taken_at;
+    bool matched_;
 };
 
 

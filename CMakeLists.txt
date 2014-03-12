@@ -6,6 +6,7 @@ find_package( OpenCV REQUIRED )
 set(BOOSTCOMPONENTS
 	date_time
 	graph
+	timer
 )
 find_package(Boost 1.45.0 COMPONENTS ${BOOSTCOMPONENTS} REQUIRED) 
 include_directories(${MyProject_SOURCE_DIR}/include)

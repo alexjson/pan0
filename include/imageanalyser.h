@@ -12,6 +12,7 @@
 #include <utils.h>
 #include <bfsvertexvisitor.h>
 #include <boost/graph/graphviz.hpp>
+#include <boost/progress.hpp>
 
 
 using namespace std;
@@ -30,9 +31,10 @@ public:
     void initGraph();
     void filterPanoramas();
     bool checkMagDiff(int id1, int id2);
+    bool checkMagDiffMax(int id1, int id2);
     bool checkTimeDiff(int id1, int id2);
     void refineGraph();
-    void printGraph();
+    void printGraph(string fileName);
     Graph *getGraph() {
         return G_;
     }

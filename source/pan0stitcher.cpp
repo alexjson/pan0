@@ -14,7 +14,6 @@ void Pan0Stitcher::add(int id) {
     string img1 =  current.getFileName();
     img1 = path_ + img1;
     imagesToStitch_.push_back(imread(img1));
-    cout << "push_back  " << imgID << endl;
     idsToStitch_.push_back(imgID);
 
 };
@@ -155,6 +154,6 @@ bool Pan0Stitcher::checkSequence() {
 
     cout << "maxDist  " << maxDist << endl;
 
-    return maxDist > 60;
+    return maxDist > 90;
 };
 
