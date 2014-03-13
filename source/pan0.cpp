@@ -67,8 +67,8 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     std::map<string, string> tmp;
     for (int i = 0; i < imageVector->size(); ++i) {
         for (int k = 0; k < imageVector->size(); ++k) {
-
-            if (checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector)) {
+            //TDOD: Add time check here to prevent bad inputs
+            if (checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector) && checkTimeDiff(i ,k, imageVector)) {
                 tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
                            (*imageVector)[k].getFileName()));
             }

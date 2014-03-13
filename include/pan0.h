@@ -10,6 +10,7 @@
 #include <imageanalyser.h>
 #include <pan0stitcher.h>
 #include <bfsvertexvisitor.h>
+#include <utils.h>
 
 
 
