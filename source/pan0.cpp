@@ -25,21 +25,21 @@ int main( int argc, char **argv ) {
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
 
-    cout << "Parsing data... ";
+    // cout << "Parsing data... ";
     vector<Imageobject> *imageVector = parser->getImageVector();
-    cout << "Done." << endl;
+    // cout << "Done." << endl;
 
     std::vector<string>  imageNames = findCandidates(imageVector);
     imageVector->clear();
 
-    cout << "Parsing images... ";
+    // cout << "Parsing images... ";
     parser->parseImages(PATH, imageNames);
-    cout << "Done." << endl;
+    // cout << "Done." << endl;
     imageVector = parser->getImageVector();
 
-    cout << "Init analyser... ";
+    // cout << "Init analyser... ";
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
-    cout << "Done." << endl;
+    // cout << "Done." << endl;
 
     cout << "Calculate descriptors... ";
     analyser->calculateDescriptors();
@@ -50,13 +50,13 @@ int main( int argc, char **argv ) {
     analyser->analyse();
     cout << "Done." << endl;
 
-    // Graph *G = analyser->getGraph();
+    Graph *G = analyser->getGraph();
 
 
-    // Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
-    // stitcher->setGraph(G);
-    // stitcher->setLookUpMap(analyser->getLookUpMap());
-    // stitcher->stitch();
+    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
+    stitcher->setGraph(G);
+    stitcher->setLookUpMap(analyser->getLookUpMap());
+    stitcher->stitch();
 
     return 0;
 };

@@ -50,7 +50,7 @@ void ImageAnalyser::analyse() {
     printf("Analysing\n");
     const int MATCHTRESH = 10;
     int numberOfMatches = MATCHTRESH;
-    int firstMatch = -1;
+    // int firstMatch = -1;
     // int secondMatch = -1;
     int currentNum = -1;
     // vector<DMatch> BestMatches;
@@ -64,13 +64,14 @@ void ImageAnalyser::analyse() {
     imageVector_->at(0).setMatched(true);
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
         numberOfMatches = MATCHTRESH;
+        int firstMatch = -1;
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
                 continue;
             } else {
                 // firstMatch secondMatch.
                 if (imageVector_->at(id2).getFirstMatchID() != id1 && !imageVector_->at(id2).getMatched() ) {
-                    if (checkMagDiffMax(id1, id2, imageVector_)) {
+                    if (checkMagDiffMax(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
                         currentNum = checkMatches(id1, id2);
                         if (currentNum > numberOfMatches) {
                             numberOfMatches = currentNum;
@@ -81,10 +82,13 @@ void ImageAnalyser::analyse() {
 
             }
         }
-        boost::add_edge(id1, firstMatch, *G_);
+        if (firstMatch != -1) {
+            boost::add_edge(id1, firstMatch, *G_);
 
-        (*imageVector_)[id1].setFirstMatchID(firstMatch);
-        (*imageVector_)[firstMatch].setMatched(true);
+            (*imageVector_)[id1].setFirstMatchID(firstMatch);
+            (*imageVector_)[firstMatch].setMatched(true);
+
+        }
 
         ++show_progress;
     }
@@ -116,9 +120,13 @@ void ImageAnalyser::initGraph() {
 };
 
 void ImageAnalyser::printGraph(string fileName) {
+    std::vector<std::string> names;
+    for (int i = 0 ; i < imageVector_->size() ; i++) {
+        names.push_back(imageVector_->at(i).getFileName());
+    }
     std::ofstream dmp;
     dmp.open(fileName + ".dot");
-    boost::write_graphviz(dmp, (*G_));
+    boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
 }
 
 //Method for removing none contributing images
@@ -164,7 +172,7 @@ void ImageAnalyser::filterPanoramas() {
     // }
 
     refineGraph();
-    printGraph("after");
+    // printGraph("after");
 
 };
 
