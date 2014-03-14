@@ -56,6 +56,7 @@ void ImageAnalyser::analyse() {
     // vector<DMatch> BestMatches;
     // vector<DMatch> SecondBestMatches;
     // std::vector<int> matchIDvec;
+    G_ = new Graph();
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
 
@@ -63,24 +64,16 @@ void ImageAnalyser::analyse() {
     imageVector_->at(0).setMatched(true);
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
         numberOfMatches = MATCHTRESH;
-        // int numberOfMatches2 = -1;
-
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
                 continue;
             } else {
-                //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
                 if (imageVector_->at(id2).getFirstMatchID() != id1 && !imageVector_->at(id2).getMatched() ) {
-                    if (checkMagDiffMax(id1, id2,imageVector_)) {
+                    if (checkMagDiffMax(id1, id2, imageVector_)) {
                         currentNum = checkMatches(id1, id2);
-
                         if (currentNum > numberOfMatches) {
-
-                            // numberOfMatches2 = numberOfMatches;
                             numberOfMatches = currentNum;
-
-                            // secondMatch = firstMatch;
                             firstMatch = id2;
                         }
                     }
@@ -88,13 +81,11 @@ void ImageAnalyser::analyse() {
 
             }
         }
-        //TODO Lägg till i GRAPH här istället för firstMatchID och secondMatchID, ta bort GRAPH init
+        boost::add_edge(id1, firstMatch, *G_);
+
         (*imageVector_)[id1].setFirstMatchID(firstMatch);
         (*imageVector_)[firstMatch].setMatched(true);
 
-        // if (numberOfMatches2 > MATCHTRESH) {
-        //     (*imageVector_)[id1].setSecondMatchID(secondMatch);
-        // }
         ++show_progress;
     }
 
@@ -104,7 +95,7 @@ void ImageAnalyser::analyse() {
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
-    initGraph();
+    // initGraph();
     printGraph("before");
     filterPanoramas();
 };
@@ -121,12 +112,7 @@ void ImageAnalyser::initGraph() {
             boost::add_edge(currentID, first, *G_);
         }
 
-
-        // if (current.getSecondMatchID() != -1) {
-        //     boost::add_edge(currentID, current.getSecondMatchID(), *G_);
-        // }
     }
-    // printGraph();
 };
 
 void ImageAnalyser::printGraph(string fileName) {
@@ -141,15 +127,12 @@ void ImageAnalyser::filterPanoramas() {
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
     cout << "components in graph  " << num << endl;
-    // cout << "component size   " << component.size() << endl;
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
         int beg = std::distance( component.begin(), it);
         int end = std::count(component.begin(), component.end(), idx) + beg - 1;
 
-        // cout << "beg  " << beg << "   end   " << end << endl;
 
-        //TODO: Fel här, tar bort för mycket noder
         for (int id1 = beg; id1 <  end; ++id1) {
             if (imageVector_->at(id1).getStatus() != NONE )
                 continue;
