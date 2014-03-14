@@ -99,34 +99,22 @@ void ImageAnalyser::analyse() {
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
     printf("Done.\n");
-    // initGraph();
+
     printGraph("before");
     filterPanoramas();
 };
 
-void ImageAnalyser::initGraph() {
-    G_ = new Graph();
-    //Use boost with graphs
-    for (std::vector<Imageobject>::iterator it = imageVector_->begin(); it != imageVector_->end(); ++it) {
-        Imageobject current = *it;
-        int first = current.getFirstMatchID();
-
-        if (first != -1) {
-            int currentID = current.getID();
-            boost::add_edge(currentID, first, *G_);
-        }
-
-    }
-};
 
 void ImageAnalyser::printGraph(string fileName) {
-    std::vector<std::string> names;
-    for (int i = 0 ; i < imageVector_->size() ; i++) {
-        names.push_back(imageVector_->at(i).getFileName());
-    }
+    // std::vector<std::string> names;
+    // for (int i = 0 ; i < imageVector_->size() ; i++) {
+    //     names.push_back(imageVector_->at(i).getFileName());
+    // }
     std::ofstream dmp;
     dmp.open(fileName + ".dot");
-    boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
+    // boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
+    boost::write_graphviz(dmp, (*G_));
+
 }
 
 //Method for removing none contributing images
@@ -134,47 +122,62 @@ void ImageAnalyser::filterPanoramas() {
     std::vector<int>::iterator it;
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
+
+
     cout << "components in graph  " << num << endl;
+
+
     for (int idx = 0; idx < num; ++idx) {
-        it = find(component.begin(), component.end(), idx);
-        int beg = std::distance( component.begin(), it);
-        int end = std::count(component.begin(), component.end(), idx) + beg - 1;
+
+        int numberOfElements = std::count(component.begin(), component.end(), idx);
+        cout << "numberOfElements :" << idx << "  " << numberOfElements << endl;
+
+        std::vector<int> idVec;
+        int id1 = 0;
+        for (int a = 0; a < numberOfElements; ++a) {
+            it = find(component.begin() + id1, component.end(), idx);
+            id1 = std::distance( component.begin(), it);
+            idVec.push_back(id1);
+            ++id1;
+        }
+
+        analyseComponent(idVec);
+    }
+
+    refineGraph();
+    printGraph("after");
+
+};
+
+bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
 
 
-        for (int id1 = beg; id1 <  end; ++id1) {
-            if (imageVector_->at(id1).getStatus() != NONE )
+    for (int idx = 0; idx <  idVec.size(); ++idx) {
+        int id1 = idVec.at(idx);
+        if (imageVector_->at(id1).getStatus() != NONE )
+            continue;
+
+        for (int idy = 0; idy <  idVec.size(); ++idy) {
+
+            int id2 = idVec.at(idy);
+            //If it is the last picture in the sequence
+            if (idy + 1 ==  idVec.size()) {
+                imageVector_->at(id1).setStatus(INCLUDED);
+                imageVector_->at(id1).setFirstMatchID(id2);
+            } else if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
                 continue;
-
-            for (int id2 = beg; id2 <  end; ++id2) {
-                //If it is the last picture in the sequence
-                if (id2 + 1 ==  end) {
-                    imageVector_->at(id1).setStatus(INCLUDED);
-                    imageVector_->at(id1).setFirstMatchID(id2);
-                } else if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
-                    continue;
-                } else if (checkMagDiffMin(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
-                    imageVector_->at(id1).setStatus(INCLUDED);
-                    imageVector_->at(id1).setFirstMatchID(id2);
-                    break;
-                } else {
-                    imageVector_->at(id2).setStatus(REJECTED);
-                    remove_vertex(id2, (*G_));
-                }
+            } else if (checkMagDiffMin(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
+                imageVector_->at(id1).setStatus(INCLUDED);
+                imageVector_->at(id1).setFirstMatchID(id2);
+                break;
+            } else {
+                imageVector_->at(id2).setStatus(REJECTED);
+                remove_vertex(id2, (*G_));
             }
         }
     }
-
-    // cout << "INCLUDED" << endl;
-    // for (std::vector<Imageobject>::iterator itTmp = imageVector_->begin(); itTmp != imageVector_->end(); ++itTmp) {
-    //     if (itTmp->getStatus() == INCLUDED) {
-    //         cout << itTmp->getFileName() << endl;
-    //     }
-    // }
-
-    refineGraph();
-    // printGraph("after");
-
 };
+
 
 void ImageAnalyser::refineGraph() {
     G_ = new Graph();

@@ -50,13 +50,13 @@ int main( int argc, char **argv ) {
     analyser->analyse();
     cout << "Done." << endl;
 
-    Graph *G = analyser->getGraph();
+    // Graph *G = analyser->getGraph();
 
 
-    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
-    stitcher->setGraph(G);
-    stitcher->setLookUpMap(analyser->getLookUpMap());
-    stitcher->stitch();
+    // Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
+    // stitcher->setGraph(G);
+    // stitcher->setLookUpMap(analyser->getLookUpMap());
+    // stitcher->stitch();
 
     return 0;
 };
