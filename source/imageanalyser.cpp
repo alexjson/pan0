@@ -72,7 +72,7 @@ void ImageAnalyser::analyse() {
                 //Spara 2 bilder som good_matches för att kunna pussla ihop panorama senare
                 // firstMatch secondMatch.
                 if (imageVector_->at(id2).getFirstMatchID() != id1 && !imageVector_->at(id2).getMatched() ) {
-                    if (checkMagDiffMax(id1, id2)) {
+                    if (checkMagDiffMax(id1, id2,imageVector_)) {
                         currentNum = checkMatches(id1, id2);
 
                         if (currentNum > numberOfMatches) {
@@ -161,7 +161,7 @@ void ImageAnalyser::filterPanoramas() {
                     imageVector_->at(id1).setFirstMatchID(id2);
                 } else if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
                     continue;
-                } else if (checkMagDiff(id1, id2) && checkTimeDiff(id1, id2)) {
+                } else if (checkMagDiffMin(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
                     imageVector_->at(id1).setStatus(INCLUDED);
                     imageVector_->at(id1).setFirstMatchID(id2);
                     break;
@@ -214,24 +214,6 @@ void ImageAnalyser::refineGraph() {
 
 };
 
-bool ImageAnalyser::checkMagDiff(int id1, int id2) {
-    double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
-    return magDiff > 21.0;
-};
-
-bool ImageAnalyser::checkMagDiffMax(int id1, int id2) {
-    double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[id2].getMag_data());
-    return magDiff < 45.0;
-};
-
-bool ImageAnalyser::checkTimeDiff(int id1, int id2) {
-    using namespace boost::posix_time;
-    ptime t1 = (*imageVector_)[id1].getTime();
-    ptime t2 = (*imageVector_)[id2].getTime();
-    time_duration diff = t2 - t1;
-
-    return abs(diff.total_seconds()) < 480;
-};
 
 std::map<int, int>::iterator ImageAnalyser::findSecond(int id) {
     for (std::map<int, int>::iterator it = lookUpMap_.begin(); it != lookUpMap_.end(); ++it ) {

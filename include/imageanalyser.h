@@ -30,9 +30,6 @@ public:
     int checkMatches(int id1, int id2);
     void initGraph();
     void filterPanoramas();
-    bool checkMagDiff(int id1, int id2);
-    bool checkMagDiffMax(int id1, int id2);
-    bool checkTimeDiff(int id1, int id2);
     void refineGraph();
     void printGraph(string fileName);
     Graph *getGraph() {

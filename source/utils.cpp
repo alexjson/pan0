@@ -43,4 +43,14 @@ bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     return tiltDiff < 2.5;
 
 };
+bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
+    double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+    return magDiff > 21.0;
+};
+
+bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
+    double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+    return magDiff < 45.0;
+};
+
 
