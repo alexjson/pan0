@@ -38,6 +38,9 @@ public:
     std::map<int, int> getLookUpMap() {
         return lookUpMap_;
     };
+    void setMatchingThreshold(int tresh){
+        MATCHTRESH_ = tresh;
+    }
 
 private:
     std::map<int, int>::iterator findSecond(int id);
@@ -48,6 +51,7 @@ private:
     std::vector<Imageobject> *imageVector_;
     std::map<int, int> lookUpMap_;
     Graph *G_;
+    int MATCHTRESH_;
 };
 
 

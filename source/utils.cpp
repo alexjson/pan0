@@ -1,4 +1,11 @@
 #include <utils.h>
+
+const double MAGDIFFUPPER = 45.0;
+const double MAGDIFFLOWER = 21.0;
+const double TILTDIFF = 2.5;
+const int   TIMEDIFF = 480; 
+
+
 double get_wall_time() {
     struct timeval time;
     if (gettimeofday(&time, NULL)) {
@@ -29,26 +36,26 @@ bool checkTimeDiff(int id1, int id2, std::vector<Imageobject> *imageVector) {
     ptime t2 = (*imageVector)[id2].getTime();
     time_duration diff = t2 - t1;
 
-    return abs(diff.total_seconds()) < 480;
+    return abs(diff.total_seconds()) < TIMEDIFF;
 };
 
 bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
-    return (magDiff > 21.0 && magDiff < 45.0);
+    return (magDiff > MAGDIFFLOWER && magDiff < MAGDIFFUPPER);
 };
 bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
-    return tiltDiff < 2.5;
+    return tiltDiff < TILTDIFF;
 
 };
 bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
-    return magDiff > 21.0;
+    return magDiff > MAGDIFFLOWER;
 };
 
 bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
-    return magDiff < 45.0;
+    return magDiff < MAGDIFFUPPER;
 };
 
 bool checkTrigger(int id1, int id2, vector<Imageobject> *imageVector) {

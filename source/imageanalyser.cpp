@@ -3,7 +3,7 @@
 using namespace std;
 using namespace cv;
 
-ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector) {
+ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector), MATCHTRESH_(40) {
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
@@ -53,9 +53,7 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
 };
 
 void ImageAnalyser::analyse() {
-    printf("Analysing\n");
-    const int MATCHTRESH = 40;
-    int numberOfMatches = MATCHTRESH;
+    int numberOfMatches = MATCHTRESH_;
     int currentNum = -1;
     G_ = new Graph();
     double wall0 = get_wall_time();

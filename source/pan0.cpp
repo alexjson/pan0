@@ -29,6 +29,7 @@ int main( int argc, char **argv ) {
     imageVector = parser->getImageVector();
 
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
+    // analyser->setMatchginThreshold(40);  DEFAULT VALUE
 
     cout << "Calculate descriptors... ";
     analyser->calculateDescriptors();
@@ -41,8 +42,10 @@ int main( int argc, char **argv ) {
 
     Graph *G = analyser->getGraph();
 
-
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
+    // stitcher->setMinimumRotation(120)  DEFAULT VALUE
+
+
     stitcher->setGraph(G);
     stitcher->setLookUpMap(analyser->getLookUpMap());
     stitcher->stitch();

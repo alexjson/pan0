@@ -43,6 +43,9 @@ public:
     bool checkSequence();
     void printID();
     void writeImg(int id, Mat img);
+    void setMinimumRotation(int rot){
+        MINDIST_ = rot;
+    }
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
@@ -50,6 +53,7 @@ private:
     std::map<int, int> lookUpMap_;
     string path_;
     std::vector<int> idsToStitch_;
+    int MINDIST_;
 };
 
 #endif //PAN0STITCHER_H
