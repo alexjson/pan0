@@ -17,6 +17,7 @@ bool checkMagDiff(int id1, int id2, std::vector<Imageobject> *imageVector);
 bool CheckTiltDiff(int id1, int id2, std::vector<Imageobject> *imageVector);
 bool checkMagDiffMin(int id1, int id2, std::vector<Imageobject> *imageVector);
 bool checkMagDiffMax(int id1, int id2, std::vector<Imageobject> *imageVector);
+bool checkTrigger(int id1, int id2, std::vector<Imageobject> *imageVector);
 
 
 #endif // UTILS_H

@@ -34,24 +34,23 @@ void ImageAnalyser::calculateDescriptors() {
 
 int ImageAnalyser::checkMatches(int id1, int id2) {
     std::vector< std::vector < cv::DMatch > > matches;
-    const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
-    cout <<"Descriptor size  " <<(*imageVector_)[id1].getDescriptors().size().height<< endl;
-    cout <<"Descriptor size  " <<(*imageVector_)[id2].getDescriptors().size().height<< endl;
 
-    if((*imageVector_)[id1].getDescriptors().size().height != 0 && (*imageVector_)[id2].getDescriptors().size().height != 0) {
+    if ((*imageVector_)[id1].getDescriptors().size().height != 0 && (*imageVector_)[id2].getDescriptors().size().height != 0) {
         matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
-    vector<cv::DMatch> good_matches;
-    for (int i = 0; i < matches.size(); ++i) {
-        if (matches[i][0].distance < ratio * matches[i][1].distance) {
-            good_matches.push_back(matches[i][0]);
-        }
-    }
+        vector<cv::DMatch> good_matches;
+        for (int i = 0; i < matches.size(); ++i) {
+            const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
 
-    return good_matches.size();
+            if (matches[i][0].distance < ratio * matches[i][1].distance) {
+                good_matches.push_back(matches[i][0]);
+            }
+        }
+
+        return good_matches.size();
     }
 
     return 0;
-    
+
 };
 
 void ImageAnalyser::analyse() {
@@ -72,7 +71,7 @@ void ImageAnalyser::analyse() {
             if (id1 == id2) {
                 continue;
             } else {
-                if (checkMagDiffMax(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
+                if (checkTrigger(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_) && checkMagDiffMax(id1, id2, imageVector_) ) {
                     currentNum = checkMatches(id1, id2);
                     if (currentNum > numberOfMatches) {
                         matchIDvec.push_back(id2);
