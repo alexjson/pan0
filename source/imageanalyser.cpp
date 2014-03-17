@@ -45,7 +45,6 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
                 good_matches.push_back(matches[i][0]);
             }
         }
-
         return good_matches.size();
     }
 
@@ -55,7 +54,7 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
 
 void ImageAnalyser::analyse() {
     printf("Analysing\n");
-    const int MATCHTRESH = 10;
+    const int MATCHTRESH = 40;
     int numberOfMatches = MATCHTRESH;
     int currentNum = -1;
     G_ = new Graph();
@@ -98,14 +97,14 @@ void ImageAnalyser::analyse() {
 
 //Just for debugging
 void ImageAnalyser::printGraph(string fileName) {
-    // std::vector<std::string> names;
-    // for (int i = 0 ; i < imageVector_->size() ; i++) {
-    //     names.push_back(imageVector_->at(i).getFileName());
-    // }
+    std::vector<std::string> names;
+    for (int i = 0 ; i < imageVector_->size() ; i++) {
+        names.push_back(imageVector_->at(i).getFileName());
+    }
     std::ofstream dmp;
     dmp.open(fileName + ".dot");
-    // boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
-    boost::write_graphviz(dmp, (*G_));
+    boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
+    // boost::write_graphviz(dmp, (*G_));
 
 }
 
@@ -129,7 +128,7 @@ void ImageAnalyser::filterPanoramas() {
         analyseComponent(idVec);
     }
     refineGraph();
-    printGraph("after");
+    // printGraph("after");
 };
 
 bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {

@@ -125,7 +125,6 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
-
-    return maxDist > 130;
+    return maxDist > 120;
 };
 

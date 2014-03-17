@@ -23,7 +23,7 @@ double eDistance(std::vector<int> vec1, std::vector<int> vec2) {
     return dist;
 };
 
-bool checkTimeDiff(int id1, int id2, std::vector<Imageobject>* imageVector) {
+bool checkTimeDiff(int id1, int id2, std::vector<Imageobject> *imageVector) {
     using namespace boost::posix_time;
     ptime t1 = (*imageVector)[id1].getTime();
     ptime t2 = (*imageVector)[id2].getTime();
