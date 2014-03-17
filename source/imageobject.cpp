@@ -22,7 +22,7 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName, int i
     triggerMethod_ = jsonRoot_["meta"]["trigger"].asString();
 
     string time = jsonRoot_["taken_at_utc"].asString();
-    time.pop_back();
+    time.erase (time.end()-6, time.end());
     taken_at = boost::date_time::parse_delimited_time<boost::posix_time::ptime>(time, 'T');
 
     const unsigned int idx2 = 0;
@@ -46,7 +46,7 @@ Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
     triggerMethod_ = jsonRoot_["meta"]["trigger"].asString();
 
     string time = jsonRoot_["taken_at_utc"].asString();
-    time.pop_back();
+    time.erase (time.end()-6, time.end());
     taken_at = boost::date_time::parse_delimited_time<boost::posix_time::ptime>(time, 'T');
 
     const unsigned int idx2 = 0;

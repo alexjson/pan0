@@ -34,6 +34,7 @@ void Dataparser::parseData(std::string dataPath) {
         /* could not open directory */
         perror ("");
     }
+
 }
 
 void Dataparser::parseImages(std::string dataPath, std::vector<string> imageNames) {

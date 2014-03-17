@@ -11,9 +11,9 @@ int main( int argc, char **argv ) {
 
     if (argc < 2) {
 
-        PATH = "/home/alex/xjobb/images/test/";
-        // std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
-        // return 1;
+        // PATH = "/home/alex/xjobb/images2/resized/";
+        std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
+        return 1;
     } else {
         PATH = argv[1];
     }
