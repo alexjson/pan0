@@ -50,12 +50,7 @@ void ImageAnalyser::analyse() {
     printf("Analysing\n");
     const int MATCHTRESH = 10;
     int numberOfMatches = MATCHTRESH;
-    // int firstMatch = -1;
-    // int secondMatch = -1;
     int currentNum = -1;
-    // vector<DMatch> BestMatches;
-    // vector<DMatch> SecondBestMatches;
-    // std::vector<int> matchIDvec;
     G_ = new Graph();
     double wall0 = get_wall_time();
     double cpu0  = get_cpu_time();
@@ -64,32 +59,22 @@ void ImageAnalyser::analyse() {
     imageVector_->at(0).setMatched(true);
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
         numberOfMatches = MATCHTRESH;
-        int firstMatch = -1;
+        std::vector<int> matchIDvec;
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
                 continue;
             } else {
-                // firstMatch secondMatch.
-                if (imageVector_->at(id2).getFirstMatchID() != id1 && !imageVector_->at(id2).getMatched() ) {
-                    if (checkMagDiffMax(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
-                        currentNum = checkMatches(id1, id2);
-                        if (currentNum > numberOfMatches) {
-                            numberOfMatches = currentNum;
-                            firstMatch = id2;
-                        }
+                if (checkMagDiffMax(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
+                    currentNum = checkMatches(id1, id2);
+                    if (currentNum > numberOfMatches) {
+                        matchIDvec.push_back(id2);
                     }
                 }
-
             }
         }
-        if (firstMatch != -1) {
-            boost::add_edge(id1, firstMatch, *G_);
-
-            (*imageVector_)[id1].setFirstMatchID(firstMatch);
-            (*imageVector_)[firstMatch].setMatched(true);
-
+        for (int idx = 0; idx < matchIDvec.size(); ++idx) {
+            boost::add_edge(id1, matchIDvec.at(idx), *G_);
         }
-
         ++show_progress;
     }
 
@@ -104,7 +89,7 @@ void ImageAnalyser::analyse() {
     filterPanoramas();
 };
 
-
+//Just for debugging
 void ImageAnalyser::printGraph(string fileName) {
     // std::vector<std::string> names;
     // for (int i = 0 ; i < imageVector_->size() ; i++) {
@@ -123,15 +108,8 @@ void ImageAnalyser::filterPanoramas() {
     std::vector<int> component(num_vertices(*G_));
     int num = boost::connected_components(*G_, &component[0]);
 
-
-    cout << "components in graph  " << num << endl;
-
-
     for (int idx = 0; idx < num; ++idx) {
-
         int numberOfElements = std::count(component.begin(), component.end(), idx);
-        cout << "numberOfElements :" << idx << "  " << numberOfElements << endl;
-
         std::vector<int> idVec;
         int id1 = 0;
         for (int a = 0; a < numberOfElements; ++a) {
@@ -143,14 +121,11 @@ void ImageAnalyser::filterPanoramas() {
 
         analyseComponent(idVec);
     }
-
     refineGraph();
     printGraph("after");
-
 };
 
 bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
-
 
     for (int idx = 0; idx <  idVec.size(); ++idx) {
         int id1 = idVec.at(idx);

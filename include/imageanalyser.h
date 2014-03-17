@@ -28,7 +28,6 @@ public:
     void analyse();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
-    // void initGraph();
     void filterPanoramas();
     void refineGraph();
     void printGraph(string fileName);

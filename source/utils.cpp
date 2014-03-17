@@ -37,7 +37,6 @@ bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     return (magDiff > 21.0 && magDiff < 45.0);
 };
 bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
-
     double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
     return tiltDiff < 2.5;
 

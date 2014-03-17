@@ -21,8 +21,6 @@ void Pan0Stitcher::add(int id) {
 void Pan0Stitcher::stitch() {
     std::vector<int> component(num_vertices(*graph_));
     int num = boost::connected_components(*graph_, &component[0]);
-    // std::vector<int>::size_type i;
-    cout << "Total number of components in graph: " << num << endl;
     Stitcher stitcher = Stitcher::createDefault(1);
     Mat dst;
     std::vector<int>::iterator it;
@@ -30,7 +28,6 @@ void Pan0Stitcher::stitch() {
     visitor.setPan0Stitcher(this);
     for (int idx = 0; idx < num; ++idx) {
         it = find(component.begin(), component.end(), idx);
-        // cout << "breadth_first_search" << "\n";
 
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
@@ -40,10 +37,7 @@ void Pan0Stitcher::stitch() {
             cout << "Number of iamges:  " << imagesToStitch_.size() << endl;
             printID();
             stitcher.stitch(imagesToStitch_, dst);
-            imshow("Stitching Result", dst);
             writeImg(idx, dst);
-            waitKey(0);
-            destroyAllWindows();
         }
         imagesToStitch_.clear();
         idsToStitch_.clear();
@@ -115,26 +109,6 @@ Mat Pan0Stitcher::mapImgToCyl(Mat image) {
     return dst;
 };
 
-void Pan0Stitcher::GraphTraverse(std::vector<int> G) {
-    std::vector<Edge> edgeVec;
-    for (std::vector<int>::iterator it = G.begin(); it != G.end(); ++it) {
-        int current = *it;
-        int first = imageVector_->at(*it).getFirstMatchID();
-        edgeVec.push_back(Edge(current, first));
-        if (imageVector_->at(*it).getSecondMatchID() != -1) {
-            edgeVec.push_back(Edge(current, imageVector_->at(*it).getSecondMatchID()));
-        }
-    }
-
-    Graph g(edgeVec.begin(), edgeVec.end(), G.size());
-    BFSVertexVisitor visitor;
-    visitor.setPan0Stitcher(this);
-    boost::breadth_first_search(g, boost::vertex(G.at(0), g), boost::visitor(visitor));
-    edgeVec.clear();
-    g.clear();
-
-};
-
 bool Pan0Stitcher::checkSequence() {
     if (idsToStitch_.size() < 3)
         return false;
@@ -152,8 +126,6 @@ bool Pan0Stitcher::checkSequence() {
         }
     }
 
-    cout << "maxDist  " << maxDist << endl;
-
-    return maxDist > 90;
+    return maxDist > 130;
 };
 

@@ -39,7 +39,6 @@ public:
     cv::Point2f convertPoints(cv::Point2f points, int w, int h);
     Mat mapImgToCyl(Mat img);
     cv::Point2f convertTest(cv::Point2f point, int w, int h);
-    void GraphTraverse(std::vector<int> G);
     void add(int id);
     bool checkSequence();
     void printID();
