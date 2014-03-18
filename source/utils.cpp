@@ -1,9 +1,14 @@
 #include <utils.h>
 
-const double MAGDIFFUPPER = 45.0;
-const double MAGDIFFLOWER = 21.0;
+// const double MAGDIFFUPPER = 45.0;
+// const double MAGDIFFLOWER = 21.0;
+
+const double MAGDIFFUPPER = 85.0; // Not in degrees... var = 2.25*Degrees
+const double MAGDIFFLOWER = 20.0;  // Not in degrees... :/
+
 const double TILTDIFF = 2.5;
-const int   TIMEDIFF = 480; 
+const int   TIMEDIFF = 480;
+const int   TIMEDIFFTRIGGER = 10;
 
 
 double get_wall_time() {
@@ -36,6 +41,9 @@ bool checkTimeDiff(int id1, int id2, std::vector<Imageobject> *imageVector) {
     ptime t2 = (*imageVector)[id2].getTime();
     time_duration diff = t2 - t1;
 
+    if ((*imageVector)[id1].getTrigger() == "double-tap")
+        return abs(diff.total_seconds()) < TIMEDIFFTRIGGER;
+
     return abs(diff.total_seconds()) < TIMEDIFF;
 };
 
@@ -55,6 +63,7 @@ bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
 
 bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+
     return magDiff < MAGDIFFUPPER;
 };
 

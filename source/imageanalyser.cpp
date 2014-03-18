@@ -62,7 +62,7 @@ void ImageAnalyser::analyse() {
     progress_display show_progress( imageVector_->size() );
     imageVector_->at(0).setMatched(true);
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
-        numberOfMatches = MATCHTRESH;
+        numberOfMatches = MATCHTRESH_;
         std::vector<int> matchIDvec;
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {

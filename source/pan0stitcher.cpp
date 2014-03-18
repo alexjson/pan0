@@ -2,7 +2,7 @@
 
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector ,string PATH) : imageVector_(imageVector),
     path_(PATH),
-    MINDIST_(120) {};
+    MINDIST_(270) {};
 
 void Pan0Stitcher::add(int id) {
     int imgID = 0;
@@ -126,6 +126,8 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
+
+    cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;
 };
 
