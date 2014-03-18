@@ -2,7 +2,7 @@
 #define IMAGEOBJECT_H
 
 #include <opencv2/opencv.hpp>
-#include </usr/include/jsoncpp/json.h>
+#include <jsoncpp/json.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 using namespace cv;

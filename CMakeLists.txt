@@ -27,6 +27,14 @@ set(HEADERS
    akaze/nldiffusion_functions.h
    akaze/utils.h
    akaze/AKAZEConfig.h
+   libs/jsoncpp/json.h
+   libs/jsoncpp/autolink.h
+   libs/jsoncpp/config.h
+   libs/jsoncpp/features.h
+   libs/jsoncpp/forwards.h
+   libs/jsoncpp/reader.h
+   libs/jsoncpp/value.h
+   libs/jsoncpp/writer.h
 
 )
 
