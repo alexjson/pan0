@@ -11,7 +11,8 @@ set(BOOSTCOMPONENTS
 find_package(Boost 1.45.0 COMPONENTS ${BOOSTCOMPONENTS} REQUIRED) 
 include_directories(${MyProject_SOURCE_DIR}/include)
 include_directories(${MyProject_SOURCE_DIR}/source)
-include_directories(${MyProject_SOURCE_DIR}/libjson)
+include_directories(${MyProject_SOURCE_DIR}/libs)
+include_directories(${MyProject_SOURCE_DIR}/akaze)
 
 set(HEADERS
    include/pan0.h
@@ -21,7 +22,11 @@ set(HEADERS
    include/pan0stitcher.h
    include/bfsvertexvisitor.h
    include/utils.h
-
+   akaze/AKAZE.h
+   akaze/fed.h
+   akaze/nldiffusion_functions.h
+   akaze/utils.h
+   akaze/AKAZEConfig.h
 
 )
 
@@ -33,11 +38,15 @@ set(SOURCE
  	source/pan0stitcher.cpp
  	source/bfsvertexvisitor.cpp
  	source/utils.cpp
+   akaze/AKAZE.cpp
+   akaze/fed.cpp
+   akaze/nldiffusion_functions.cpp
+   akaze/utils.cpp
 )
 add_executable( pan0  ${SOURCE} ${HEADER_FILES})
 
 
-TARGET_LINK_LIBRARIES(pan0 ${MyProject_SOURCE_DIR}/libjson/libjson.a)
+TARGET_LINK_LIBRARIES(pan0 ${MyProject_SOURCE_DIR}/libs/libjson.a)
 TARGET_LINK_LIBRARIES( pan0 ${OpenCV_LIBS})
 TARGET_LINK_LIBRARIES( pan0 ${Boost_LIBRARIES})
 target_link_libraries(pan0)

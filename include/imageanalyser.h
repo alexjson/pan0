@@ -13,7 +13,7 @@
 #include <bfsvertexvisitor.h>
 #include <boost/graph/graphviz.hpp>
 #include <boost/progress.hpp>
-
+#include <AKAZE.h>
 
 using namespace std;
 using namespace cv;
@@ -25,6 +25,7 @@ public:
     ~ImageAnalyser();
 
     void calculateDescriptors();
+    void calculateAKAZE();
     void analyse();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);

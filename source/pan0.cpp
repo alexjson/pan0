@@ -33,6 +33,8 @@ int main( int argc, char **argv ) {
 
     cout << "Calculate descriptors... ";
     analyser->calculateDescriptors();
+    // cout << "Calculate AKAZE... ";
+    // analyser->calculateAKAZE();
     cout << "Done." << endl;
 
 
@@ -46,9 +48,9 @@ int main( int argc, char **argv ) {
     // stitcher->setMinimumRotation(120)  DEFAULT VALUE
 
 
-    // stitcher->setGraph(G);
-    // stitcher->setLookUpMap(analyser->getLookUpMap());
-    // stitcher->stitch();
+    stitcher->setGraph(G);
+    stitcher->setLookUpMap(analyser->getLookUpMap());
+    stitcher->stitch();
 
     return 0;
 };
