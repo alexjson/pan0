@@ -2,7 +2,7 @@
 
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector ,string PATH) : imageVector_(imageVector),
     path_(PATH),
-    MINDIST_(200) {};
+    MINDIST_(270) {};
 
 void Pan0Stitcher::add(int id) {
     int imgID = 0;

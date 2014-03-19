@@ -52,7 +52,7 @@ int main( int argc, char **argv ) {
 
     Graph *G = analyser->getGraph();
 
-    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120 degree rotation default
+    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120(2.25*120=270) degree rotation default
 
 
     stitcher->setGraph(G);
@@ -81,7 +81,6 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
         result.push_back(it->first);
         result.push_back(it->second);
     }
-
     sort( result.begin(), result.end() );
     result.erase( unique( result.begin(), result.end() ), result.end() );
 
