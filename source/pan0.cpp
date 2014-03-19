@@ -18,6 +18,9 @@ int main( int argc, char **argv ) {
         PATH = argv[1];
     }
 
+    double wall0 = get_wall_time();
+    double cpu0  = get_cpu_time();
+
     Dataparser *parser = new Dataparser();
     parser->parseData(PATH);
 
@@ -31,21 +34,25 @@ int main( int argc, char **argv ) {
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
     // analyser->setMatchginThreshold(40);  DEFAULT VALUE
 
-    cout << "Calculate descriptors... ";
-    analyser->calculateDescriptors();
-    // cout << "Calculate AKAZE... ";
-    // analyser->calculateAKAZE();
-    cout << "Done." << endl;
+    // cout << "Calculate descriptors... ";
+    // // analyser->calculateDescriptors();
+    // // cout << "Calculate AKAZE... ";
+    // // analyser->calculateAKAZE();
+    // cout << "Done." << endl;
 
 
     cout << " analyse... ";
     analyser->analyse();
     cout << "Done." << endl;
 
+    double wall1 = get_wall_time();
+    double cpu1  = get_cpu_time();
+    cout << "Wall Time = " << wall1 - wall0 << endl;
+    cout << "CPU Time  = " << cpu1  - cpu0  << endl;
+
     Graph *G = analyser->getGraph();
 
-    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH);
-    // stitcher->setMinimumRotation(120)  DEFAULT VALUE
+    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120 degree rotation default
 
 
     stitcher->setGraph(G);
@@ -59,7 +66,7 @@ std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
     std::map<string, string> tmp;
     for (int i = 0; i < imageVector->size(); ++i) {
         for (int k = 0; k < imageVector->size(); ++k) {
-            if (checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector) && checkTimeDiff(i ,k, imageVector)) {
+            if (checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector) && checkTimeDiff(i , k, imageVector)) {
                 tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
                            (*imageVector)[k].getFileName()));
             }

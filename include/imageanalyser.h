@@ -31,8 +31,9 @@ public:
     int checkMatches(int id1, int id2);
     void filterPanoramas();
     void refineGraph();
-    void printGraph(string fileName);
+    void printGraph(string fileName, bool names = false);
     bool analyseComponent(std::vector<int> idVec);
+    void extractDescriptors(int id);
     Graph *getGraph() {
         return G_;
     }

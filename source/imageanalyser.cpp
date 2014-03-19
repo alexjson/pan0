@@ -12,8 +12,8 @@ ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVecto
 void ImageAnalyser::calculateDescriptors() {
     vector<KeyPoint> keypoints;
     Mat descriptors;
-    double wall0 = get_wall_time();
-    double cpu0  = get_cpu_time();
+    // double wall0 = get_wall_time();
+    // double cpu0  = get_cpu_time();
 
     progress_display show_progress( imageVector_->size() );
 
@@ -26,10 +26,10 @@ void ImageAnalyser::calculateDescriptors() {
         keypoints.clear();
         ++show_progress;
     }
-    double wall1 = get_wall_time();
-    double cpu1  = get_cpu_time();
-    cout << "Wall Time = " << wall1 - wall0 << endl;
-    cout << "CPU Time  = " << cpu1  - cpu0  << endl;
+    // double wall1 = get_wall_time();
+    // double cpu1  = get_cpu_time();
+    // cout << "Wall Time = " << wall1 - wall0 << endl;
+    // cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 };
 
 void ImageAnalyser::calculateAKAZE() {
@@ -58,7 +58,7 @@ void ImageAnalyser::calculateAKAZE() {
 
     int counter = 0;
     for (std::vector<Imageobject>::iterator i = imageVector_->begin(); i != imageVector_->end(); ++i) {
-        
+
         evolution1.Create_Nonlinear_Scale_Space(img32.at(counter));
         evolution1.Feature_Detection(kpts1);
         evolution1.Compute_Descriptors(kpts1, desc1);
@@ -78,8 +78,25 @@ void ImageAnalyser::calculateAKAZE() {
 
 };
 
+void ImageAnalyser::extractDescriptors(int id) {
+
+    vector<KeyPoint> keypoints;
+    Mat descriptors;
+
+    detector->detect(imageVector_->at(id).getImage(), keypoints);
+    imageVector_->at(id).setKeyPoints(keypoints);
+    extractor->compute(imageVector_->at(id).getImage(), keypoints, descriptors);
+    imageVector_->at(id).setDescriptors(descriptors);
+};
+
 int ImageAnalyser::checkMatches(int id1, int id2) {
     std::vector< std::vector < cv::DMatch > > matches;
+    if ((*imageVector_)[id1].getDescriptors().size().width == 0) {
+        extractDescriptors(id1);
+    }
+    if ((*imageVector_)[id2].getDescriptors().size().width == 0) {
+        extractDescriptors(id2);
+    }
 
     if ((*imageVector_)[id1].getDescriptors().size().height != 0 && (*imageVector_)[id2].getDescriptors().size().height != 0) {
         matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
@@ -102,8 +119,8 @@ void ImageAnalyser::analyse() {
     int numberOfMatches = MATCHTRESH_;
     int currentNum = -1;
     G_ = new Graph();
-    double wall0 = get_wall_time();
-    double cpu0  = get_cpu_time();
+    // double wall0 = get_wall_time();
+    // double cpu0  = get_cpu_time();
 
     progress_display show_progress( imageVector_->size() );
     imageVector_->at(0).setMatched(true);
@@ -128,28 +145,32 @@ void ImageAnalyser::analyse() {
         ++show_progress;
     }
 
-    double wall1 = get_wall_time();
-    double cpu1  = get_cpu_time();
+    // double wall1 = get_wall_time();
+    // double cpu1  = get_cpu_time();
 
-    cout << "Wall Time = " << wall1 - wall0 << endl;
-    cout << "CPU Time  = " << cpu1  - cpu0  << endl;
-    printf("Done.\n");
+    // cout << "Wall Time = " << wall1 - wall0 << endl;
+    // cout << "CPU Time  = " << cpu1  - cpu0  << endl;
+    // printf("Done.\n");
 
-    printGraph("before");
+    printGraph("before", true);
     filterPanoramas();
 };
 
 //Just for debugging
-void ImageAnalyser::printGraph(string fileName) {
-    std::vector<std::string> names;
-    for (int i = 0 ; i < imageVector_->size() ; i++) {
-        names.push_back(imageVector_->at(i).getFileName());
+void ImageAnalyser::printGraph(string fileName, bool names) {
+    if (names) {
+        std::vector<std::string> names;
+        for (int i = 0 ; i < imageVector_->size() ; i++) {
+            names.push_back(imageVector_->at(i).getFileName());
+        }
+        std::ofstream dmp;
+        dmp.open(fileName + ".dot");
+        boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
+    } else {
+        std::ofstream dmp;
+        dmp.open(fileName + ".dot");
+        boost::write_graphviz(dmp, (*G_));
     }
-    std::ofstream dmp;
-    dmp.open(fileName + ".dot");
-    boost::write_graphviz(dmp, (*G_), boost::make_label_writer(&names[0]));
-    // boost::write_graphviz(dmp, (*G_));
-
 }
 
 //Method for removing none contributing images
@@ -172,7 +193,7 @@ void ImageAnalyser::filterPanoramas() {
         analyseComponent(idVec);
     }
     refineGraph();
-    // printGraph("after");
+    printGraph("after");
 };
 
 bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
