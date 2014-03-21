@@ -13,7 +13,7 @@ enum nodeStatus { NONE, INCLUDED, REJECTED  };
 class Imageobject {
 public:
     Imageobject(Json::Value jsonRoot, Mat image, string fielName, int id);
-    Imageobject(Json::Value jsonRoot, string fielName, int id);
+    Imageobject(Json::Value jsonRoot, string fielName, int id, string path);
     ~Imageobject();
 
     bool operator==(const Imageobject &rhs) {
@@ -42,6 +42,8 @@ public:
     void setImage(Mat image) {
         image_ = image;
     };
+
+    void loadImage();
 
 
     void setKeyPoints(std::vector<KeyPoint> keyPoints);
@@ -106,6 +108,7 @@ public:
     }
 private:
     Json::Value jsonRoot_;
+    string PATH_;
     Mat image_;
     string fileName_;
     vector<int> mag_data;

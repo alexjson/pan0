@@ -3,7 +3,7 @@
 // const double MAGDIFFUPPER = 45.0;
 // const double MAGDIFFLOWER = 21.0;
 
-const double MAGDIFFUPPER = 85.0; // Not in degrees... var = 2.25*Degrees
+const double MAGDIFFUPPER = 100.0; // 85 Not in degrees... var = 2.25*Degrees
 const double MAGDIFFLOWER = 20.0;  // Not in degrees... :/
 
 const double TILTDIFF = 2.5;

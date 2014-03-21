@@ -91,10 +91,13 @@ void ImageAnalyser::extractDescriptors(int id) {
 
 int ImageAnalyser::checkMatches(int id1, int id2) {
     std::vector< std::vector < cv::DMatch > > matches;
-    if ((*imageVector_)[id1].getDescriptors().size().width == 0) {
+    if ((*imageVector_)[id1].getImage().size().width == 0) {
+        (*imageVector_)[id1].loadImage();
         extractDescriptors(id1);
+
     }
-    if ((*imageVector_)[id2].getDescriptors().size().width == 0) {
+    if ((*imageVector_)[id2].getImage().size().width == 0) {
+        (*imageVector_)[id2].loadImage();
         extractDescriptors(id2);
     }
 

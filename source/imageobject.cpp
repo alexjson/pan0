@@ -28,10 +28,11 @@ Imageobject::Imageobject(Json::Value jsonRoot, Mat image, string fileName, int i
     const unsigned int idx2 = 0;
     tilt_ = jsonRoot_["meta"]["rotation"][idx2].asDouble();
 };
-Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id) :
+Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id, string path) :
     jsonRoot_(jsonRoot),
     fileName_(fileName),
     currentID_(id),
+    PATH_(path),
     firstMatchID_(-1),
     secondMatchID_(-1),
     matched_(false),
@@ -61,4 +62,8 @@ void Imageobject::setKeyPoints(std::vector<KeyPoint> keyPoints) {
 
 void Imageobject::setDescriptors(Mat descriptors) {
     descriptors_ = descriptors;
-}
+};
+
+void Imageobject::loadImage(){
+    image_ = imread(PATH_+fileName_);
+};

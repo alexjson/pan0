@@ -25,7 +25,7 @@ void Dataparser::parseData(std::string dataPath) {
                 jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
                 ifstream test(jsonFile.c_str(), ifstream::binary);
                 reader.parse(test, root, false);
-                Imageobject imgObj(root, tmp, imageVector_->size());
+                Imageobject imgObj(root, tmp, imageVector_->size(),dataPath);
                 imageVector_->push_back(imgObj);
             }
         }
