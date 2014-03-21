@@ -25,21 +25,9 @@ int main( int argc, char **argv ) {
     parser->parseData(PATH);
 
     vector<Imageobject> *imageVector = parser->getImageVector();
-    // std::vector<string>  imageNames = findCandidates(imageVector);
-    // imageVector->clear();
-
-    // parser->parseImages(PATH, imageNames);
-    // imageVector = parser->getImageVector();
 
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
     // analyser->setMatchginThreshold(40);  DEFAULT VALUE
-
-    // cout << "Calculate descriptors... ";
-    // // analyser->calculateDescriptors();
-    // // cout << "Calculate AKAZE... ";
-    // // analyser->calculateAKAZE();
-    // cout << "Done." << endl;
-
 
     cout << " analyse... ";
     analyser->analyse();
@@ -61,30 +49,3 @@ int main( int argc, char **argv ) {
 
     return 0;
 };
-
-// std::vector<string> findCandidates(vector<Imageobject> *imageVector) {
-//     std::map<string, string> tmp;
-//     for (int i = 0; i < imageVector->size(); ++i) {
-//         for (int k = 0; k < imageVector->size(); ++k) {
-//             if (checkTrigger(i, k, imageVector) && checkTimeDiff(i , k, imageVector) && checkMagDiff(i, k, imageVector) && CheckTiltDiff(i, k, imageVector) ) {
-//                 tmp.insert(std::map<string, string>::value_type((*imageVector)[i].getFileName(),
-//                            (*imageVector)[k].getFileName()));
-//             }
-
-//         }
-
-//     }
-
-//     std::vector<string> result;
-//     std::map<string, string>::iterator it = tmp.begin();
-//     for (it = tmp.begin(); it != tmp.end(); ++it) {
-//         result.push_back(it->first);
-//         result.push_back(it->second);
-//     }
-//     sort( result.begin(), result.end() );
-//     result.erase( unique( result.begin(), result.end() ), result.end() );
-
-//     return result;
-// }
-
-

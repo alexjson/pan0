@@ -44,8 +44,6 @@ public:
     };
 
     void loadImage();
-
-
     void setKeyPoints(std::vector<KeyPoint> keyPoints);
     void setDescriptors(Mat descriptors);
 

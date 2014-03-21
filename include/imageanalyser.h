@@ -24,8 +24,6 @@ public:
     ImageAnalyser(std::vector<Imageobject> *imageVector);
     ~ImageAnalyser();
 
-    void calculateDescriptors();
-    void calculateAKAZE();
     void analyse();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
@@ -56,6 +54,5 @@ private:
     Graph *G_;
     int MATCHTRESH_;
 };
-
 
 #endif
