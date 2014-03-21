@@ -94,7 +94,6 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
     if ((*imageVector_)[id1].getImage().size().width == 0) {
         (*imageVector_)[id1].loadImage();
         extractDescriptors(id1);
-
     }
     if ((*imageVector_)[id2].getImage().size().width == 0) {
         (*imageVector_)[id2].loadImage();
@@ -121,7 +120,7 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
 void ImageAnalyser::analyse() {
     int numberOfMatches = MATCHTRESH_;
     int currentNum = -1;
-    G_ = new Graph();
+    G_ = new Graph(imageVector_->size());
     // double wall0 = get_wall_time();
     // double cpu0  = get_cpu_time();
 
@@ -132,6 +131,8 @@ void ImageAnalyser::analyse() {
         std::vector<int> matchIDvec;
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
+                continue;
+            } else if (checkEdge(id1, id2)) {
                 continue;
             } else {
                 if (checkTrigger(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_) && checkMagDiffMax(id1, id2, imageVector_) ) {
@@ -157,6 +158,12 @@ void ImageAnalyser::analyse() {
 
     printGraph("before", true);
     filterPanoramas();
+};
+
+bool ImageAnalyser::checkEdge(int id1, int id2) {
+    std::pair < MyEdge, bool > p = boost::edge( id1, id2, *G_);
+    if (p.second == true)  return true;
+    else return false;
 };
 
 //Just for debugging

@@ -34,6 +34,7 @@ public:
     void printGraph(string fileName, bool names = false);
     bool analyseComponent(std::vector<int> idVec);
     void extractDescriptors(int id);
+    bool checkEdge(int id1, int id2);
     Graph *getGraph() {
         return G_;
     }
