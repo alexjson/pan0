@@ -13,7 +13,6 @@
 #include <bfsvertexvisitor.h>
 #include <boost/graph/graphviz.hpp>
 #include <boost/progress.hpp>
-#include <AKAZE.h>
 
 using namespace std;
 using namespace cv;

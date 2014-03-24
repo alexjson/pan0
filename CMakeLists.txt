@@ -22,11 +22,6 @@ set(HEADERS
    include/pan0stitcher.h
    include/bfsvertexvisitor.h
    include/utils.h
-   akaze/AKAZE.h
-   akaze/fed.h
-   akaze/nldiffusion_functions.h
-   akaze/utils.h
-   akaze/AKAZEConfig.h
    libs/jsoncpp/json.h
    libs/jsoncpp/autolink.h
    libs/jsoncpp/config.h
@@ -46,10 +41,6 @@ set(SOURCE
  	source/pan0stitcher.cpp
  	source/bfsvertexvisitor.cpp
  	source/utils.cpp
-   akaze/AKAZE.cpp
-   akaze/fed.cpp
-   akaze/nldiffusion_functions.cpp
-   akaze/utils.cpp
 )
 add_executable( pan0  ${SOURCE} ${HEADER_FILES})
 

@@ -1,6 +1,6 @@
 #include <pan0stitcher.h>
 
-Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector ,string PATH) : imageVector_(imageVector),
+Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) : imageVector_(imageVector),
     path_(PATH),
     MINDIST_(270) {};
 
@@ -40,11 +40,13 @@ void Pan0Stitcher::stitch() {
             stitcher.stitch(imagesToStitch_, dst);
             writeImg(idx, dst);
         }
+
         imagesToStitch_.clear();
         idsToStitch_.clear();
     }
 };
 
+//For debugging only
 void Pan0Stitcher::printID() {
     cout << "Printing IDs" << endl;
     for (int idx = 0; idx < idsToStitch_.size(); ++idx) {
@@ -126,6 +128,8 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
+    printID();
+
 
     cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;

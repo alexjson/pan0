@@ -29,23 +29,23 @@ int main( int argc, char **argv ) {
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
     // analyser->setMatchginThreshold(40);  DEFAULT VALUE
 
-    cout << " analyse... ";
+    // cout << " analyse... ";
     analyser->analyse();
-    cout << "Done." << endl;
+    // cout << "Done." << endl;
 
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 
-    // Graph *G = analyser->getGraph();
+    Graph *G = analyser->getGraph();
 
-    // Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120(2.25*120=270) degree rotation default
+    Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120(2.25*120=270) degree rotation default
 
 
-    // stitcher->setGraph(G);
-    // stitcher->setLookUpMap(analyser->getLookUpMap());
-    // stitcher->stitch();
+    stitcher->setGraph(G);
+    stitcher->setLookUpMap(analyser->getLookUpMap());
+    stitcher->stitch();
 
     return 0;
 };
