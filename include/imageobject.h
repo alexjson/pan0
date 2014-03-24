@@ -104,6 +104,8 @@ public:
     void setMatched(bool matched){
         matched_ = matched;
     }
+    void tiltAdapter();
+    void timeFromFileName();
 private:
     Json::Value jsonRoot_;
     string PATH_;

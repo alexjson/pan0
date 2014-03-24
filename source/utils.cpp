@@ -8,7 +8,7 @@ const double MAGDIFFLOWER = 20.0;  // Not in degrees... :/
 
 const double TILTDIFF = 2.5;
 const int   TIMEDIFF = 480;
-const int   TIMEDIFFTRIGGER = 10;
+const int   TIMEDIFFTRIGGER = 30;
 
 
 double get_wall_time() {

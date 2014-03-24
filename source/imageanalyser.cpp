@@ -118,6 +118,7 @@ void ImageAnalyser::filterPanoramas() {
 
     for (int idx = 0; idx < num; ++idx) {
         int numberOfElements = std::count(component.begin(), component.end(), idx);
+
         std::vector<int> idVec;
         int id1 = 0;
         for (int a = 0; a < numberOfElements; ++a) {
@@ -126,7 +127,6 @@ void ImageAnalyser::filterPanoramas() {
             idVec.push_back(id1);
             ++id1;
         }
-
         analyseComponent(idVec);
     }
     refineGraph();

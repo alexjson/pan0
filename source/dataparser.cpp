@@ -22,7 +22,7 @@ void Dataparser::parseData(std::string dataPath) {
         while ((ent = readdir (dir)) != NULL) {
             tmp = ent->d_name;
             if (tmp.find(".jpg") != string::npos) {
-                jsonFile = dataPath + tmp.substr(0, tmp.find(".jpg")) + ".json";
+                jsonFile = dataPath +"meta/"+ tmp.substr(0, tmp.find(".jpg")) + ".json";
                 ifstream test(jsonFile.c_str(), ifstream::binary);
                 reader.parse(test, root, false);
                 Imageobject imgObj(root, tmp, imageVector_->size(),dataPath);

@@ -2,7 +2,7 @@
 
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) : imageVector_(imageVector),
     path_(PATH),
-    MINDIST_(270) {};
+    MINDIST_(120    ) {};
 
 void Pan0Stitcher::add(int id) {
     int imgID = 0;
@@ -34,11 +34,11 @@ void Pan0Stitcher::stitch() {
                                     *graph_), boost::visitor(visitor));
 
         if (checkSequence()) {
-            cout << "Stitching...." << endl;
+            cout << "panorama found " << endl;
             cout << "Number of iamges:  " << imagesToStitch_.size() << endl;
             printID();
-            stitcher.stitch(imagesToStitch_, dst);
-            writeImg(idx, dst);
+            // stitcher.stitch(imagesToStitch_, dst);
+            // writeImg(idx, dst);
         }
 
         imagesToStitch_.clear();
@@ -128,8 +128,6 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
-    printID();
-
 
     cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;
