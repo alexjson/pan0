@@ -52,6 +52,7 @@ Imageobject::Imageobject(Json::Value jsonRoot, string fileName, int id, string p
     // const unsigned int idx2 = 0;
     // tilt_ = jsonRoot_["meta"]["rotation"][idx2].asDouble();
     tiltAdapter();
+    rollAdapter();
 };
 
 Imageobject::~Imageobject() {};
@@ -78,7 +79,17 @@ void Imageobject::tiltAdapter() {
     double horizontal = sqrt(pow(ax, 2) + pow(ay, 2));
     double tilt = atan2(az, horizontal);
     tilt_ = tilt;
-}
+};
+
+void Imageobject::rollAdapter() {
+    #define _USE_MATH_DEFINES
+    int ax, ay;
+    ax = acc_data[0];
+    ay = acc_data[1];
+    double roll = fmod((-M_PI/ 2 - atan2(ax, ay)) , (2 * M_PI));
+    cout << "Roll " << roll << endl;
+    roll_ = roll;
+};
 
 void Imageobject::setKeyPoints(std::vector<KeyPoint> keyPoints) {
     keyPointVec_ = keyPoints;

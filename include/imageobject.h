@@ -39,6 +39,10 @@ public:
         return tilt_;
     };
 
+    double getRoll() const {
+        return roll_;
+    };
+
     void setImage(Mat image) {
         image_ = image;
     };
@@ -105,6 +109,7 @@ public:
         matched_ = matched;
     }
     void tiltAdapter();
+    void rollAdapter();
     void timeFromFileName();
 private:
     Json::Value jsonRoot_;
@@ -114,6 +119,7 @@ private:
     vector<int> mag_data;
     vector<int> acc_data;
     double tilt_;
+    double roll_;
     std::vector<KeyPoint> keyPointVec_;
     Mat descriptors_;
     string triggerMethod_;

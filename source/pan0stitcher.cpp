@@ -22,7 +22,7 @@ void Pan0Stitcher::add(int id) {
 void Pan0Stitcher::stitch() {
     std::vector<int> component(num_vertices(*graph_));
     int num = boost::connected_components(*graph_, &component[0]);
-    Stitcher stitcher = Stitcher::createDefault(1);
+    Stitcher stitcher = Stitcher::createDefault(true); // Try_use_GPU true
     Mat dst;
     std::vector<int>::iterator it;
     BFSVertexVisitor visitor;

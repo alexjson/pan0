@@ -4,9 +4,11 @@
 // const double MAGDIFFLOWER = 21.0;
 
 const double MAGDIFFUPPER = 100.0; // 85 Not in degrees... var = 2.25*Degrees
-const double MAGDIFFLOWER = 20.0;  // Not in degrees... :/
+const double MAGDIFFUPPER2 = 50.0; // Not in degrees... var = 2.25*Degrees
+const double MAGDIFFLOWER = 20.0;  // Not in degrees...
 
-const double TILTDIFF = 2.5;
+const double TILTDIFF = 0.7; // 0.785 = 45 degrees
+const double ROLLTHRESH = 0.7; // Kolla bara raotation på första bilden
 const int   TIMEDIFF = 480;
 const int   TIMEDIFFTRIGGER = 30;
 
@@ -53,9 +55,10 @@ bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
 };
 bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
-    return tiltDiff < TILTDIFF;
+    return -TILTDIFF < tiltDiff < TILTDIFF;
 
 };
+
 bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
     return magDiff > MAGDIFFLOWER;
@@ -63,8 +66,14 @@ bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
 
 bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
+    double thresh;
+    if (- ROLLTHRESH < imageVector->at(id1).getRoll() < ROLLTHRESH) {
+        thresh = MAGDIFFUPPER;
+    } else {
+        thresh = MAGDIFFUPPER2;
+    }
 
-    return magDiff < MAGDIFFUPPER;
+    return magDiff < thresh;
 };
 
 bool checkTrigger(int id1, int id2, vector<Imageobject> *imageVector) {
