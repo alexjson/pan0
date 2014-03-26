@@ -43,6 +43,8 @@ public:
         return roll_;
     };
 
+    double getRollDegrees();
+
     void setImage(Mat image) {
         image_ = image;
     };

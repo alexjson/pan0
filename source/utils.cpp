@@ -10,7 +10,7 @@ const double MAGDIFFLOWER = 20.0;  // Not in degrees...
 const double TILTDIFF = 0.7; // 0.785 = 45 degrees
 const double ROLLTHRESH = 0.7; // Kolla bara raotation på första bilden
 const int   TIMEDIFF = 480;
-const int   TIMEDIFFTRIGGER = 30;
+const int   TIMEDIFFTRIGGER = 12;
 
 
 double get_wall_time() {
@@ -51,12 +51,17 @@ bool checkTimeDiff(int id1, int id2, std::vector<Imageobject> *imageVector) {
 
 bool checkMagDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
-    return (magDiff > MAGDIFFLOWER && magDiff < MAGDIFFUPPER);
+    double upperThresh;
+    if (abs(imageVector->at(id1).getRoll()) < ROLLTHRESH) {
+        upperThresh = MAGDIFFUPPER;
+    } else {
+        upperThresh = MAGDIFFUPPER2;
+    }
+    return (magDiff > MAGDIFFLOWER && magDiff < upperThresh);
 };
-bool CheckTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
+bool checkTiltDiff(int id1, int id2, vector<Imageobject> *imageVector) {
     double tiltDiff = abs((*imageVector)[id1].getTilt() - (*imageVector)[id2].getTilt());
-    return -TILTDIFF < tiltDiff < TILTDIFF;
-
+    return tiltDiff < TILTDIFF;
 };
 
 bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
@@ -67,12 +72,12 @@ bool checkMagDiffMin(int id1, int id2, vector<Imageobject> *imageVector) {
 bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
     double magDiff = eDistance((*imageVector)[id1].getMag_data(), (*imageVector)[id2].getMag_data());
     double thresh;
-    if (- ROLLTHRESH < imageVector->at(id1).getRoll() < ROLLTHRESH) {
+    double imgRoll = imageVector->at(id1).getRoll();
+    if (-ROLLTHRESH < imgRoll && imgRoll < ROLLTHRESH) {
         thresh = MAGDIFFUPPER;
     } else {
         thresh = MAGDIFFUPPER2;
     }
-
     return magDiff < thresh;
 };
 

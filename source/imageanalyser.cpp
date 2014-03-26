@@ -32,8 +32,10 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
         extractDescriptors(id2);
     }
 
-    if ((*imageVector_)[id1].getDescriptors().size().height != 0 && (*imageVector_)[id2].getDescriptors().size().height != 0) {
-        matcher->knnMatch((*imageVector_)[id1].getDescriptors(), (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
+    if ((*imageVector_)[id1].getDescriptors().size().height != 0 &&
+            (*imageVector_)[id2].getDescriptors().size().height != 0) {
+        matcher->knnMatch((*imageVector_)[id1].getDescriptors(),
+                          (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
         vector<cv::DMatch> good_matches;
         for (int i = 0; i < matches.size(); ++i) {
             const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
@@ -67,7 +69,10 @@ void ImageAnalyser::analyse() {
             } else if (checkEdge(id1, id2)) {
                 continue;
             } else {
-                if (checkTrigger(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_) && checkMagDiffMax(id1, id2, imageVector_) ) {
+                if (checkTrigger(id1, id2, imageVector_) &&
+                        checkTimeDiff(id1, id2, imageVector_) &&
+                        checkTiltDiff(id1, id2, imageVector_) &&
+                        checkMagDiffMax(id1, id2, imageVector_) ) {
                     currentNum = checkMatches(id1, id2);
                     if (currentNum > numberOfMatches) {
                         matchIDvec.push_back(id2);

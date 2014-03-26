@@ -42,6 +42,8 @@ public:
     void add(int id);
     bool checkSequence();
     void printID();
+    void generateOutput(int id);
+    void parseImgs();
     void writeImg(int id, Mat img);
     void setMinimumRotation(int rot){
         MINDIST_ = rot;

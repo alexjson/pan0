@@ -2,7 +2,7 @@
 
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) : imageVector_(imageVector),
     path_(PATH),
-    MINDIST_(120    ) {};
+    MINDIST_(50) {};
 
 void Pan0Stitcher::add(int id) {
     int imgID = 0;
@@ -11,10 +11,6 @@ void Pan0Stitcher::add(int id) {
             imgID = it->first;
     }
 
-    Imageobject current = imageVector_->at(imgID);
-    string img1 =  current.getFileName();
-    img1 = path_ + img1;
-    imagesToStitch_.push_back(imread(img1));
     idsToStitch_.push_back(imgID);
 
 };
@@ -33,10 +29,15 @@ void Pan0Stitcher::stitch() {
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
 
+
+
         if (checkSequence()) {
+            generateOutput(idx);
+
             cout << "panorama found " << endl;
-            cout << "Number of iamges:  " << imagesToStitch_.size() << endl;
+            cout << "Number of iamges:  " << idsToStitch_.size() << endl;
             printID();
+            // parseImgs();
             // stitcher.stitch(imagesToStitch_, dst);
             // writeImg(idx, dst);
         }
@@ -46,6 +47,57 @@ void Pan0Stitcher::stitch() {
     }
 };
 
+
+void Pan0Stitcher::generateOutput(int id) {
+    string tmp = "mkdir " + to_string(id);
+    system(tmp.c_str());
+
+    vector<int> compression_params;
+    compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+
+    for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
+        string outfile = to_string(id) + "/" + to_string(*it) + ".png";
+        imwrite(outfile, imageVector_->at(*it).getImage(), compression_params);
+        cout << "saved file as: " << outfile << endl;
+    }
+
+
+
+
+}
+
+void Pan0Stitcher::parseImgs() {
+    cout << "rotating images" << endl;
+    for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
+        Imageobject current = imageVector_->at(*it);
+        string imgFile =  current.getFileName();
+        imgFile = path_ + imgFile;
+        Mat img = imread(imgFile);
+
+        if ( abs(imageVector_->at(*it).getRollDegrees()) < 45) {
+            imagesToStitch_.push_back(img);
+            cout << "no rot" << endl;
+        } else {
+            /// Compute a rotation matrix with respect to the center of the image
+            Point center = Point( img.cols / 2, img.rows / 2 );
+            double angle = imageVector_->at(*it).getRollDegrees();
+            double scale = 1;
+
+            /// Get the rotation matrix with the specifications above
+            Mat rot_mat = getRotationMatrix2D( center, angle, scale );
+            Mat rotate_dst;
+            /// Rotate the warped image
+            warpAffine( img, rotate_dst, rot_mat, img.size() );
+            imagesToStitch_.push_back(rotate_dst);
+            writeImg(*it, rotate_dst);
+        }
+
+
+    }
+    cout << "rotating images done" << endl;
+
+};
 //For debugging only
 void Pan0Stitcher::printID() {
     cout << "Printing IDs" << endl;

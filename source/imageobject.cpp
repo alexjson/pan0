@@ -87,8 +87,11 @@ void Imageobject::rollAdapter() {
     ax = acc_data[0];
     ay = acc_data[1];
     double roll = fmod((-M_PI/ 2 - atan2(ax, ay)) , (2 * M_PI));
-    cout << "Roll " << roll << endl;
     roll_ = roll;
+};
+double Imageobject::getRollDegrees(){
+    #define _USE_MATH_DEFINES
+    return (roll_ * (180/M_PI));
 };
 
 void Imageobject::setKeyPoints(std::vector<KeyPoint> keyPoints) {
