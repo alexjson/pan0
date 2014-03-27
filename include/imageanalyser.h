@@ -27,6 +27,7 @@ public:
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
     void filterPanoramas();
+    void printAlgorithmParams( cv::Algorithm* algorithm);
     void refineGraph();
     void printGraph(string fileName, bool names = false);
     bool analyseComponent(std::vector<int> idVec);

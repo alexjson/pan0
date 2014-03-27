@@ -7,6 +7,63 @@ ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVecto
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
+
+
+    // SIFT::SIFT(int nfeatures=0, int nOctaveLayers=3, double contrastThreshold=0.04, double edgeThreshold=10, double sigma=1.6)
+    // Parameters:
+    // nfeatures – The number of best features to retain. The features are ranked by their scores
+    // (measured in SIFT algorithm as the local contrast)
+    // nOctaveLayers – The number of layers in each octave. 3 is the value used in D. Lowe paper.
+    // The number of octaves is computed automatically from the image resolution.
+    // contrastThreshold – The contrast threshold used to filter out weak features in semi-uniform (low-contrast) regions.
+    // The larger the threshold, the less features are produced by the detector.
+    // edgeThreshold – The threshold used to filter out edge-like features. Note that the its meaning is different from the contrastThreshold, i.e. the larger the edgeThreshold, the less features are filtered out (more features are retained).
+    // sigma – The sigma of the Gaussian applied to the input image at the octave #0. If your image is captured with a weak camera with soft lenses, you might want to reduce the number.
+
+    // printAlgorithmParams(detector);
+
+    detector->set("nFeatures", 500);
+
+};
+
+void ImageAnalyser::printAlgorithmParams( cv::Algorithm *algorithm) {
+
+
+    std::vector<cv::String> parameters;
+    algorithm->getParams(parameters);
+
+    for (int i = 0; i < (int) parameters.size(); i++) {
+        std::string param = parameters[i];
+        int type = algorithm->paramType(param);
+        std::string helpText = algorithm->paramHelp(param);
+        std::string typeText;
+
+        switch (type) {
+        case cv::Param::BOOLEAN:
+            typeText = "bool";
+            break;
+        case cv::Param::INT:
+            typeText = "int";
+            break;
+        case cv::Param::REAL:
+            typeText = "real (double)";
+            break;
+        case cv::Param::STRING:
+            typeText = "string";
+            break;
+        case cv::Param::MAT:
+            typeText = "Mat";
+            break;
+        case cv::Param::ALGORITHM:
+            typeText = "Algorithm";
+            break;
+        case cv::Param::MAT_VECTOR:
+            typeText = "Mat vector";
+            break;
+        }
+        std::cout << "Parameter '" << param << "' type=" << typeText << " help=" << helpText << std::endl;
+    }
+
 };
 
 
@@ -140,6 +197,7 @@ void ImageAnalyser::filterPanoramas() {
     printGraph("after");
 };
 
+//TODO needs improvement, try to maximise magDiff
 bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
 
     for (int idx = 0; idx <  idVec.size(); ++idx) {
