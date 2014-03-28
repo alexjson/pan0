@@ -213,8 +213,6 @@ void ImageAnalyser::analyseComponent(std::vector<int> idVec) {
                 maxDist = dist;
                 startID = idVec.at(idx);
                 endID = idVec.at(idy);
-                cout << maxDist << endl;
-                cout << startID << "  " << endID << endl;
             }
         }
     }
@@ -227,10 +225,21 @@ void ImageAnalyser::analyseComponent(std::vector<int> idVec) {
 
     std::sort (objectVector.begin(), objectVector.end(), cmp);
 
+
+    // DEBUG ONLY
+    cout << "Printing vectors" << endl;
+    for (std::vector<Imageobject>::iterator itr = objectVector.begin(); itr != objectVector.end(); ++itr) {
+        std::vector<int> magData1 = itr->getMag_data();
+        double first = sqrt(pow(magData1[0], 2) + pow(magData1[1], 2) + pow(magData1[2], 2));
+        cout << first << endl;
+    }
+    cout << "------------------------------------------------------------------------------------" << endl;
+    cout << "------------------------------------------------------------------------------------" << endl;
+
+
     bool start = false;
     bool end = false;
 
-    cout << "startID " << startID << " endID " << endID << endl;
 
     for (int idx = 0; idx <  idVec.size(); ++idx) {
         int id1 = idVec.at(idx);
