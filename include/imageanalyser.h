@@ -30,7 +30,7 @@ public:
     void printAlgorithmParams( cv::Algorithm* algorithm);
     void refineGraph();
     void printGraph(string fileName, bool names = false);
-    bool analyseComponent(std::vector<int> idVec);
+    void analyseComponent(std::vector<int> idVec);
     void extractDescriptors(int id);
     bool checkEdge(int id1, int id2);
     Graph *getGraph() {
@@ -42,10 +42,8 @@ public:
     void setMatchingThreshold(int tresh){
         MATCHTRESH_ = tresh;
     }
+    void shortestPath();
     void test(Graph g);
-    };
-
-
 
 private:
     std::map<int, int>::iterator findSecond(int id);

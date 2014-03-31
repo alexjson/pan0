@@ -381,24 +381,6 @@ void ImageAnalyser::analyseComponent(std::vector<int> idVec) {
 
 };
 
-void ImageAnalyser::addToComponent(std::vector<int> idVec, int ID) {
-    for (int idx = 0; idx <  idVec.size(); ++idx) {
-        int id1 = idVec.at(idx);
-        if (imageVector_->at(id1).getStatus() == INCLUDED)
-            if (imageVector_->at(id1).getFirstMatchID() == -1)
-                imageVector_->at(id1).setFirstMatchID(ID);
-    }
-};
-
-bool ImageAnalyser::isIncluded(std::vector<int> idVec, int ID) {
-    for (int idx = 0; idx <  idVec.size(); ++idx) {
-        int id1 = idVec.at(idx);
-        if (imageVector_->at(id1).getStatus() == INCLUDED)
-            if (id1 == ID || imageVector_->at(id1).getFirstMatchID() == ID)
-                return true;
-    }
-    return false;
-}
 
 void ImageAnalyser::refineGraph() {
     G_ = new Graph();
