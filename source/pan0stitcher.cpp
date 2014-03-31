@@ -34,7 +34,7 @@ void Pan0Stitcher::stitch() {
 
             cout << "panorama found " << endl;
             cout << "Number of iamges:  " << idsToStitch_.size() << endl;
-            printID();
+            // printID();
             // parseImgs();
             // stitcher.stitch(imagesToStitch_, dst);
             // writeImg(idx, dst);

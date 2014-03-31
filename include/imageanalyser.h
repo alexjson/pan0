@@ -42,8 +42,10 @@ public:
     void setMatchingThreshold(int tresh){
         MATCHTRESH_ = tresh;
     }
-    void shortestPath();
     void test(Graph g);
+    };
+
+
 
 private:
     std::map<int, int>::iterator findSecond(int id);

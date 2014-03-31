@@ -6,17 +6,13 @@ using namespace cv;
 ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector), MATCHTRESH_(40) {
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
+    detector->set("nFeatures", 500);
     extractor = DescriptorExtractor::create("SIFT");
 
     // printAlgorithmParams(detector);
-
-    detector->set("nFeatures", 500);
-
 };
 
 void ImageAnalyser::printAlgorithmParams( cv::Algorithm *algorithm) {
-
-
     std::vector<cv::String> parameters;
     algorithm->getParams(parameters);
 
@@ -276,38 +272,102 @@ void ImageAnalyser::filterPanoramas() {
     for (int idx = 0; idx < num; ++idx) {
         int numberOfElements = std::count(component.begin(), component.end(), idx);
 
-        std::vector<int> idVec;
-        int id1 = 0;
-        for (int a = 0; a < numberOfElements; ++a) {
-            it = find(component.begin() + id1, component.end(), idx);
-            id1 = std::distance( component.begin(), it);
-            idVec.push_back(id1);
-            ++id1;
+        if (numberOfElements > 3) {
+            std::vector<int> idVec;
+            int id1 = 0;
+            for (int a = 0; a < numberOfElements; ++a) {
+                it = find(component.begin() + id1, component.end(), idx);
+                id1 = std::distance( component.begin(), it);
+                idVec.push_back(id1);
+                ++id1;
+            }
+            analyseComponent(idVec);
         }
-        analyseComponent(idVec);
+
     }
     refineGraph();
     printGraph("after");
 };
 
+bool cmp(const Imageobject &i, const Imageobject &j) {
+    std::vector<int> magData1 = i.getMag_data();
+    std::vector<int> magData2 = j.getMag_data();
+    double first = sqrt(pow(magData1[0], 2) + pow(magData1[1], 2) + pow(magData1[2], 2));
+    double second = sqrt(pow(magData2[0], 2) + pow(magData2[1], 2) + pow(magData2[2], 2));
+    return first < second;
+};
+
+
 //TODO needs improvement, try to maximise magDiff
-bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
+void ImageAnalyser::analyseComponent(std::vector<int> idVec) {
+
+    if (idVec.size() < 3)
+        return;
+
+
+    double maxDist = 0.0;
+    int startID, endID;
+
+    for (int idx = 0; idx < idVec.size() - 1; ++idx) {
+
+        std::vector<int> Xvec = imageVector_->at(idVec[idx]).getMag_data();
+        for (int idy = idx + 1; idy < idVec.size(); ++idy) {
+            std::vector<int> Yvec = imageVector_->at(idVec[idy]).getMag_data();
+            double dist = eDistance(Xvec, Yvec);
+            if (maxDist < dist) {
+                maxDist = dist;
+                startID = idVec.at(idx);
+                endID = idVec.at(idy);
+            }
+        }
+    }
+
+    std::vector<Imageobject> objectVector;
+    for (std::vector<int>::iterator it = idVec.begin(); it != idVec.end(); ++it) {
+        objectVector.push_back(imageVector_->at(*it));
+    }
+
+
+    std::sort (objectVector.begin(), objectVector.end(), cmp);
+
+
+    // DEBUG ONLY
+    cout << "Printing vectors" << endl;
+    for (std::vector<Imageobject>::iterator itr = objectVector.begin(); itr != objectVector.end(); ++itr) {
+        std::vector<int> magData1 = itr->getMag_data();
+        double first = sqrt(pow(magData1[0], 2) + pow(magData1[1], 2) + pow(magData1[2], 2));
+        cout << first << endl;
+    }
+    cout << "------------------------------------------------------------------------------------" << endl;
+    cout << "------------------------------------------------------------------------------------" << endl;
+
+
+    bool start = false;
+    bool end = false;
+
 
     for (int idx = 0; idx <  idVec.size(); ++idx) {
         int id1 = idVec.at(idx);
         if (imageVector_->at(id1).getStatus() != NONE )
             continue;
 
-        for (int idy = 0; idy <  idVec.size(); ++idy) {
+        if (checkMagDiff(id1, startID, imageVector_) && !start) {
+            start = true;
+            imageVector_->at(id1).setStatus(INCLUDED);
+            imageVector_->at(id1).setFirstMatchID(startID);
+            continue;
+        } else if (checkMagDiff(id1, endID, imageVector_) && !end) {
+            end = true;
+            imageVector_->at(id1).setStatus(INCLUDED);
+            imageVector_->at(id1).setFirstMatchID(endID);
+            continue;
+        }
 
+        for (int idy = 0; idy <  idVec.size(); ++idy) {
             int id2 = idVec.at(idy);
-            //If it is the last picture in the sequence
-            if (idy + 1 ==  idVec.size()) {
-                imageVector_->at(id1).setStatus(INCLUDED);
-                imageVector_->at(id1).setFirstMatchID(id2);
-            } else if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
+            if (id1 == id2 || imageVector_->at(id2).getStatus() != NONE) {
                 continue;
-            } else if (checkMagDiffMin(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
+            } else if (checkMagDiff(id1, id2, imageVector_) && checkTimeDiff(id1, id2, imageVector_)) {
                 imageVector_->at(id1).setStatus(INCLUDED);
                 imageVector_->at(id1).setFirstMatchID(id2);
                 break;
@@ -317,8 +377,28 @@ bool ImageAnalyser::analyseComponent(std::vector<int> idVec) {
             }
         }
     }
+
+
 };
 
+void ImageAnalyser::addToComponent(std::vector<int> idVec, int ID) {
+    for (int idx = 0; idx <  idVec.size(); ++idx) {
+        int id1 = idVec.at(idx);
+        if (imageVector_->at(id1).getStatus() == INCLUDED)
+            if (imageVector_->at(id1).getFirstMatchID() == -1)
+                imageVector_->at(id1).setFirstMatchID(ID);
+    }
+};
+
+bool ImageAnalyser::isIncluded(std::vector<int> idVec, int ID) {
+    for (int idx = 0; idx <  idVec.size(); ++idx) {
+        int id1 = idVec.at(idx);
+        if (imageVector_->at(id1).getStatus() == INCLUDED)
+            if (id1 == ID || imageVector_->at(id1).getFirstMatchID() == ID)
+                return true;
+    }
+    return false;
+}
 
 void ImageAnalyser::refineGraph() {
     G_ = new Graph();
@@ -333,7 +413,6 @@ void ImageAnalyser::refineGraph() {
                 lookUpMap_.emplace(current.getFirstMatchID(), num_vertices(*G_));
                 boost::add_edge(num_vertices(*G_),
                                 lookUpMap_.find(current.getID())->second, *G_);
-
             } else if (lookUpMap_.find(current.getFirstMatchID()) != lookUpMap_.end()) { //If onlyfirstMatch exist in map
                 lookUpMap_.emplace(current.getID(), num_vertices(*G_));
                 boost::add_edge(lookUpMap_.find(current.getFirstMatchID())->second,
