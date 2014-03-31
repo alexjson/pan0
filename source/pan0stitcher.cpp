@@ -29,8 +29,6 @@ void Pan0Stitcher::stitch() {
         boost::breadth_first_search(*graph_, boost::vertex(distance(component.begin(), it),
                                     *graph_), boost::visitor(visitor));
 
-
-
         if (checkSequence()) {
             generateOutput(idx);
 

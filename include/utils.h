@@ -20,5 +20,6 @@ bool checkMagDiffMax(int id1, int id2, std::vector<Imageobject> *imageVector);
 bool checkTrigger(int id1, int id2, std::vector<Imageobject> *imageVector);
 
 
+
 #endif // UTILS_H
 

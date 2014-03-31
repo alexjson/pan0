@@ -81,6 +81,8 @@ bool checkMagDiffMax(int id1, int id2, vector<Imageobject> *imageVector) {
     return magDiff < thresh;
 };
 
+
+
 bool checkTrigger(int id1, int id2, vector<Imageobject> *imageVector) {
     return (*imageVector)[id1].getTrigger() == (*imageVector)[id2].getTrigger();
 };

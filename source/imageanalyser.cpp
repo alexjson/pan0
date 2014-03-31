@@ -8,18 +8,6 @@ ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVecto
     detector = FeatureDetector::create("SIFT");
     extractor = DescriptorExtractor::create("SIFT");
 
-
-    // SIFT::SIFT(int nfeatures=0, int nOctaveLayers=3, double contrastThreshold=0.04, double edgeThreshold=10, double sigma=1.6)
-    // Parameters:
-    // nfeatures – The number of best features to retain. The features are ranked by their scores
-    // (measured in SIFT algorithm as the local contrast)
-    // nOctaveLayers – The number of layers in each octave. 3 is the value used in D. Lowe paper.
-    // The number of octaves is computed automatically from the image resolution.
-    // contrastThreshold – The contrast threshold used to filter out weak features in semi-uniform (low-contrast) regions.
-    // The larger the threshold, the less features are produced by the detector.
-    // edgeThreshold – The threshold used to filter out edge-like features. Note that the its meaning is different from the contrastThreshold, i.e. the larger the edgeThreshold, the less features are filtered out (more features are retained).
-    // sigma – The sigma of the Gaussian applied to the input image at the octave #0. If your image is captured with a weak camera with soft lenses, you might want to reduce the number.
-
     // printAlgorithmParams(detector);
 
     detector->set("nFeatures", 500);
@@ -113,6 +101,7 @@ void ImageAnalyser::analyse() {
     int currentNum = -1;
     G_ = new Graph(imageVector_->size());
 
+
     progress_display show_progress( imageVector_->size() );
     imageVector_->at(0).setMatched(true);
 
@@ -138,7 +127,9 @@ void ImageAnalyser::analyse() {
             }
         }
         for (int idx = 0; idx < matchIDvec.size(); ++idx) {
-            boost::add_edge(id1, matchIDvec.at(idx), *G_);
+            // double magDiff = eDistance((*imageVector_)[id1].getMag_data(), (*imageVector_)[matchIDvec.at(idx)].getMag_data());;
+            boost::add_edge(id1, matchIDvec.at(idx), Weight(1), *G_);
+            // boost::add_edge(id1, matchIDvec.at(idx), *G_);
         }
         ++show_progress;
     }
@@ -147,9 +138,111 @@ void ImageAnalyser::analyse() {
     // double cpu1  = get_cpu_time();
 
 
-    printGraph("before", true);
-    filterPanoramas();
+    printGraph("before");
+    // filterPanoramas();
+    // shortestPath();
+    test(*G_);
 };
+
+void ImageAnalyser::test(Graph g) {
+
+    std::vector<MyVertex> p(num_vertices(g));
+    std::vector<int> d(num_vertices(g));
+    MyVertex start_vertex = vertex(1, g);
+
+    dijkstra_shortest_paths(g, start_vertex, predecessor_map(&p[0]).distance_map(&d[0]));
+
+
+    std::cout << "distances and parents:" << std::endl;
+    graph_traits < Graph >::vertex_iterator vi, vend;
+    for (boost::tie(vi, vend) = vertices(g); vi != vend; ++vi) {
+        std::cout << "distance(" << *vi << ") = " << d[*vi] << ", ";
+        std::cout << "node(" << *vi << ") = " << "Parent ( " << p[*vi] << std::endl;
+    }
+    std::cout << std::endl;
+
+
+    std::vector< MyVertex > path;
+    MyVertex current = vertex(60,g);
+
+    while (current != start_vertex) {
+        path.push_back(current);
+        current = p[current];
+    }
+    path.push_back(start_vertex);
+
+    //This prints the path reversed use reverse_iterator and rbegin/rend
+    std::vector<MyVertex >::iterator it;
+    for (it = path.begin(); it != path.end(); ++it) {
+
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
+
+};
+
+void ImageAnalyser::shortestPath() {
+    using namespace boost;
+
+    typedef size_t vertex_descriptor;
+
+
+    std::vector<int>::iterator it;
+    std::vector<int> component(num_vertices(*G_));
+    int num = boost::connected_components(*G_, &component[0]);
+
+    for (int idx = 0; idx < num; ++idx) {
+        int numberOfElements = std::count(component.begin(), component.end(), idx);
+
+        if (numberOfElements > 3) {
+            std::vector<int> idVec;
+            int id1 = 0;
+            for (int a = 0; a < numberOfElements; ++a) {
+                it = find(component.begin() + id1, component.end(), idx);
+                id1 = std::distance( component.begin(), it);
+                idVec.push_back(id1);
+                ++id1;
+            }
+
+            double maxDist = 0.0;
+            int startID, endID;
+
+            for (int idx = 0; idx < idVec.size() - 1; ++idx) {
+
+                std::vector<int> Xvec = imageVector_->at(idVec[idx]).getMag_data();
+                for (int idy = idx + 1; idy < idVec.size(); ++idy) {
+                    std::vector<int> Yvec = imageVector_->at(idVec[idy]).getMag_data();
+                    double dist = eDistance(Xvec, Yvec);
+                    if (maxDist < dist) {
+                        maxDist = dist;
+                        startID = idVec.at(idx);
+                        endID = idVec.at(idy);
+                    }
+                }
+            }
+
+            std::vector<int>::iterator startIt =  find(component.begin(), component.end(), startID);
+            std::vector<int>::iterator endIt =  find(component.begin(), component.end(), endID);
+            std::vector<MyVertex> p(boost::num_vertices(*G_));
+            std::vector<int> d(num_vertices(*G_));
+            // std::vector<MyVertex> predecessors(boost::num_vertices(*G_));
+            MyVertex start_vertex = distance(component.begin(), startIt);
+            MyVertex finish_vertex = distance(component.begin(), endIt);
+            vertex_descriptor s = vertex(start_vertex, *G_);
+            dijkstra_shortest_paths(*G_, s, predecessor_map(&p[0]).distance_map(&d[0]));
+
+            std::cout << "distances and parents:" << std::endl;
+            graph_traits < Graph >::vertex_iterator vi, vend;
+            for (boost::tie(vi, vend) = vertices(*G_); vi != vend; ++vi) {
+                std::cout << "distance(" << *vi << ") = " << d[*vi] << ", ";
+                std::cout << "parent(" << *vi << ") = " << p[*vi] << std::
+                          endl;
+            }
+            std::cout << std::endl;
+
+        }
+    }
+}
 
 bool ImageAnalyser::checkEdge(int id1, int id2) {
     std::pair < MyEdge, bool > p = boost::edge( id1, id2, *G_);

@@ -19,9 +19,10 @@
 using namespace std;
 using namespace cv;
 using namespace boost;
-
-typedef adjacency_list<vecS, vecS, undirectedS> Graph;
-
+typedef property < edge_weight_t, int >Weight;
+typedef adjacency_list < listS, vecS, undirectedS,
+        no_property, property < edge_weight_t, int > > Graph;
+// typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 
 class Pan0Stitcher {
 public:
