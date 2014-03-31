@@ -26,34 +26,25 @@ public:
     void analyse();
     bool verifyImage(int id1, int id2, vector<DMatch> matches);
     int checkMatches(int id1, int id2);
-    void filterPanoramas();
     void printAlgorithmParams( cv::Algorithm* algorithm);
-    void refineGraph();
     void printGraph(string fileName, bool names = false);
-    void analyseComponent(std::vector<int> idVec);
     void extractDescriptors(int id);
     bool checkEdge(int id1, int id2);
-    Graph *getGraph() {
-        return G_;
-    }
-    std::map<int, int> getLookUpMap() {
-        return lookUpMap_;
-    };
     void setMatchingThreshold(int tresh){
         MATCHTRESH_ = tresh;
-    }
-    void shortestPath();
+    };
     void test(Graph g);
+    std::vector< std::vector<int> > getImageIDs(){
+        return imageIDs;
+    };
 
 private:
-    std::map<int, int>::iterator findSecond(int id);
-
     Ptr<DescriptorMatcher> matcher;
     Ptr<FeatureDetector> detector;
     Ptr<DescriptorExtractor> extractor;
     std::vector<Imageobject> *imageVector_;
-    std::map<int, int> lookUpMap_;
     Graph *G_;
+    std::vector< std::vector<int> > imageIDs;
     int MATCHTRESH_;
 };
 

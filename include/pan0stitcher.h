@@ -22,7 +22,6 @@ using namespace boost;
 typedef property < edge_weight_t, int >Weight;
 typedef adjacency_list < listS, vecS, undirectedS,
         no_property, property < edge_weight_t, int > > Graph;
-// typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 
 class Pan0Stitcher {
 public:
@@ -30,10 +29,10 @@ public:
     ~Pan0Stitcher();
 
     void stitch();
-    void setGraph(Graph* g){
-        graph_=g;
+    void setGraph(Graph *g) {
+        graph_ = g;
     };
-    void setLookUpMap(std::map<int, int> map){
+    void setLookUpMap(std::map<int, int> map) {
         lookUpMap_ = map;
     };
     Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
@@ -46,16 +45,20 @@ public:
     void generateOutput(int id);
     void parseImgs();
     void writeImg(int id, Mat img);
-    void setMinimumRotation(int rot){
+    void setMinimumRotation(int rot) {
         MINDIST_ = rot;
+    }
+    void setIdsToStitch(  std::vector < std::vector<int>  > idVec){
+        idVec_ = idVec;
     }
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
-    Graph* graph_;
+    Graph *graph_;
     std::map<int, int> lookUpMap_;
     string path_;
     std::vector<int> idsToStitch_;
+    std::vector < std::vector<int>  > idVec_;
     int MINDIST_;
 };
 

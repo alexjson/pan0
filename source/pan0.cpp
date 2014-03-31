@@ -38,13 +38,12 @@ int main( int argc, char **argv ) {
     cout << "Wall Time = " << wall1 - wall0 << endl;
     cout << "CPU Time  = " << cpu1  - cpu0  << endl;
 
-    Graph *G = analyser->getGraph();
+    std::vector < std::vector<int>  > idVec = analyser->getImageIDs();
+
 
     Pan0Stitcher *stitcher = new Pan0Stitcher(imageVector, PATH); //120(2.25*120=270) degree rotation default
 
-
-    stitcher->setGraph(G);
-    stitcher->setLookUpMap(analyser->getLookUpMap());
+    stitcher->setIdsToStitch(idVec);
     stitcher->stitch();
 
     return 0;
