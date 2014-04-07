@@ -69,7 +69,12 @@ void Imageobject::timeFromFileName() {
     ptime t1 (d, hours(H) + minutes(M) + seconds(S) + millisec(0));
     taken_at = t1;
 };
-
+void Imageobject::setImageFeatures() {
+    imageFeatures_.img_idx = currentID_;
+    imageFeatures_.img_size = image_.size();
+    imageFeatures_.keypoints = keyPointVec_;
+    imageFeatures_.descriptors = descriptors_;
+};
 void Imageobject::tiltAdapter() {
     int ax, ay, az;
     ax = acc_data[0];
@@ -82,16 +87,16 @@ void Imageobject::tiltAdapter() {
 };
 
 void Imageobject::rollAdapter() {
-    #define _USE_MATH_DEFINES
+#define _USE_MATH_DEFINES
     int ax, ay;
     ax = acc_data[0];
     ay = acc_data[1];
-    double roll = fmod((-M_PI/ 2 - atan2(ax, ay)) , (2 * M_PI));
+    double roll = fmod((-M_PI / 2 - atan2(ax, ay)) , (2 * M_PI));
     roll_ = roll;
 };
-double Imageobject::getRollDegrees(){
-    #define _USE_MATH_DEFINES
-    return (roll_ * (180/M_PI));
+double Imageobject::getRollDegrees() {
+#define _USE_MATH_DEFINES
+    return (roll_ * (180 / M_PI));
 };
 
 void Imageobject::setKeyPoints(std::vector<KeyPoint> keyPoints) {

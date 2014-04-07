@@ -17,8 +17,8 @@ void Pan0Stitcher::add(int id) {
 
 void Pan0Stitcher::stitch() {
 
-    Stitcher stitcher = Stitcher::createDefault(true); // Try_use_GPU true
-    Mat dst;
+    // Stitcher stitcher = Stitcher::createDefault(true); // Try_use_GPU true
+    // Mat dst;
     for (int idx = 0; idx < idVec_.size(); ++idx) {
 
         idsToStitch_ = idVec_.at(idx);
@@ -29,7 +29,8 @@ void Pan0Stitcher::stitch() {
             cout << "panorama found " << endl;
             cout << "Number of iamges:  " << idsToStitch_.size() << endl;
             // printID();
-            // parseImgs();
+            parseImgs();
+            stitching_detailed(imageVector_, idsToStitch_, to_string(idx)+".jpg");
             // stitcher.stitch(imagesToStitch_, dst);
             // writeImg(idx, dst);
         }
@@ -64,8 +65,8 @@ void Pan0Stitcher::parseImgs() {
         Mat img = imread(imgFile);
 
         if ( abs(imageVector_->at(*it).getRollDegrees()) < 45) {
-            imagesToStitch_.push_back(img);
-            cout << "no rot" << endl;
+            // imagesToStitch_.push_back(img);
+            // cout << "no rot" << endl;
         } else {
             /// Compute a rotation matrix with respect to the center of the image
             Point center = Point( img.cols / 2, img.rows / 2 );
@@ -77,8 +78,9 @@ void Pan0Stitcher::parseImgs() {
             Mat rotate_dst;
             /// Rotate the warped image
             warpAffine( img, rotate_dst, rot_mat, img.size() );
-            imagesToStitch_.push_back(rotate_dst);
-            writeImg(*it, rotate_dst);
+            // imagesToStitch_.push_back(rotate_dst);
+            // writeImg(*it, rotate_dst);
+            current.setImage(rotate_dst);
         }
 
     }

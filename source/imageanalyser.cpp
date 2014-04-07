@@ -1,4 +1,5 @@
 #include <imageanalyser.h>
+#include <omp.h>
 
 using namespace std;
 using namespace cv;
@@ -60,6 +61,8 @@ void ImageAnalyser::extractDescriptors(int id) {
     imageVector_->at(id).setKeyPoints(keypoints);
     extractor->compute(imageVector_->at(id).getImage(), keypoints, descriptors);
     imageVector_->at(id).setDescriptors(descriptors);
+    imageVector_->at(id).setImageFeatures();
+
 };
 
 int ImageAnalyser::checkMatches(int id1, int id2) {
@@ -101,10 +104,14 @@ void ImageAnalyser::analyse() {
     progress_display show_progress( imageVector_->size() );
     imageVector_->at(0).setMatched(true);
 
+    omp_set_dynamic(0);     // Explicitly disable dynamic teams
+    omp_set_num_threads(4); // Use 4 cores
+    #pragma omp parallel for
     for (int id1 = 0; id1 < imageVector_->size(); ++id1) {
         numberOfMatches = MATCHTRESH_;
         std::vector<int> matchIDvec;
-        //TODO OpenMP pragma here
+
+
         for (int id2 = 0; id2 < imageVector_->size(); ++id2) {
             if (id1 == id2) {
                 continue;
@@ -188,7 +195,6 @@ void ImageAnalyser::test(Graph g) {
     }
 
 };
-
 
 
 bool ImageAnalyser::checkEdge(int id1, int id2) {

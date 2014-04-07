@@ -15,6 +15,7 @@
 #include <opencv2/stitching/warpers.hpp>
 #include <opencv2/stitching/stitcher.hpp>
 #include <utils.h>
+#include <stitching_detailed.h>
 
 using namespace std;
 using namespace cv;

@@ -4,6 +4,8 @@
 #include <opencv2/opencv.hpp>
 #include <jsoncpp/json.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <opencv2/stitching/detail/matchers.hpp>
+
 
 using namespace cv;
 using namespace std;
@@ -59,34 +61,6 @@ public:
     vector<KeyPoint> getKeypoints() const {
         return keyPointVec_;
     };
-    int getFirstMatchID() const {
-        return firstMatchID_;
-    };
-    int getSecondMatchID() const {
-        return secondMatchID_;
-    };
-
-
-    void setFirstMatchID(int match) {
-        firstMatchID_ = match;
-    };
-    void setSecondMatchID(int match) {
-        secondMatchID_ = match;
-    };
-
-    void setFirstMatches(vector<DMatch> matches) {
-        firstBestMatches_ = matches;
-    };
-    void setSecondMatches(vector<DMatch> matches) {
-        secondBestMatches_ = matches;
-    };
-
-    std::vector<DMatch> getFirstMatches() {
-        return firstBestMatches_;
-    };
-    std::vector<DMatch> getSecondMatches() {
-        return secondBestMatches_;
-    };
 
     int getID() {
         return currentID_;
@@ -113,6 +87,10 @@ public:
     void tiltAdapter();
     void rollAdapter();
     void timeFromFileName();
+    void setImageFeatures();
+    cv::detail::ImageFeatures getImageFeatures(){
+        return imageFeatures_;
+    }
 private:
     Json::Value jsonRoot_;
     string PATH_;
@@ -128,13 +106,10 @@ private:
     int currentID_;
     int firstMatchID_;
     int secondMatchID_;
-    Mat homographyFirstMatch_;
-    Mat homographySecondtMatch_;
-    vector<DMatch> firstBestMatches_;
-    vector<DMatch> secondBestMatches_;
     nodeStatus status_;
     boost::posix_time::ptime taken_at;
     bool matched_;
+    cv::detail::ImageFeatures imageFeatures_;
 };
 
 

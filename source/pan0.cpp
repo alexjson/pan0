@@ -1,6 +1,5 @@
 #include <pan0.h>
 
-// int SIZE = 4;
 string PATH = "";
 std::vector<string> findCandidates(vector<Imageobject> *imageVector);
 
@@ -29,9 +28,7 @@ int main( int argc, char **argv ) {
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
     // analyser->setMatchginThreshold(40);  DEFAULT VALUE
 
-    // cout << " analyse... ";
     analyser->analyse();
-    // cout << "Done." << endl;
 
     double wall1 = get_wall_time();
     double cpu1  = get_cpu_time();
