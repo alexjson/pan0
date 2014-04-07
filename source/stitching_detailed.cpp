@@ -47,64 +47,6 @@ using namespace std;
 using namespace cv;
 using namespace cv::detail;
 
-static void printUsage() {
-    cout <<
-         "Rotation model images stitcher.\n\n"
-         "stitching_detailed img1 img2 [...imgN] [flags]\n\n"
-         "Flags:\n"
-         "  --preview\n"         "      Run stitching in the preview mode. Works faster than usual mode,\n"
-         "      but output image will have lower resolution.\n"
-         "  --try_cuda (yes|no)\n"
-         "      Try to use CUDA. The default value is 'no'. All default values\n"
-         "      are for CPU mode.\n"
-         "  --try_ocl (yes|no)\n"
-         "      Try to use OpenCL. The default value is 'no'. All default values\n"
-         "      are for CPU mode.\n"
-         "\nMotion Estimation Flags:\n"
-         "  --work_megapix <float>\n"
-         "      Resolution for image registration step. The default is 0.6 Mpx.\n"
-         "  --features (surf|orb)\n"
-         "      Type of features used for images matching. The default is surf.\n"
-         "  --match_conf <float>\n"
-         "      Confidence for feature matching step. The default is 0.65 for surf and 0.3 for orb.\n"
-         "  --conf_thresh <float>\n"
-         "      Threshold for two images are from the same panorama confidence.\n"
-         "      The default is 1.0.\n"
-         "  --ba (reproj|ray)\n"
-         "      Bundle adjustment cost function. The default is ray.\n"
-         "  --ba_refine_mask (mask)\n"
-         "      Set refinement mask for bundle adjustment. It looks like 'x_xxx',\n"
-         "      where 'x' means refine respective parameter and '_' means don't\n"
-         "      refine one, and has the following format:\n"
-         "      <fx><skew><ppx><aspect><ppy>. The default mask is 'xxxxx'. If bundle\n"
-         "      adjustment doesn't support estimation of selected parameter then\n"
-         "      the respective flag is ignored.\n"
-         "  --wave_correct (no|horiz|vert)\n"
-         "      Perform wave effect correction. The default is 'horiz'.\n"
-         "  --save_graph <file_name>\n"
-         "      Save matches graph represented in DOT language to <file_name> file.\n"
-         "      Labels description: Nm is number of matches, Ni is number of inliers,\n"
-         "      C is confidence.\n"
-         "\nCompositing Flags:\n"
-         "  --warp (plane|cylindrical|spherical|fisheye|stereographic|compressedPlaneA2B1|compressedPlaneA1.5B1|compressedPlanePortraitA2B1|compressedPlanePortraitA1.5B1|paniniA2B1|paniniA1.5B1|paniniPortraitA2B1|paniniPortraitA1.5B1|mercator|transverseMercator)\n"
-         "      Warp surface type. The default is 'spherical'.\n"
-         "  --seam_megapix <float>\n"
-         "      Resolution for seam estimation step. The default is 0.1 Mpx.\n"
-         "  --seam (no|voronoi|gc_color|gc_colorgrad)\n"
-         "      Seam estimation method. The default is 'gc_color'.\n"
-         "  --compose_megapix <float>\n"
-         "      Resolution for compositing step. Use -1 for original resolution.\n"
-         "      The default is -1.\n"
-         "  --expos_comp (no|gain|gain_blocks)\n"
-         "      Exposure compensation method. The default is 'gain_blocks'.\n"
-         "  --blend (no|feather|multiband)\n"
-         "      Blending method. The default is 'multiband'.\n"
-         "  --blend_strength <float>\n"
-         "      Blending strength from [0,100] range. The default is 5.\n"
-         "  --output <result_img>\n"
-         "      The default is 'result.jpg'.\n";
-}
-
 
 // Default command line args
 vector<String> img_names;
@@ -130,143 +72,6 @@ int blend_type = Blender::MULTI_BAND;
 float blend_strength = 5;
 string result_name = "result.jpg";
 
-static int parseCmdArgs(int argc, char **argv) {
-    if (argc == 1) {
-        printUsage();
-        return -1;
-    }
-    for (int i = 1; i < argc; ++i) {
-        if (string(argv[i]) == "--help" || string(argv[i]) == "/?") {
-            printUsage();
-            return -1;
-        } else if (string(argv[i]) == "--preview") {
-            preview = true;
-        } else if (string(argv[i]) == "--try_cuda") {
-            if (string(argv[i + 1]) == "no")
-                try_cuda = false;
-            else if (string(argv[i + 1]) == "yes")
-                try_cuda = true;
-            else {
-                cout << "Bad --try_cuda flag value\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--try_ocl") {
-            if (string(argv[i + 1]) == "no")
-                try_ocl = false;
-            else if (string(argv[i + 1]) == "yes")
-                try_ocl = true;
-            else {
-                cout << "Bad --try_ocl flag value\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--work_megapix") {
-            work_megapix = atof(argv[i + 1]);
-            i++;
-        } else if (string(argv[i]) == "--seam_megapix") {
-            seam_megapix = atof(argv[i + 1]);
-            i++;
-        } else if (string(argv[i]) == "--compose_megapix") {
-            compose_megapix = atof(argv[i + 1]);
-            i++;
-        } else if (string(argv[i]) == "--result") {
-            result_name = argv[i + 1];
-            i++;
-        } else if (string(argv[i]) == "--features") {
-            features_type = argv[i + 1];
-            if (features_type == "orb")
-                match_conf = 0.3f;
-            i++;
-        } else if (string(argv[i]) == "--match_conf") {
-            match_conf = static_cast<float>(atof(argv[i + 1]));
-            i++;
-        } else if (string(argv[i]) == "--conf_thresh") {
-            conf_thresh = static_cast<float>(atof(argv[i + 1]));
-            i++;
-        } else if (string(argv[i]) == "--ba") {
-            ba_cost_func = argv[i + 1];
-            i++;
-        } else if (string(argv[i]) == "--ba_refine_mask") {
-            ba_refine_mask = argv[i + 1];
-            if (ba_refine_mask.size() != 5) {
-                cout << "Incorrect refinement mask length.\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--wave_correct") {
-            if (string(argv[i + 1]) == "no")
-                do_wave_correct = false;
-            else if (string(argv[i + 1]) == "horiz") {
-                do_wave_correct = true;
-                wave_correct = detail::WAVE_CORRECT_HORIZ;
-            } else if (string(argv[i + 1]) == "vert") {
-                do_wave_correct = true;
-                wave_correct = detail::WAVE_CORRECT_VERT;
-            } else {
-                cout << "Bad --wave_correct flag value\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--save_graph") {
-            save_graph = true;
-            save_graph_to = argv[i + 1];
-            i++;
-        } else if (string(argv[i]) == "--warp") {
-            warp_type = string(argv[i + 1]);
-            i++;
-        } else if (string(argv[i]) == "--expos_comp") {
-            if (string(argv[i + 1]) == "no")
-                expos_comp_type = ExposureCompensator::NO;
-            else if (string(argv[i + 1]) == "gain")
-                expos_comp_type = ExposureCompensator::GAIN;
-            else if (string(argv[i + 1]) == "gain_blocks")
-                expos_comp_type = ExposureCompensator::GAIN_BLOCKS;
-            else {
-                cout << "Bad exposure compensation method\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--seam") {
-            if (string(argv[i + 1]) == "no" ||
-                    string(argv[i + 1]) == "voronoi" ||
-                    string(argv[i + 1]) == "gc_color" ||
-                    string(argv[i + 1]) == "gc_colorgrad" ||
-                    string(argv[i + 1]) == "dp_color" ||
-                    string(argv[i + 1]) == "dp_colorgrad")
-                seam_find_type = argv[i + 1];
-            else {
-                cout << "Bad seam finding method\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--blend") {
-            if (string(argv[i + 1]) == "no")
-                blend_type = Blender::NO;
-            else if (string(argv[i + 1]) == "feather")
-                blend_type = Blender::FEATHER;
-            else if (string(argv[i + 1]) == "multiband")
-                blend_type = Blender::MULTI_BAND;
-            else {
-                cout << "Bad blending method\n";
-                return -1;
-            }
-            i++;
-        } else if (string(argv[i]) == "--blend_strength") {
-            blend_strength = static_cast<float>(atof(argv[i + 1]));
-            i++;
-        } else if (string(argv[i]) == "--output") {
-            result_name = argv[i + 1];
-            i++;
-        } else
-            img_names.push_back(argv[i]);
-    }
-    if (preview) {
-        compose_megapix = 0.6;
-    }
-    return 0;
-}
-
 
 int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> idVec, string result_name ) {
 #if ENABLE_LOG
@@ -275,10 +80,8 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     cv::setBreakOnError(true);
 
-
     double work_scale = 1, seam_scale = 1, compose_scale = 1;
     bool  is_seam_scale_set = false, is_compose_scale_set = false;
-
 
     int num_images = idVec.size();
 
@@ -301,13 +104,13 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     }
 
-    LOG("Pairwise matching");
-#if ENABLE_LOG
-    t = getTickCount();
-#endif
     vector<MatchesInfo> pairwise_matches;
     BestOf2NearestMatcher matcher(try_cuda, match_conf);
-    matcher(features, pairwise_matches);
+    Mat matchMask(features.size(), features.size(), CV_8U, Scalar(0));
+    for (int i = 0; i < num_images - 1; ++i) {
+        matchMask.at<char>(i, i + 1) = 1;
+    }
+    matcher(features, pairwise_matches, matchMask);
     matcher.collectGarbage();
 
     // Leave only images we are sure are from the same panorama
@@ -321,7 +124,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         img_subset.push_back(images[indices[i]]);
         full_img_sizes_subset.push_back(full_img_sizes[indices[i]]);
     }
-
 
     images = img_subset;
     img_names = img_names_subset;
@@ -373,7 +175,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     vector<double> focals;
 
-
     for (size_t i = 0; i < cameras.size(); ++i) {
         LOGLN("Camera #" << indices[i] + 1 << ":\n" << cameras[i].K());
         focals.push_back(cameras[i].focal);
@@ -395,10 +196,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
             cameras[i].R = rmats[i];
     }
 
-    LOGLN("Warping images (auxiliary)... ");
-#if ENABLE_LOG
-    t = getTickCount();
-#endif
 
     vector<Point> corners(num_images);
     vector<Mat> masks_warped(num_images);
@@ -407,8 +204,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     vector<Mat> masks(num_images);
 
     // Preapre images masks
-
-
     for (int i = 0; i < num_images; ++i) {
         masks[i].create(images[i].size(), CV_8U);
         masks[i].setTo(Scalar::all(255));
@@ -473,9 +268,9 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         return 1;
     }
 
+
     Ptr<RotationWarper> warper = warper_creator->create(static_cast<float>(warped_image_scale * seam_work_aspect));
-
-
+    // #pragma omp parallel for
     for (int i = 0; i < num_images; ++i) {
         Mat_<float> K;
         cameras[i].K().convertTo(K, CV_32F);
@@ -487,14 +282,13 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         sizes[i] = images_warped[i].size();
 
         warper->warp(masks[i], K, cameras[i].R, INTER_NEAREST, BORDER_CONSTANT, masks_warped[i]);
+
     }
 
     vector<Mat> images_warped_f(num_images);
 
     for (int i = 0; i < num_images; ++i)
         images_warped[i].convertTo(images_warped_f[i], CV_32F);
-
-    LOGLN("Warping images, time: " << ((getTickCount() - t) / getTickFrequency()) << " sec");
 
     Ptr<ExposureCompensator> compensator = ExposureCompensator::createDefault(expos_comp_type);
     compensator->feed(corners, images_warped, masks_warped);
@@ -535,11 +329,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     images_warped_f.clear();
     masks.clear();
 
-    LOGLN("Compositing...");
-#if ENABLE_LOG
-    t = getTickCount();
-#endif
-
     Mat img_warped, img_warped_s;
     Mat dilated_mask, seam_mask, mask, mask_warped;
     Ptr<Blender> blender;
@@ -547,16 +336,14 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     double compose_work_aspect = 1;
 
     for (int img_idx = 0; img_idx < num_images; ++img_idx) {
-        LOGLN("Compositing image #" << indices[img_idx] + 1);
-        cout << "Compositing image #" << indices[img_idx] + 1 << endl;
 
         // Read image and resize it if necessary
         if (!is_compose_scale_set) {
-            
-            if (compose_megapix > 0)
-                
 
-            compose_scale = min(1.0, sqrt(compose_megapix * 1e6 /  full_img[img_idx].size().area()));
+            if (compose_megapix > 0)
+
+
+                compose_scale = min(1.0, sqrt(compose_megapix * 1e6 /  full_img[img_idx].size().area()));
             is_compose_scale_set = true;
 
             // Compute relative scales
@@ -567,12 +354,9 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
             warped_image_scale *= static_cast<float>(compose_work_aspect);
             warper = warper_creator->create(warped_image_scale);
 
-
-
             // Update corners and sizes
             for (int i = 0; i < num_images; ++i) {
                 // Update intrinsics
-                
 
                 cameras[i].focal *= compose_work_aspect;
                 cameras[i].ppx *= compose_work_aspect;
@@ -592,9 +376,7 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
                 sizes[i] = roi.size();
             }
 
-
         }
-        
 
         if (abs(compose_scale - 1) > 1e-1)
             resize( full_img[img_idx], img[img_idx], Size(), compose_scale, compose_scale);
@@ -602,11 +384,8 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
             img[img_idx] =  full_img[img_idx];
         Size img_size = img[img_idx].size();
 
-        
-
         Mat K;
         cameras[img_idx].K().convertTo(K, CV_32F);
-        
 
         // Warp the current image
         warper->warp(img[img_idx], K, cameras[img_idx].R, INTER_LINEAR, BORDER_REFLECT, img_warped);
@@ -615,7 +394,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         mask.create(img_size, CV_8U);
         mask.setTo(Scalar::all(255));
         warper->warp(mask, K, cameras[img_idx].R, INTER_NEAREST, BORDER_CONSTANT, mask_warped);
-
 
         // Compensate exposure
         compensator->apply(img_idx, corners[img_idx], img_warped, mask_warped);
@@ -628,7 +406,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         resize(dilated_mask, seam_mask, mask_warped.size());
         mask_warped = seam_mask & mask_warped;
 
-        
         if (!blender) {
             blender = Blender::createDefault(blend_type, try_cuda);
             Size dst_sz = resultRoi(corners, sizes).size();
