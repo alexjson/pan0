@@ -33,7 +33,7 @@ public:
     void setMatchingThreshold(int tresh){
         MATCHTRESH_ = tresh;
     };
-    void test(Graph g);
+    void shortestPath(Graph g);
     std::vector< std::vector<int> > getImageIDs(){
         return imageIDs;
     };

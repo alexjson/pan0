@@ -136,10 +136,10 @@ void ImageAnalyser::analyse() {
     }
 
     printGraph("before");
-    test(*G_);
+    shortestPath(*G_);
 };
 
-void ImageAnalyser::test(Graph g) {
+void ImageAnalyser::shortestPath(Graph g) {
 
     std::vector<int>::iterator it;
     std::vector<int> component(num_vertices(*G_));
