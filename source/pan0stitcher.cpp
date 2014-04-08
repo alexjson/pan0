@@ -5,7 +5,7 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
     MINDIST_(50) {
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
-    detector->set("nFeatures", 500);
+    detector->set("nFeatures", 1000);
     extractor = DescriptorExtractor::create("SIFT");
 };
 
@@ -43,9 +43,7 @@ void Pan0Stitcher::prepareImages() {
         if ( abs(imageVector_->at(*it).getRollDegrees()) > 45) {
             
             Mat img =  imageVector_->at(*it).getImage();
-            cout << "Rotating n such" << endl;
-            /// Compute a rotation matrix with respect to the center of the image
-            // Point center = Point( img.cols / 2, img.rows / 2 );
+
             double angle = 90;
             double scale = 1;
             Size newSize(img.size().width , img.size().width );
@@ -73,14 +71,9 @@ void Pan0Stitcher::prepareImages() {
             int Y1, X1, X2, Y2;
             X1 = (borderImg.rows - img.cols) / 2;
             Y1 = (borderImg.cols - img.rows) / 2;
-            X2 = img.cols + X1;
-            Y2 = img.rows + Y1;
-            // cout << "X1 Y1 X2 Y2 " << X1 <<" " << Y1 << " " << X2 << " " << Y2 << endl;
 
-            // cout << borderImg.size() << endl;
             cv::Rect roi = cv::Rect(Y1, X1, img.size().height, img.size().width);
             Mat roiImg = rotate_dst(roi).clone();
-            cout << roi.size() << endl;
             imageVector_->at(*it).setImage(roiImg);
 
             extractDescriptors(*it);
@@ -119,37 +112,6 @@ void Pan0Stitcher::generateOutput(int id) {
     }
 }
 
-void Pan0Stitcher::parseImgs() {
-    cout << "rotating images" << endl;
-    for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
-        Imageobject current = imageVector_->at(*it);
-        string imgFile =  current.getFileName();
-        imgFile = path_ + imgFile;
-        Mat img = imread(imgFile);
-
-        if ( abs(imageVector_->at(*it).getRollDegrees()) < 45) {
-            // imagesToStitch_.push_back(img);
-            // cout << "no rot" << endl;
-        } else {
-            /// Compute a rotation matrix with respect to the center of the image
-            Point center = Point( img.cols / 2, img.rows / 2 );
-            double angle = imageVector_->at(*it).getRollDegrees();
-            double scale = 1;
-
-            /// Get the rotation matrix with the specifications above
-            Mat rot_mat = getRotationMatrix2D( center, angle, scale );
-            Mat rotate_dst;
-            /// Rotate the warped image
-            warpAffine( img, rotate_dst, rot_mat, img.size() );
-            // imagesToStitch_.push_back(rotate_dst);
-            // writeImg(*it, rotate_dst);
-            current.setImage(rotate_dst);
-        }
-
-    }
-    cout << "rotating images done" << endl;
-
-};
 //For debugging only
 void Pan0Stitcher::printID() {
     cout << "Printing IDs" << endl;
