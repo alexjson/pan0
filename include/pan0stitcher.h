@@ -36,11 +36,7 @@ public:
     void setLookUpMap(std::map<int, int> map) {
         lookUpMap_ = map;
     };
-    // Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
-    // cv::Point2f convertPoints(cv::Point2f points, int w, int h);
-    // Mat mapImgToCyl(Mat img);
-    // cv::Point2f convertTest(cv::Point2f point, int w, int h);
-    void add(int id);
+    // void add(int id);
     bool checkSequence();
     void printID();
     void generateOutput(int id);
@@ -49,9 +45,10 @@ public:
     void setMinimumRotation(int rot) {
         MINDIST_ = rot;
     }
-    void setIdsToStitch(  std::vector < std::vector<int>  > idVec){
+    void setIdsToStitch(  std::vector < std::vector<int>  > idVec) {
         idVec_ = idVec;
     }
+    void prepareImages();
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;
@@ -61,6 +58,9 @@ private:
     std::vector<int> idsToStitch_;
     std::vector < std::vector<int>  > idVec_;
     int MINDIST_;
+    Ptr<DescriptorMatcher> matcher;
+    Ptr<FeatureDetector> detector;
+    Ptr<DescriptorExtractor> extractor;
 };
 
 #endif //PAN0STITCHER_H
