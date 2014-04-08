@@ -18,18 +18,14 @@ void Pan0Stitcher::stitch() {
         idsToStitch_ = idVec_.at(idx);
 
         if (checkSequence()) {
-
             cout << "panorama found " << endl;
             cout << "Number of iamges:  " << idsToStitch_.size() << endl;
-            // printID();
-            // parseImgs();
 
             prepareImages();
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
             generateOutput(idx);
 
         }
-
         imagesToStitch_.clear();
         idsToStitch_.clear();
     }
@@ -39,12 +35,14 @@ void Pan0Stitcher::prepareImages() {
     int top, bottom, left, right;
     for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
 
-
         if ( abs(imageVector_->at(*it).getRollDegrees()) > 45) {
-            
-            Mat img =  imageVector_->at(*it).getImage();
 
+            Mat img =  imageVector_->at(*it).getImage();
             double angle = 90;
+
+            if (imageVector_->at(*it).getRollDegrees() < 0)
+                angle = -90;
+
             double scale = 1;
             Size newSize(img.size().width , img.size().width );
 
@@ -64,11 +62,10 @@ void Pan0Stitcher::prepareImages() {
 
             Mat rotate_dst;
             /// Rotate the warped image
-
             t_mat = rot_mat + t_mat;
             warpAffine( borderImg, rotate_dst, rot_mat, borderImg.size() );
 
-            int Y1, X1, X2, Y2;
+            int Y1, X1;
             X1 = (borderImg.rows - img.cols) / 2;
             Y1 = (borderImg.cols - img.rows) / 2;
 
@@ -80,7 +77,6 @@ void Pan0Stitcher::prepareImages() {
         }
 
     }
-
 };
 
 void Pan0Stitcher::extractDescriptors(int id) {
@@ -150,4 +146,3 @@ bool Pan0Stitcher::checkSequence() {
     cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;
 };
-
