@@ -14,7 +14,6 @@ enum nodeStatus { NONE, INCLUDED, REJECTED  };
 
 class Imageobject {
 public:
-    Imageobject(Json::Value jsonRoot, Mat image, string fielName, int id);
     Imageobject(Json::Value jsonRoot, string fielName, int id, string path);
     ~Imageobject();
 

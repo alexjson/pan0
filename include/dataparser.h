@@ -22,8 +22,6 @@ public:
         return imageVector_;
     };
     void parseData(std::string dataPath);
-    void parseImages(std::string dataPath, std::vector<string> imageNames);
-
 
 private:
     std::vector<Imageobject> *imageVector_;

@@ -36,10 +36,10 @@ public:
     void setLookUpMap(std::map<int, int> map) {
         lookUpMap_ = map;
     };
-    Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
-    cv::Point2f convertPoints(cv::Point2f points, int w, int h);
-    Mat mapImgToCyl(Mat img);
-    cv::Point2f convertTest(cv::Point2f point, int w, int h);
+    // Mat getHomography(int id1, int id2, std::vector<DMatch> good_matches);
+    // cv::Point2f convertPoints(cv::Point2f points, int w, int h);
+    // Mat mapImgToCyl(Mat img);
+    // cv::Point2f convertTest(cv::Point2f point, int w, int h);
     void add(int id);
     bool checkSequence();
     void printID();
