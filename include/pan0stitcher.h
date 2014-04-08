@@ -48,6 +48,7 @@ public:
         idVec_ = idVec;
     }
     void prepareImages();
+    void extractDescriptors(int id);
 private:
     std::vector<Imageobject> *imageVector_;
     std::vector<Mat> imagesToStitch_;

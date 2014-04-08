@@ -12,22 +12,22 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
 
 void Pan0Stitcher::stitch() {
 
-    // Stitcher stitcher = Stitcher::createDefault(true); // Try_use_GPU true
-    // Mat dst;
+
     for (int idx = 0; idx < idVec_.size(); ++idx) {
 
         idsToStitch_ = idVec_.at(idx);
 
         if (checkSequence()) {
-            // generateOutput(idx);
 
             cout << "panorama found " << endl;
             cout << "Number of iamges:  " << idsToStitch_.size() << endl;
             // printID();
             // parseImgs();
+
+            prepareImages();
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
-            // stitcher.stitch(imagesToStitch_, dst);
-            // writeImg(idx, dst);
+            generateOutput(idx);
+
         }
 
         imagesToStitch_.clear();
@@ -36,29 +36,72 @@ void Pan0Stitcher::stitch() {
 };
 
 void Pan0Stitcher::prepareImages() {
-
+    int top, bottom, left, right;
     for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
 
-        Mat img =  imageVector_->at(*it).getImage();
 
         if ( abs(imageVector_->at(*it).getRollDegrees()) > 45) {
+            
+            Mat img =  imageVector_->at(*it).getImage();
+            cout << "Rotating n such" << endl;
             /// Compute a rotation matrix with respect to the center of the image
-            Point center = Point( img.cols / 2, img.rows / 2 );
-            double angle = imageVector_->at(*it).getRollDegrees();
+            // Point center = Point( img.cols / 2, img.rows / 2 );
+            double angle = 90;
             double scale = 1;
+            Size newSize(img.size().width , img.size().width );
+
+            int T = img.size().width - img.size().height;
+            Mat t_mat = (Mat_<double>(2, 3) << 1, 0, T, 0, 1, T);
+
+            Mat borderImg;
+            top = (int) (0.25 * img.rows); bottom = (int) (0.25 * img.rows);
+            left = (int) (0.25 * img.cols); right = (int) (0.25 * img.cols);
+            Scalar value = Scalar( 0, 0, 0 );
+            copyMakeBorder( img, borderImg, top, bottom, left, right, BORDER_CONSTANT, value );
+
+            Point center = Point( borderImg.cols / 2, borderImg.rows / 2 );
 
             /// Get the rotation matrix with the specifications above
             Mat rot_mat = getRotationMatrix2D( center, angle, scale );
+
             Mat rotate_dst;
             /// Rotate the warped image
-            warpAffine( img, rotate_dst, rot_mat, img.size() );
 
-            imageVector_->at(*it).setImage(rotate_dst);
+            t_mat = rot_mat + t_mat;
+            warpAffine( borderImg, rotate_dst, rot_mat, borderImg.size() );
+
+            int Y1, X1, X2, Y2;
+            X1 = (borderImg.rows - img.cols) / 2;
+            Y1 = (borderImg.cols - img.rows) / 2;
+            X2 = img.cols + X1;
+            Y2 = img.rows + Y1;
+            // cout << "X1 Y1 X2 Y2 " << X1 <<" " << Y1 << " " << X2 << " " << Y2 << endl;
+
+            // cout << borderImg.size() << endl;
+            cv::Rect roi = cv::Rect(Y1, X1, img.size().height, img.size().width);
+            Mat roiImg = rotate_dst(roi).clone();
+            cout << roi.size() << endl;
+            imageVector_->at(*it).setImage(roiImg);
+
+            extractDescriptors(*it);
         }
 
     }
 
-}
+};
+
+void Pan0Stitcher::extractDescriptors(int id) {
+
+    vector<KeyPoint> keypoints;
+    Mat descriptors;
+
+    detector->detect(imageVector_->at(id).getImage(), keypoints);
+    imageVector_->at(id).setKeyPoints(keypoints);
+    extractor->compute(imageVector_->at(id).getImage(), keypoints, descriptors);
+    imageVector_->at(id).setDescriptors(descriptors);
+    imageVector_->at(id).setImageFeatures();
+
+};
 
 
 void Pan0Stitcher::generateOutput(int id) {
