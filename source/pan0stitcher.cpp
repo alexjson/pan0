@@ -9,16 +9,6 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
     extractor = DescriptorExtractor::create("SIFT");
 };
 
-// void Pan0Stitcher::add(int id) {
-//     int imgID = 0;
-//     for (std::map<int, int>::iterator it = lookUpMap_.begin(); it != lookUpMap_.end(); ++it ) {
-//         if (it->second == id)
-//             imgID = it->first;
-//     }
-
-//     idsToStitch_.push_back(imgID);
-
-// };
 
 void Pan0Stitcher::stitch() {
 

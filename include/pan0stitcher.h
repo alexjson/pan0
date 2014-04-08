@@ -36,7 +36,6 @@ public:
     void setLookUpMap(std::map<int, int> map) {
         lookUpMap_ = map;
     };
-    // void add(int id);
     bool checkSequence();
     void printID();
     void generateOutput(int id);
