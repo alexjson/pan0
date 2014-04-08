@@ -5,7 +5,7 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
     MINDIST_(50) {
     matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
     detector = FeatureDetector::create("SIFT");
-    detector->set("nFeatures", 1000);
+    detector->set("nFeatures", 1500);
     extractor = DescriptorExtractor::create("SIFT");
 };
 
@@ -18,12 +18,12 @@ void Pan0Stitcher::stitch() {
         idsToStitch_ = idVec_.at(idx);
 
         if (checkSequence()) {
-            cout << "panorama found " << endl;
-            cout << "Number of iamges:  " << idsToStitch_.size() << endl;
+            // cout << "panorama found " << endl;
+            // cout << "Number of iamges:  " << idsToStitch_.size() << endl;
 
             prepareImages();
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
-            generateOutput(idx);
+            // generateOutput(idx);
 
         }
         imagesToStitch_.clear();
@@ -38,10 +38,16 @@ void Pan0Stitcher::prepareImages() {
         if ( abs(imageVector_->at(*it).getRollDegrees()) > 45) {
 
             Mat img =  imageVector_->at(*it).getImage();
-            double angle = 90;
+            double angle;
 
-            if (imageVector_->at(*it).getRollDegrees() < 0)
+            if (imageVector_->at(*it).getRollDegrees() < -180) {
+                angle = 90;
+                // cout<< "inne i roll" << endl;
+                // cout << angle << endl;
+               // cout << "Roll  "<< imageVector_->at(*it).getRollDegrees() << endl;
+            }else{
                 angle = -90;
+            }
 
             double scale = 1;
             Size newSize(img.size().width , img.size().width );
@@ -142,7 +148,6 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
-
-    cout << "maxDist " << maxDist << endl;
+    // cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;
 };

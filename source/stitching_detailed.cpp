@@ -118,7 +118,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     vector<Mat> img_subset;
     vector<String> img_names_subset;
     vector<Size> full_img_sizes_subset;
-    cout << indices.size() << endl;
     for (size_t i = 0; i < indices.size(); ++i) {
         img_names_subset.push_back(img_names[indices[i]]);
         img_subset.push_back(images[indices[i]]);
