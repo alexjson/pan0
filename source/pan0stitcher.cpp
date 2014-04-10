@@ -4,7 +4,7 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
     path_(PATH),
     MINDIST_(50) {
     matcher = DescriptorMatcher::create("BruteForce"); // FlannBased , BruteForce
-    detector = FeatureDetector::create("ORB"); 
+    detector = FeatureDetector::create("ORB");
     // detector->set("nFeatures", 1500);
     extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
 };
@@ -35,18 +35,23 @@ void Pan0Stitcher::stitch() {
 void Pan0Stitcher::prepareImages() {
     int top, bottom, left, right;
     for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
+        double rollAngle = imageVector_->at(*it).getRollDegrees();
 
-        if ( abs(imageVector_->at(*it).getRollDegrees()) > 45) {
+        if ( 45 < abs(rollAngle)) {
 
+            if (rollAngle < 0) {
+                rollAngle += 360;
+            }
             Mat img =  imageVector_->at(*it).getImage();
             double angle;
 
-            if (imageVector_->at(*it).getRollDegrees() < -180) {
+            if ( 60 < rollAngle  && rollAngle < 220) {
                 angle = 90;
                 // cout<< "inne i roll" << endl;
                 // cout << angle << endl;
-               // cout << "Roll  "<< imageVector_->at(*it).getRollDegrees() << endl;
-            }else{
+                cout << "Roll1  " << imageVector_->at(*it).getRollDegrees() << endl;
+            } else {
+                cout << "Roll2  " << imageVector_->at(*it).getRollDegrees() << endl;
                 angle = -90;
             }
 
