@@ -46,6 +46,7 @@ private:
     Graph *G_;
     std::vector< std::vector<int> > imageIDs;
     int MATCHTRESH_;
+    float RATIO_;
 };
 
 #endif

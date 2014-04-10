@@ -3,19 +3,20 @@
 Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) : imageVector_(imageVector),
     path_(PATH),
     MINDIST_(50) {
-    matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
-    detector = FeatureDetector::create("SIFT");
-    detector->set("nFeatures", 1500);
-    extractor = DescriptorExtractor::create("SIFT");
+    matcher = DescriptorMatcher::create("BruteForce"); // FlannBased , BruteForce
+    detector = FeatureDetector::create("ORB"); 
+    // detector->set("nFeatures", 1500);
+    extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
 };
 
 
 void Pan0Stitcher::stitch() {
 
-
     for (int idx = 0; idx < idVec_.size(); ++idx) {
 
         idsToStitch_ = idVec_.at(idx);
+
+        cout << "Number of iamges:  " << idsToStitch_.size() << endl;
 
         if (checkSequence()) {
             // cout << "panorama found " << endl;
@@ -23,7 +24,7 @@ void Pan0Stitcher::stitch() {
 
             prepareImages();
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
-            // generateOutput(idx);
+            generateOutput(idx);
 
         }
         imagesToStitch_.clear();
@@ -148,6 +149,6 @@ bool Pan0Stitcher::checkSequence() {
             }
         }
     }
-    // cout << "maxDist " << maxDist << endl;
+    cout << "maxDist " << maxDist << endl;
     return maxDist > MINDIST_;
 };

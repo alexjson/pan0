@@ -4,13 +4,16 @@
 using namespace std;
 using namespace cv;
 
-ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) : imageVector_(imageVector), MATCHTRESH_(40) {
-    matcher = DescriptorMatcher::create("FlannBased"); // FlannBased , BruteForce
-    detector = FeatureDetector::create("SIFT");
-    detector->set("nFeatures", 500);
-    extractor = DescriptorExtractor::create("SIFT");
+ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) :
+    imageVector_(imageVector), MATCHTRESH_(20) {
+    matcher = DescriptorMatcher::create("BruteForce"); // FlannBased , BruteForce
+    detector = FeatureDetector::create("ORB");
+    // detector->set("nFeatures", 500);
+    extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
+    RATIO_ = 0.81;
+    // RATIO_ = 0.7; //SIFT VALUE, MATCHTRESH 40
 
-    // printAlgorithmParams(detector);
+    // printAlgorithmParams(detector);  // For printing detector variables
 };
 
 void ImageAnalyser::printAlgorithmParams( cv::Algorithm *algorithm) {
@@ -82,12 +85,13 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
                           (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
         vector<cv::DMatch> good_matches;
         for (int i = 0; i < matches.size(); ++i) {
-            const float ratio = 0.7; // As in Lowe's SIFT paper; can be tuned
+            // const float ratio = 0.9; // As in Lowe's SIFT paper; can be tuned
 
-            if (matches[i][0].distance < ratio * matches[i][1].distance) {
+            if (matches[i][0].distance < RATIO_ * matches[i][1].distance) {
                 good_matches.push_back(matches[i][0]);
             }
         }
+
         return good_matches.size();
     }
 
