@@ -17,6 +17,7 @@ void Pan0Stitcher::stitch() {
         idsToStitch_ = idVec_.at(idx);
 
         cout << "Number of iamges:  " << idsToStitch_.size() << endl;
+            generateOutput(idx);
 
         if (checkSequence()) {
             // cout << "panorama found " << endl;
@@ -24,7 +25,6 @@ void Pan0Stitcher::stitch() {
 
             prepareImages();
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
-            generateOutput(idx);
 
         }
         imagesToStitch_.clear();
@@ -47,11 +47,8 @@ void Pan0Stitcher::prepareImages() {
 
             if ( 60 < rollAngle  && rollAngle < 220) {
                 angle = 90;
-                // cout<< "inne i roll" << endl;
-                // cout << angle << endl;
-                cout << "Roll1  " << imageVector_->at(*it).getRollDegrees() << endl;
             } else {
-                cout << "Roll2  " << imageVector_->at(*it).getRollDegrees() << endl;
+
                 angle = -90;
             }
 

@@ -56,8 +56,8 @@ bool try_ocl = false;
 double work_megapix = 0.6;
 double seam_megapix = 0.1;
 double compose_megapix = -1;
-float conf_thresh = 1.f;
-string features_type = "surf";
+float conf_thresh = 0.05f;
+// string features_type = "surf";
 string ba_cost_func = "ray";
 string ba_refine_mask = "xxxxx";
 bool do_wave_correct = true;
@@ -66,7 +66,7 @@ bool save_graph = false;
 std::string save_graph_to;
 string warp_type = "spherical";
 int expos_comp_type = ExposureCompensator::GAIN_BLOCKS;
-float match_conf = 0.3f;
+float match_conf = 0.2f;
 string seam_find_type = "gc_color";
 int blend_type = Blender::MULTI_BAND;
 float blend_strength = 5;
@@ -113,6 +113,8 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     matcher(features, pairwise_matches, matchMask);
     matcher.collectGarbage();
 
+    cout << num_images << endl;
+
     // Leave only images we are sure are from the same panorama
     vector<int> indices = leaveBiggestComponent(features, pairwise_matches, conf_thresh);
     vector<Mat> img_subset;
@@ -130,6 +132,7 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     // Check if we still have enough images
     num_images = static_cast<int>(img_names.size());
+    cout << num_images << endl;
     if (num_images < 2) {
         LOGLN("Need more images");
         return -1;
