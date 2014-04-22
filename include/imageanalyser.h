@@ -37,6 +37,9 @@ public:
     std::vector< std::vector<int> > getImageIDs(){
         return imageIDs;
     };
+    void printKP(int id);
+    void printMatches(int id1, int id2, vector<cv::DMatch> matchVec);
+    void printMatches2(int id1, int id2, std::vector< vector<cv::DMatch> >  matchVec);
 
 private:
     Ptr<DescriptorMatcher> matcher;

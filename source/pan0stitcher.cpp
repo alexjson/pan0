@@ -12,18 +12,23 @@ Pan0Stitcher::Pan0Stitcher(std::vector<Imageobject> *imageVector , string PATH) 
 
 void Pan0Stitcher::stitch() {
 
+    string tmp = "mkdir output";
+    system(tmp.c_str());
+
     for (int idx = 0; idx < idVec_.size(); ++idx) {
 
         idsToStitch_ = idVec_.at(idx);
 
         cout << "Number of iamges:  " << idsToStitch_.size() << endl;
-            generateOutput(idx);
-
-        if (checkSequence()) {
-            // cout << "panorama found " << endl;
-            // cout << "Number of iamges:  " << idsToStitch_.size() << endl;
-
             prepareImages();
+            generateOutput(idx);
+            
+        if (checkSequence()) {
+
+
+            // prepareImages();
+            // generateOutput(idx);
+
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
 
         }
@@ -38,7 +43,6 @@ void Pan0Stitcher::prepareImages() {
         double rollAngle = imageVector_->at(*it).getRollDegrees();
 
         if ( 45 < abs(rollAngle)) {
-
             if (rollAngle < 0) {
                 rollAngle += 360;
             }
@@ -48,7 +52,6 @@ void Pan0Stitcher::prepareImages() {
             if ( 60 < rollAngle  && rollAngle < 220) {
                 angle = 90;
             } else {
-
                 angle = -90;
             }
 
@@ -103,7 +106,7 @@ void Pan0Stitcher::extractDescriptors(int id) {
 
 
 void Pan0Stitcher::generateOutput(int id) {
-    string tmp = "mkdir " + to_string(id);
+    string tmp = "mkdir output/" + to_string(id);
     system(tmp.c_str());
 
     vector<int> compression_params;
@@ -111,7 +114,7 @@ void Pan0Stitcher::generateOutput(int id) {
     compression_params.push_back(9);
 
     for (std::vector<int>::iterator it = idsToStitch_.begin(); it != idsToStitch_.end(); ++it) {
-        string outfile = to_string(id) + "/" + to_string(*it) + ".png";
+        string outfile = "output/" + to_string(id) + "/" + to_string(*it) + ".png";
         imwrite(outfile, imageVector_->at(*it).getImage(), compression_params);
         cout << "saved file as: " << outfile << endl;
     }

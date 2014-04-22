@@ -56,7 +56,7 @@ bool try_ocl = false;
 double work_megapix = 0.6;
 double seam_megapix = 0.1;
 double compose_megapix = -1;
-float conf_thresh = 0.05f;
+float conf_thresh = 0.35f;  //Change this or remove the connected components from this test stitcher
 // string features_type = "surf";
 string ba_cost_func = "ray";
 string ba_refine_mask = "xxxxx";
@@ -433,7 +433,7 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     blender->blend(result, result_mask);
 
 
-    imwrite(result_name, result);
+    imwrite("output/"+result_name, result);
 
     return 0;
 }

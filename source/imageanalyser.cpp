@@ -5,12 +5,14 @@ using namespace std;
 using namespace cv;
 
 ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) :
-    imageVector_(imageVector), MATCHTRESH_(20) {
+    imageVector_(imageVector), MATCHTRESH_(35) {
     matcher = DescriptorMatcher::create("BruteForce"); // FlannBased , BruteForce
     detector = FeatureDetector::create("ORB");
     // detector->set("nFeatures", 500);
     extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
-    RATIO_ = 0.81;
+    RATIO_ = 0.81; // ORB VALUE, MATCHTRESH 35, works for house and walk sequence.
+    // RATIO_ = 0.75; // ORB VALUE, MATCHTRESH 20, works best for house sequence
+    // RATIO_ = 0.81; //ORB VALUE, MATCHTRESH 20, walk sequence
     // RATIO_ = 0.7; //SIFT VALUE, MATCHTRESH 40
 
     // printAlgorithmParams(detector);  // For printing detector variables
@@ -83,6 +85,7 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
             (*imageVector_)[id2].getDescriptors().size().height != 0) {
         matcher->knnMatch((*imageVector_)[id1].getDescriptors(),
                           (*imageVector_)[id2].getDescriptors(), matches, 2); // Find two nearest matches
+        // printMatches2(id1, id2, matches);
         vector<cv::DMatch> good_matches;
         for (int i = 0; i < matches.size(); ++i) {
             // const float ratio = 0.9; // As in Lowe's SIFT paper; can be tuned
@@ -91,14 +94,69 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
                 good_matches.push_back(matches[i][0]);
             }
         }
-
+        // printMatches(id1,id2,good_matches);
         return good_matches.size();
     }
 
     return 0;
 
 };
+void ImageAnalyser::printMatches(int id1, int id2, vector<cv::DMatch> matchVec) {
 
+    Imageobject first = imageVector_->at(id1);
+    Imageobject second = imageVector_->at(id2);
+    Mat outImg;
+
+    drawMatches(first.getImage(), first.getKeypoints(),
+                second.getImage(), second.getKeypoints(),
+                matchVec, outImg);
+
+    vector<int> compression_params;
+    compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+
+    string tmp = "mkdir goodMatches";
+    system(tmp.c_str());
+
+    string outfile = "goodMatches/" + to_string(id1) + "to" + to_string(id2) + ".png";
+    imwrite(outfile, outImg, compression_params);
+    cout << "saved file as: " << outfile << endl;
+
+}
+void ImageAnalyser::printMatches2(int id1, int id2, std::vector< vector <cv::DMatch> >  matchVec) {
+
+    Imageobject first = imageVector_->at(id1);
+    Imageobject second = imageVector_->at(id2);
+    Mat outImg;
+
+    drawMatches(first.getImage(), first.getKeypoints(),
+                second.getImage(), second.getKeypoints(),
+                matchVec, outImg);
+
+    vector<int> compression_params;
+    compression_params.push_back(IMWRITE_PNG_COMPRESSION);
+    compression_params.push_back(9);
+
+    string tmp = "mkdir allMatches";
+    system(tmp.c_str());
+
+    string outfile = "allMatches/" + to_string(id1) + "to" + to_string(id2) + ".png";
+    imwrite(outfile, outImg, compression_params);
+    cout << "saved file as: " << outfile << endl;
+
+}
+
+void ImageAnalyser::printKP(int id) {
+
+    Mat outImg;
+
+    drawKeypoints( imageVector_->at(id).getImage(),
+                   imageVector_->at(id).getKeypoints(), outImg,
+                   Scalar::all(-1), DrawMatchesFlags::DEFAULT );
+
+    imshow("KeyPoints", outImg);
+    waitKey(0);
+}
 void ImageAnalyser::analyse() {
     int numberOfMatches = MATCHTRESH_;
     int currentNum = -1;
@@ -138,7 +196,7 @@ void ImageAnalyser::analyse() {
         }
         ++show_progress;
     }
-
+    // printKP(1);
     printGraph("before");
     shortestPath(*G_);
 };
