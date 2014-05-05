@@ -10,7 +10,6 @@ using namespace boost;
 typedef property < edge_weight_t, int >Weight;
 typedef adjacency_list < listS, vecS, undirectedS,
         no_property, property < edge_weight_t, int > > Graph;
-// typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor MyVertex;
 typedef boost::graph_traits<Graph>::edge_descriptor MyEdge;
 typedef std::pair<int, int> Edge;

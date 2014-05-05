@@ -6,7 +6,7 @@ using namespace cv;
 
 ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) :
     imageVector_(imageVector), MATCHTRESH_(35) {
-    matcher = DescriptorMatcher::create("BruteForce"); // FlannBased , BruteForce
+    matcher = DescriptorMatcher::create("BruteForce-Hamming"); // FlannBased , BruteForce-Hamming
     detector = FeatureDetector::create("ORB");
     // detector->set("nFeatures", 500);
     extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
@@ -88,8 +88,6 @@ int ImageAnalyser::checkMatches(int id1, int id2) {
         // printMatches2(id1, id2, matches);
         vector<cv::DMatch> good_matches;
         for (int i = 0; i < matches.size(); ++i) {
-            // const float ratio = 0.9; // As in Lowe's SIFT paper; can be tuned
-
             if (matches[i][0].distance < RATIO_ * matches[i][1].distance) {
                 good_matches.push_back(matches[i][0]);
             }
@@ -162,9 +160,7 @@ void ImageAnalyser::analyse() {
     int currentNum = -1;
     G_ = new Graph(imageVector_->size());
 
-
     progress_display show_progress( imageVector_->size() );
-    imageVector_->at(0).setMatched(true);
 
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(4); // Use 4 cores

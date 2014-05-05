@@ -10,8 +10,6 @@
 using namespace cv;
 using namespace std;
 
-enum nodeStatus { NONE, INCLUDED, REJECTED  };
-
 class Imageobject {
 public:
     Imageobject(Json::Value jsonRoot, string fielName, int id, string path);
@@ -65,24 +63,10 @@ public:
         return currentID_;
     };
 
-    nodeStatus getStatus(){
-        return status_;
-    };
-
-    void setStatus(nodeStatus status){
-        status_ = status;
-    }
-
     boost::posix_time::ptime getTime(){
         return taken_at;
     };
 
-    bool getMatched(){
-        return matched_;
-    }
-    void setMatched(bool matched){
-        matched_ = matched;
-    }
     void tiltAdapter();
     void rollAdapter();
     void timeFromFileName();
@@ -103,11 +87,7 @@ private:
     Mat descriptors_;
     string triggerMethod_;
     int currentID_;
-    int firstMatchID_;
-    int secondMatchID_;
-    nodeStatus status_;
     boost::posix_time::ptime taken_at;
-    bool matched_;
     cv::detail::ImageFeatures imageFeatures_;
 };
 
