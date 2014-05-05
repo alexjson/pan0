@@ -1,5 +1,6 @@
 #pan0
-pan0 is an application for the narrative clip which is used to find panorama sequences in the feed.
+pan0 is an application for the narrative clip which is used to find panorama sequences in the feed. 
+The raw data from the camera must be used.
 
 Only tested on Ubuntu
 
