@@ -80,8 +80,8 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     cv::setBreakOnError(true);
 
-    double work_scale = 1, seam_scale = 1, compose_scale = 1;
-    bool  is_seam_scale_set = false, is_compose_scale_set = false;
+    double work_scale = 1,  compose_scale = 1;
+    bool  is_compose_scale_set = false;
 
     int num_images = idVec.size();
 

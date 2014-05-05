@@ -8,7 +8,7 @@ const double MAGDIFFUPPER2 = 50.0; // Not in degrees... var = 2.25*Degrees
 const double MAGDIFFLOWER = 20.0;  // Not in degrees...
 
 const double TILTDIFF = 0.7; // 0.785 = 45 degrees
-const double ROLLTHRESH = 0.7; // Kolla bara raotation på första bilden
+const double ROLLTHRESH = 0.7; 
 const int   TIMEDIFF = 480;
 const int   TIMEDIFFTRIGGER = 12;
 

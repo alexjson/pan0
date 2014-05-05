@@ -45,7 +45,6 @@ set(SOURCE
  	source/imageanalyser.cpp
  	source/imageobject.cpp
  	source/pan0stitcher.cpp
- 	source/bfsvertexvisitor.cpp
   source/utils.cpp
  	source/stitching_detailed.cpp
 )

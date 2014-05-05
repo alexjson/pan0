@@ -25,10 +25,6 @@ void Pan0Stitcher::stitch() {
             
         if (checkSequence()) {
 
-
-            // prepareImages();
-            // generateOutput(idx);
-
             stitching_detailed(imageVector_, idsToStitch_, to_string(idx) + ".jpg");
 
         }

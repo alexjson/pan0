@@ -9,8 +9,6 @@ using namespace std;
 int main( int argc, char **argv ) {
 
     if (argc < 2) {
-
-        // PATH = "/home/alex/xjobb/images2/resized/";
         std::cerr << "Usage: " << argv[0] << " PATH" << std::endl;
         return 1;
     } else {
@@ -26,7 +24,6 @@ int main( int argc, char **argv ) {
     vector<Imageobject> *imageVector = parser->getImageVector();
 
     ImageAnalyser *analyser = new ImageAnalyser(imageVector);
-    // analyser->setMatchginThreshold(40);  DEFAULT VALUE
 
     analyser->analyse();
 
