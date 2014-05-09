@@ -49,7 +49,6 @@ using namespace cv::detail;
 
 
 // Default command line args
-vector<String> img_names;
 bool preview = false;
 bool try_cuda = false;
 bool try_ocl = false;
@@ -84,7 +83,7 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     bool  is_compose_scale_set = false;
 
     int num_images = idVec.size();
-
+    vector<String> img_names;
     vector<Mat> full_img(num_images);
     vector<Mat> img(num_images);
     vector<ImageFeatures> features(num_images);
@@ -101,9 +100,10 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
         img[i] = currentImg;
         full_img_sizes[i] = currentImg.size();
         img_names.push_back(imageVector->at(idVec.at(i)).getFileName());
-
     }
 
+    // cout << "num_images 1  " << num_images << endl;
+    // cout << img_names.size() << endl;
     vector<MatchesInfo> pairwise_matches;
     BestOf2NearestMatcher matcher(try_cuda, match_conf);
     Mat matchMask(features.size(), features.size(), CV_8U, Scalar(0));
@@ -112,31 +112,6 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
     }
     matcher(features, pairwise_matches, matchMask);
     matcher.collectGarbage();
-
-    cout << num_images << endl;
-
-    // Leave only images we are sure are from the same panorama
-    vector<int> indices = leaveBiggestComponent(features, pairwise_matches, conf_thresh);
-    vector<Mat> img_subset;
-    vector<String> img_names_subset;
-    vector<Size> full_img_sizes_subset;
-    for (size_t i = 0; i < indices.size(); ++i) {
-        img_names_subset.push_back(img_names[indices[i]]);
-        img_subset.push_back(images[indices[i]]);
-        full_img_sizes_subset.push_back(full_img_sizes[indices[i]]);
-    }
-
-    images = img_subset;
-    img_names = img_names_subset;
-    full_img_sizes = full_img_sizes_subset;
-
-    // Check if we still have enough images
-    num_images = static_cast<int>(img_names.size());
-    cout << num_images << endl;
-    if (num_images < 2) {
-        LOGLN("Need more images");
-        return -1;
-    }
 
     HomographyBasedEstimator estimator;
     vector<CameraParams> cameras;
@@ -327,6 +302,7 @@ int stitching_detailed(std::vector<Imageobject> *imageVector, std::vector<int> i
 
     // Release unused memory
     images.clear();
+    img_names.clear();
     images_warped.clear();
     images_warped_f.clear();
     masks.clear();
