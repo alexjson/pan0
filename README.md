@@ -1,7 +1,8 @@
-#pan0
-pan0 is an application for the narrative clip which is used to find panorama sequences in the feed.
+#Automated panorama sequence detection using the Narrative-platform
+pan0 is an application for the narrative clip which is used to find panorama sequences in the feed. 
+The raw data from the camera must be used.
 
-Linux version only
+Only tested on Ubuntu
 
 ###Libs used
 * [JsonCPP](http://jsoncpp.sourceforge.net/)
