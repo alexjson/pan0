@@ -4,7 +4,8 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
-#include </usr/include/jsoncpp/json.h>
+// #include </usr/include/jsoncpp/json.h>
+#include <../libs/jsoncpp/json.h>
 #include <opencv2/opencv.hpp>
 #include <dirent.h>
 #include <fstream>

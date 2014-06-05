@@ -9,13 +9,14 @@ ImageAnalyser::ImageAnalyser(std::vector<Imageobject> *imageVector) :
     matcher = DescriptorMatcher::create("BruteForce-Hamming"); // FlannBased , BruteForce-Hamming
     detector = FeatureDetector::create("ORB");
     // detector->set("nFeatures", 500);
+    // detector->set("hessianThreshold", 900);
     extractor = DescriptorExtractor::create("ORB"); // ORB SIFT
     RATIO_ = 0.81; // ORB VALUE, MATCHTRESH 35, works for house and walk sequence.
     // RATIO_ = 0.75; // ORB VALUE, MATCHTRESH 20, works best for house sequence
     // RATIO_ = 0.81; //ORB VALUE, MATCHTRESH 20, walk sequence
     // RATIO_ = 0.7; //SIFT VALUE, MATCHTRESH 40
 
-    // printAlgorithmParams(detector);  // For printing detector variables
+     // printAlgorithmParams(detector);  // For printing detector variables
 };
 
 void ImageAnalyser::printAlgorithmParams( cv::Algorithm *algorithm) {
@@ -67,6 +68,8 @@ void ImageAnalyser::extractDescriptors(int id) {
     extractor->compute(imageVector_->at(id).getImage(), keypoints, descriptors);
     imageVector_->at(id).setDescriptors(descriptors);
     imageVector_->at(id).setImageFeatures();
+
+    // cout << keypoints.size() << endl;
 
 };
 
@@ -160,7 +163,7 @@ void ImageAnalyser::analyse() {
     int currentNum = -1;
     G_ = new Graph(imageVector_->size());
 
-    progress_display show_progress( imageVector_->size() );
+    // progress_display show_progress( imageVector_->size() );
 
     omp_set_dynamic(0);     // Explicitly disable dynamic teams
     omp_set_num_threads(4); // Use 4 cores
@@ -190,10 +193,10 @@ void ImageAnalyser::analyse() {
         for (int idx = 0; idx < matchIDvec.size(); ++idx) {
             boost::add_edge(id1, matchIDvec.at(idx), Weight(1), *G_);
         }
-        ++show_progress;
+        // ++show_progress;
     }
     // printKP(1);
-    printGraph("before");
+    // printGraph("before");
     shortestPath(*G_);
 };
 
